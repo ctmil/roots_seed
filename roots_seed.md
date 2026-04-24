@@ -2,9 +2,10 @@
 
 > Plantilla maestra para crear estructura de documentación y memoria de desarrollo. Este archivo define los estándares de formato, estilo y protocolos de poblado.
 
-**Versión:** 1.3
+**Versión:** 1.4
 
 **Changelog:**
+- **1.4** (24 Abril 2026) — Nueva carpeta `workbench/` para materiales de referencia del usuario. Nueva sección "Sync con canonical upstream (ctmil/roots_seed)" con protocolo de comparación de versiones y reglas de contribución. Nueva sección "Integración con CLAUDE.md y Claude Code (.claude/)" con jerarquía de contexto, reglas de no-duplicación, template de CLAUDE.md, y tabla de compatibilidad futura. Nuevo hook `on-seed-process.md` que consolida bootstrap completo: sync upstream, distribución, verificación CLAUDE.md, y creación de workbench. `session-start` ampliado para listar `workbench/` al inicio.
 - **1.3** (18 Abril 2026) — Regla de distribución del seed dentro de cada `.roots/`. Cada módulo/proyecto lleva una **copia local** del seed que lo generó, así es self-contained y reprocesable aunque se extraiga a otro repo. Nuevo hook `on-seed-update` para re-distribuir al canonical bumpear versión. `session-start` ahora compara copia local vs canonical y avisa si están desincronizadas.
 - **1.2** (18 Abril 2026) — Incorporados tres protocolos al seed, tool-agnostic (aplicables a cualquier asistente de IA o desarrollador humano):
   - Hook `on-topic-shift`: al cambiar de foco mid-sesión a un archivo/sistema no cubierto por el bootstrap, re-escanear `.roots/docs/` antes de pedir aclaraciones o decidir.
@@ -43,13 +44,13 @@ Esta estructura está diseñada para ser usada por **agentes de IA** y **desarro
 El canonical del seed vive en el módulo que lo mantiene. En este repo:
 
 ```
-geoecon_odoo/odoo_moldeo_roots/roots_seed.md   ← canonical (editable)
+odoo_moldeo_roots/roots_seed.md   ← canonical (editable)
 ```
 
 Toda copia distribuida lleva el header:
 
 ```html
-<!-- CANONICAL: geoecon_odoo/odoo_moldeo_roots/roots_seed.md -->
+<!-- CANONICAL: odoo_moldeo_roots/roots_seed.md -->
 <!-- Esto es una COPIA distribuida del seed para que el módulo sea self-contained. -->
 <!-- Para cambios permanentes: editar el canonical y re-distribuir a todos los .roots/. -->
 <!-- Para cambios locales experimentales: agregar nota al pie de este archivo. -->
@@ -64,7 +65,7 @@ Toda copia distribuida lleva el header:
 ### Comando de distribución (one-shot, tool-agnostic)
 
 ```bash
-SEED="geoecon_odoo/odoo_moldeo_roots/roots_seed.md"  # ajustar según repo
+SEED="odoo_moldeo_roots/roots_seed.md"  # ajustar según repo
 HEADER='<!-- CANONICAL: '"$SEED"' -->
 <!-- Esto es una COPIA distribuida del seed para que el módulo sea self-contained. -->
 <!-- Para cambios permanentes: editar el canonical y re-distribuir a todos los .roots/. -->
@@ -78,6 +79,153 @@ done
 
 ---
 
+## Workbench — Materiales de referencia
+
+**Regla:** cada `.roots/{module}/` incluye una carpeta `workbench/` como espacio libre para materiales de referencia que el usuario comparte durante el trabajo.
+
+### Qué va en workbench/
+
+- Imágenes, screenshots, mockups
+- PDFs, documentos de análisis
+- Videos o links a videos
+- Datasets de ejemplo, CSVs
+- Archivos de terceros para estudio
+- Cualquier material que el usuario pase como referencia
+
+### Reglas
+
+1. **El usuario es quien llena el workbench** — el agente no inventa contenido aquí; sólo lo consulta.
+2. **El agente DEBE revisar `workbench/`** al inicio de sesión (ver `session-start`) y al cambiar de tema (ver `on-topic-shift`). Si hay archivos nuevos, leerlos o mencionar su existencia.
+3. **No hay formato obligatorio** — es un espacio libre, no requiere estructura interna.
+4. **Los archivos pueden ser temporales** — el usuario puede borrar materiales obsoletos sin consecuencias.
+5. **No se redistribuye** — a diferencia del seed, el contenido del workbench es local al módulo y no se copia entre `.roots/`.
+6. **Si un material inspira una decisión** → referenciar en `design/decisions.md` (ej: "ver `workbench/mockup-v3.png`").
+7. **Gitignore selectivo** — archivos pesados (videos, datasets grandes) pueden agregarse a `.gitignore` del módulo; los livianos (screenshots, notas) se commitean.
+
+---
+
+## Sync con canonical upstream (ctmil/roots_seed)
+
+**Regla:** el canonical del seed se publica como copia open-source en:
+
+```
+https://github.com/ctmil/roots_seed/blob/main/roots_seed.md
+```
+
+Este upstream público es la **referencia de paridad**. El canonical del repo privado (`odoo_moldeo_roots/roots_seed.md`) puede tener extensiones propias, pero las convenciones core deben mantenerse alineadas con el upstream.
+
+### Jerarquía de canonicals
+
+| Nivel | Ubicación | Rol |
+|-------|-----------|-----|
+| **Upstream público** | `github.com/ctmil/roots_seed/main/roots_seed.md` | Referencia open-source, convenciones core |
+| **Canonical del repo** | `odoo_moldeo_roots/roots_seed.md` | Fuente de verdad local, puede extender el upstream |
+| **Copias distribuidas** | `.roots/roots_seed.md` (cada módulo) | Self-contained, refleja el canonical del repo |
+
+### Protocolo de sync al procesar el seed
+
+Cada vez que un agente o humano **procesa el seed** (bootstrap, session-start, bump de versión), debe:
+
+1. **Obtener la versión upstream** — fetch de `https://raw.githubusercontent.com/ctmil/roots_seed/main/roots_seed.md`, leer campo `**Versión:**`.
+2. **Comparar con la versión del canonical local** — leer `odoo_moldeo_roots/roots_seed.md`, mismo campo.
+3. **Resolver según el caso:**
+
+| Caso | Acción |
+|------|--------|
+| Local < Upstream | Revisar changelog del upstream, aplicar cambios nuevos al canonical local, bumpear versión, re-distribuir |
+| Local = Upstream | No action — en paridad |
+| Local > Upstream | El canonical local tiene extensiones propias. Evaluar si las extensiones deben subir al upstream (PR a `ctmil/roots_seed`) |
+| Diff sin cambio de versión | Cambio cosmético o local. Documentar en `journal/notes.md` |
+
+4. **Si hay delta sustancial** → avisar al humano antes de aplicar. No mergear a ciegas.
+5. **Si el upstream no es accesible** (offline, rate limit) → continuar con el canonical local, anotar en `journal/notes.md` que no se pudo verificar.
+
+### Cuándo sincronizar con el upstream
+
+- **Al hacer bootstrap de un `.roots/` nuevo** → verificar que el canonical local está al día con el upstream.
+- **Al bumpear la versión del canonical local** → evaluar si el bump incluye cosas que deben subir al upstream público.
+- **Al inicio de sesión** (opcional, no bloqueante) → si el agente tiene acceso a internet, hacer un check rápido. No bloquear la sesión si falla.
+
+### Contribuir al upstream
+
+Si el canonical local evoluciona con convenciones útiles para la comunidad:
+
+1. Preparar el diff entre canonical local y upstream.
+2. Separar extensiones privadas (específicas del repo) de mejoras genéricas.
+3. Las mejoras genéricas → PR a `github.com/ctmil/roots_seed`.
+4. Las extensiones privadas → quedan sólo en el canonical local.
+
+---
+
+## Integración con CLAUDE.md y Claude Code (.claude/)
+
+**Principio:** `.roots/` es tool-agnostic — lo debe poder leer cualquier agente o humano. `CLAUDE.md` y `.claude/` son específicos de Claude Code. Cuando ambos conviven, `.roots/` es la **fuente de verdad** y `CLAUDE.md`/`.claude/` son **bridges**.
+
+### Jerarquía de contexto
+
+| Archivo | Alcance | Quién lo lee | Rol |
+|---------|---------|--------------|-----|
+| `CLAUDE.md` (raíz) | Proyecto global | Claude Code (auto-carga) | Índice y directivas top-level |
+| `.roots/{module}/context.md` | Módulo específico | Cualquier agente/humano | Detalle del módulo |
+| `.claude/` (raíz) | Config Claude Code | Solo Claude Code | Bridge opcional — settings, hooks json |
+
+### Reglas de no-duplicación
+
+1. **`CLAUDE.md` indexa, no repite.** Si existe `.roots/`, `CLAUDE.md` lista los módulos activos y apunta a cada `.roots/{module}/context.md`. No copia el contenido de context.md ni de otros archivos de `.roots/`.
+2. **`.claude/hooks/*.json` puede hacer bridge.** Los hooks de Claude Code pueden disparar lectura/ejecución de los protocolos tool-agnostic en `.roots/*/hooks/*.md`. La lógica vive en `.roots/`, el trigger en `.claude/`.
+3. **Sin `.roots/`, `CLAUDE.md` es autónomo.** Si un proyecto no tiene `.roots/` (es legacy o simple), `CLAUDE.md` documenta stack y directivas directamente. No se fuerza la creación de `.roots/` en proyectos que no lo necesitan.
+4. **Con `.roots/`, `CLAUDE.md` es ligero.** Sólo contiene: (a) directivas globales que aplican a todo el proyecto (ej: reglas de routing Odoo), (b) índice de módulos con `.roots/`, (c) referencia al seed.
+
+### Regla al procesar el seed (obligatoria)
+
+Al hacer bootstrap o bump del seed, verificar `CLAUDE.md`:
+
+| Situación | Acción |
+|-----------|--------|
+| No existe `CLAUDE.md` | Crear con template mínimo (ver abajo) |
+| Existe pero no lista módulos con `.roots/` | Agregar sección de índice de módulos |
+| Existe y lista módulos | Verificar que los módulos listados coinciden con los `.roots/` actuales — agregar nuevos, marcar removidos |
+| Existe `.claude/` | Verificar que sus hooks referencian `.roots/` sin duplicar lógica |
+
+### Template mínimo de CLAUDE.md
+
+Cuando se crea `CLAUDE.md` desde el seed, usar este template como base:
+
+```markdown
+# {Proyecto} - Development Directives
+
+## Módulos con memoria persistente (.roots/)
+
+| Módulo | Context | Estado |
+|--------|---------|--------|
+| `{module_a}` | [context.md](.roots/{module_a}/context.md) | Activo |
+| `{module_b}` | [context.md](.roots/{module_b}/context.md) | Activo |
+
+## Seed
+
+**Versión:** {X.Y}
+**Canonical:** `odoo_moldeo_roots/roots_seed.md`
+**Upstream:** `github.com/ctmil/roots_seed`
+
+## Directivas globales del proyecto
+
+(Reglas que aplican a todo el proyecto, no a un módulo específico.
+Ejemplo: convenciones de routing Odoo multi-website, estándares de JS, etc.)
+```
+
+### Compatibilidad futura
+
+Problemas anticipados y cómo resolverlos:
+
+| Problema | Resolución |
+|----------|------------|
+| Otro agente (Cursor, Copilot) ignora `CLAUDE.md` | No importa — `.roots/` es self-contained y tool-agnostic, el otro agente lo lee directamente |
+| Claude Code ignora `.roots/` | `CLAUDE.md` apunta a `.roots/` — Claude Code sigue los links. Alternativamente, un hook `session-start` en `.claude/hooks/` puede forzar la lectura |
+| Módulo extraído a otro repo pierde `CLAUDE.md` | El módulo lleva su `.roots/` con seed embebido — es reprocesable sin `CLAUDE.md`. El nuevo repo puede generar su propio `CLAUDE.md` desde el seed |
+| `CLAUDE.md` crece demasiado | Señal de que contenido debería migrar a `.roots/`. `CLAUDE.md` debe mantenerse como índice ligero |
+
+---
+
 ## Estructura Base
 
 ```
@@ -86,6 +234,9 @@ done
 │
 └── {module_name}/
     ├── context.md             # Briefing rápido del módulo (30 seg)
+    │
+    ├── workbench/             # Materiales de referencia del usuario
+    │   └── (archivos libres)  # Imágenes, PDFs, videos, análisis, etc.
     │
     ├── journal/               # Bitácora - registros temporales
     │   ├── changelog.md       # Historial de versiones (para clientes)
@@ -117,7 +268,8 @@ done
     │   ├── session-start.md   # Qué ejecutar al iniciar sesión
     │   ├── session-end.md     # Qué ejecutar al cerrar sesión
     │   ├── on-error.md        # Protocolo al detectar error
-    │   └── on-fix.md          # Protocolo al commitear fix
+    │   ├── on-fix.md          # Protocolo al commitear fix
+    │   └── on-seed-process.md # Bootstrap/reprocesamiento del seed
     │
     └── skills/                # Skills y workflows del módulo
         ├── prompts.md         # Prompts reutilizables específicos del módulo
@@ -200,16 +352,11 @@ Contenido...
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
 │  DURANTE el trabajo:                                        │
-│  - Nuevo archivo/sistema en foco no cubierto por bootstrap  │
-│    → hooks/on-topic-shift.md → revisar docs/ antes de       │
-│      preguntar o decidir                                    │
-│  - Encontré error → hooks/on-error.md → errors-log.md       │
-│  - Arreglé algo → hooks/on-fix.md → fixes-log.md            │
+│  - Encontré error → hooks/on-error.md → errors-log.md      │
+│  - Arreglé algo → hooks/on-fix.md → fixes-log.md           │
 │  - Tomé decisión importante → decisions.md                  │
 │  - Tuve idea → notes.md                                     │
-│  - Completé tarea → hooks/on-task-done.md →                 │
-│      tasks/todo.md + tasks/tasks.md + docs/commits.md       │
-│      (ANTES de reportar al humano)                          │
+│  - Completé tarea → tasks/tasks.md (marcar done)            │
 │  - Término nuevo → glossary.md                              │
 │  - Cambié esquema/datos → migrations.md                     │
 └─────────────────────────────────────────────────────────────┘
@@ -702,22 +849,24 @@ Los hooks son **protocolos ejecutables** que definen qué hacer automáticamente
 5. Leer `tasks/todo.md` — backlog pendiente.
 6. Leer `tasks/tasks.md` — trabajo en progreso (si existe, retomar).
 7. Leer `debug/errors-log.md` — errores activos sin resolver.
-8. Leer `_meta.json` — `active_branch` y `current_feature`.
-9. Verificar git state:
+8. Listar `workbench/` — si hay archivos nuevos o recientes, leer o
+   mencionar su existencia al humano. Son materiales de referencia.
+9. Leer `_meta.json` — `active_branch` y `current_feature`.
+10. Verificar git state:
     - `git branch --show-current`
     - `git log --oneline -10`
     - `git status`
-10. Si `_meta.json.active_branch` o `tasks/tasks.md` no reflejan la rama
+11. Si `_meta.json.active_branch` o `tasks/tasks.md` no reflejan la rama
     actual → el `.roots/` está desincronizado. Avisar al humano antes de
     hacer suposiciones; no decidir a ciegas.
-11. Si hay feature activa, buscar design docs en `docs/design-*.md` y
+12. Si hay feature activa, buscar design docs en `docs/design-*.md` y
     leer la sección relevante antes de tocar código.
 
 ## Output esperado
 
 Resumen interno de: estado del proyecto, tareas pendientes,
 errores activos, contexto de última sesión, estado git sincronizado
-con `.roots/`.
+con `.roots/`, materiales de referencia disponibles en workbench.
 ```
 
 ##### session-end.md
@@ -746,132 +895,6 @@ con `.roots/`.
 ## Output esperado
 
 Archivos de .roots/ actualizados con el trabajo de la sesión.
-```
-
-##### on-seed-update.md
-
-| Aspecto | Protocolo |
-|---------|-----------|
-| **Propósito** | Re-distribuir el seed canonical a todas las copias locales (`.roots/roots_seed.md`) del repo cuando cambia la versión canónica |
-| **Ejecutor** | Agente IA o desarrollador humano |
-| **Trigger** | (a) Se bumpea la versión del seed canonical, (b) un `session-start` detecta desync entre copia local y canonical, (c) se crea un `.roots/` nuevo y hay que poblarlo |
-| **Obligatorio** | Sí — sin esto los módulos dejan de ser self-contained y el seed deja de ser reprocesable localmente |
-
-**Formato de entrada:**
-```markdown
-# Hook: On Seed Update
-
-> Protocolo al bumpear el seed canonical o detectar desync con copias locales.
-
-## Pasos
-
-1. Identificar el canonical (una sola fuente de verdad en el repo).
-2. Para cada directorio `.roots/` del repo:
-    - Escribir `<dir>/roots_seed.md` con el header de distribución
-      seguido del contenido del canonical.
-3. Verificar con `diff` (o equivalente) que todas las copias coinciden
-   en contenido (ignorando el header de distribución).
-4. Registrar la re-distribución en `journal/diary.md` o `docs/commits.md`.
-5. Si algún `.roots/` tenía modificaciones locales al seed → preservarlas
-   como nota al pie de la copia local antes de sobrescribir. Avisar al
-   humano si hay conflicto.
-
-## Comando de referencia (bash, tool-agnostic)
-
-```bash
-SEED="<ruta/al/canonical/roots_seed.md>"
-HEADER='<!-- CANONICAL: '"$SEED"' -->
-<!-- Esto es una COPIA distribuida del seed para que el módulo sea self-contained. -->
-<!-- Para cambios permanentes: editar el canonical y re-distribuir a todos los .roots/. -->
-<!-- Para cambios locales experimentales: agregar nota al pie de este archivo. -->
-
-'
-find . -type d -name ".roots" -not -path "*/node_modules/*" | while read -r dir; do
-    { printf '%s' "$HEADER"; cat "$SEED"; } > "$dir/roots_seed.md"
-done
-```
-
-## Output esperado
-
-Todas las copias `.roots/roots_seed.md` alineadas con el canonical.
-Cada módulo vuelve a ser self-contained y reprocesable aisladamente.
-```
-
-##### on-task-done.md
-
-| Aspecto | Protocolo |
-|---------|-----------|
-| **Propósito** | Cerrar correctamente cada tarea individual (no al final de la sesión) manteniendo `.roots/` sincronizado |
-| **Ejecutor** | Agente IA o desarrollador humano |
-| **Trigger** | Una tarea listada en `tasks/tasks.md` o `tasks/todo.md` queda completada y está por reportarse al humano |
-| **Obligatorio** | Sí — evita dejar el `.roots/` desactualizado entre tareas de la misma sesión |
-
-**Formato de entrada:**
-```markdown
-# Hook: On Task Done
-
-> Protocolo al completar una tarea, antes de reportarla al humano.
-
-## Pasos mínimos (siempre)
-
-1. `tasks/todo.md` — marcar la tarea como `[x]` o moverla a "Completadas"
-2. `tasks/tasks.md` — mover la tarea de "En Progreso" a "Completadas Recientemente"
-3. `docs/commits.md` — si hubo commit, agregar entrada con hash, motivación y cambios
-
-## Pasos condicionales
-
-- Si se encontró un error durante la tarea → `debug/errors-log.md` (ERROR-XXX)
-- Si se aplicó un fix → `debug/fixes-log.md` (FIX-XXX)
-- Si se tomó una decisión arquitectónica → `design/decisions.md` (ADR-XXX)
-- Si surgió una idea → `journal/notes.md`
-- Si aparece término nuevo del dominio → `docs/glossary.md`
-- Si cambió esquema/datos → `debug/migrations.md`
-
-## Output esperado
-
-`.roots/` sincronizado con la tarea completada ANTES de reportar al humano.
-Un humano que lea sólo `.roots/` debe poder reconstruir qué se hizo y por qué.
-```
-
-##### on-topic-shift.md
-
-| Aspecto | Protocolo |
-|---------|-----------|
-| **Propósito** | Garantizar que el agente (IA o humano) no trabaje a ciegas cuando la conversación pivota a un archivo/sistema que no era parte del feature activo al bootstrap |
-| **Ejecutor** | Agente IA, desarrollador o cualquier herramienta de asistencia de código |
-| **Trigger** | Aparece en la conversación un archivo, módulo o sistema no tocado en los últimos pasos (ej: `query.php`, un módulo Odoo específico, un subsistema frontend, un servicio externo) |
-| **Obligatorio** | Sí — evita preguntas redundantes y decisiones sin contexto |
-
-**Formato de entrada:**
-```markdown
-# Hook: On Topic Shift
-
-> Protocolo al cambiar de foco a un archivo/sistema no cubierto por el bootstrap de sesión.
-
-## Pasos
-
-1. Listar `.roots/docs/` (`ls` o equivalente).
-2. Buscar un doc con nombre relacionado al nuevo foco
-   (ej: `query-php.md`, `architecture.md`, `design-<feature>.md`, `geoeconol6-js.md`).
-3. Si existe, leer la sección relevante ANTES de preguntar aclaraciones
-   o proponer un diseño.
-4. Revisar `.roots/journal/notes.md` y `.roots/design/decisions.md` por
-   observaciones o ADRs sobre el mismo sistema.
-5. Solo preguntar al humano lo que quede genuinamente no documentado.
-6. Si al terminar la tarea se descubre información que debería haber
-   estado en `.roots/docs/` pero no estaba → agregarla o proponer un
-   nuevo doc.
-
-## Output esperado
-
-Contexto cargado del sistema nuevo antes de escribir código o pedir
-aclaraciones. Preguntas al humano reducidas a lo no documentado.
-
-## Compatibilidad
-
-Este protocolo es tool-agnostic. Aplica a cualquier asistente de IA
-(Claude Code, Cursor, Copilot Workspace, Aider, etc.) o desarrollador
-humano que retome el repo.
 ```
 
 ##### on-error.md
@@ -922,6 +945,184 @@ Usar el formato ERROR-XXX definido en el protocolo de errors-log.md.
 ## Template
 
 Usar el formato definido en el protocolo de fixes-log.md.
+```
+
+##### on-seed-update.md
+
+| Aspecto | Protocolo |
+|---------|-----------|
+| **Propósito** | Re-distribuir el seed canonical a todas las copias locales (`.roots/roots_seed.md`) del repo cuando cambia la versión canónica |
+| **Ejecutor** | Agente IA o desarrollador humano |
+| **Trigger** | (a) Se bumpea la versión del seed canonical, (b) un `session-start` detecta desync entre copia local y canonical, (c) se crea un `.roots/` nuevo y hay que poblarlo |
+| **Obligatorio** | Sí — sin esto los módulos dejan de ser self-contained y el seed deja de ser reprocesable localmente |
+
+**Formato de entrada:**
+```markdown
+# Hook: On Seed Update
+
+> Protocolo al bumpear el seed canonical o detectar desync con copias locales.
+
+## Pasos
+
+1. Identificar el canonical (una sola fuente de verdad en el repo).
+2. Para cada directorio `.roots/` del repo:
+    - Escribir `<dir>/roots_seed.md` con el header de distribución
+      seguido del contenido del canonical.
+3. Verificar con `diff` (o equivalente) que todas las copias coinciden
+   en contenido (ignorando el header de distribución).
+4. Registrar la re-distribución en `journal/diary.md` o `docs/commits.md`.
+5. Si algún `.roots/` tenía modificaciones locales al seed → preservarlas
+   como nota al pie de la copia local antes de sobrescribir. Avisar al
+   humano si hay conflicto.
+
+## Comando de referencia (bash, tool-agnostic)
+
+SEED="odoo_moldeo_roots/roots_seed.md"
+find . -type d -name ".roots" -not -path "*/node_modules/*" | while read -r dir; do
+    cp "$SEED" "$dir/roots_seed.md"
+done
+
+## Output esperado
+
+Todas las copias `.roots/roots_seed.md` alineadas con el canonical.
+Cada módulo vuelve a ser self-contained y reprocesable aisladamente.
+```
+
+##### on-task-done.md
+
+| Aspecto | Protocolo |
+|---------|-----------|
+| **Propósito** | Cerrar correctamente cada tarea individual (no al final de la sesión) manteniendo `.roots/` sincronizado |
+| **Ejecutor** | Agente IA o desarrollador humano |
+| **Trigger** | Una tarea listada en `tasks/tasks.md` o `tasks/todo.md` queda completada y está por reportarse al humano |
+| **Obligatorio** | Sí — evita dejar el `.roots/` desactualizado entre tareas de la misma sesión |
+
+**Formato de entrada:**
+```markdown
+# Hook: On Task Done
+
+> Protocolo al completar una tarea, antes de reportarla al humano.
+
+## Pasos mínimos (siempre)
+
+1. `tasks/todo.md` — marcar la tarea como `[x]` o moverla a "Completadas"
+2. `tasks/tasks.md` — mover la tarea de "En Progreso" a "Completadas Recientemente"
+3. `docs/commits.md` — si hubo commit, agregar entrada con hash, motivación y cambios
+
+## Pasos condicionales
+
+- Si se encontró un error durante la tarea → `debug/errors-log.md` (ERROR-XXX)
+- Si se aplicó un fix → `debug/fixes-log.md` (FIX-XXX)
+- Si se tomó una decisión arquitectónica → `design/decisions.md` (ADR-XXX)
+- Si surgió una idea → `journal/notes.md`
+- Si aparece término nuevo del dominio → `docs/glossary.md`
+- Si cambió esquema/datos → `debug/migrations.md`
+
+## Output esperado
+
+`.roots/` sincronizado con la tarea completada ANTES de reportar al humano.
+Un humano que lea sólo `.roots/` debe poder reconstruir qué se hizo y por qué.
+```
+
+##### on-topic-shift.md
+
+| Aspecto | Protocolo |
+|---------|-----------|
+| **Propósito** | Garantizar que el agente no trabaje a ciegas cuando la conversación pivota a un archivo/sistema no cubierto por el bootstrap |
+| **Ejecutor** | Agente IA, desarrollador o cualquier herramienta de asistencia de código |
+| **Trigger** | Aparece en la conversación un archivo, módulo o sistema no tocado en los últimos pasos |
+| **Obligatorio** | Sí — evita preguntas redundantes y decisiones sin contexto |
+
+**Formato de entrada:**
+```markdown
+# Hook: On Topic Shift
+
+> Protocolo al cambiar de foco a un archivo/sistema no cubierto por el bootstrap de sesión.
+
+## Pasos
+
+1. Listar `.roots/docs/` (`ls` o equivalente).
+2. Buscar un doc con nombre relacionado al nuevo foco.
+3. Si existe, leer la sección relevante ANTES de preguntar aclaraciones
+   o proponer un diseño.
+4. Revisar `.roots/journal/notes.md` y `.roots/design/decisions.md` por
+   observaciones o ADRs sobre el mismo sistema.
+5. Revisar `.roots/workbench/` por materiales de referencia relacionados.
+6. Solo preguntar al humano lo que quede genuinamente no documentado.
+7. Si al terminar la tarea se descubre información que debería haber
+   estado en `.roots/docs/` pero no estaba → agregarla o proponer un
+   nuevo doc.
+
+## Output esperado
+
+Contexto cargado del sistema nuevo antes de escribir código o pedir
+aclaraciones. Preguntas al humano reducidas a lo no documentado.
+
+## Compatibilidad
+
+Este protocolo es tool-agnostic. Aplica a cualquier asistente de IA
+(Claude Code, Cursor, Copilot Workspace, Aider, etc.) o desarrollador
+humano que retome el repo.
+```
+
+##### on-seed-process.md
+
+| Aspecto | Protocolo |
+|---------|-----------|
+| **Propósito** | Consolidar todos los pasos de bootstrap/reprocesamiento del seed en un solo hook ejecutable |
+| **Ejecutor** | Agente IA o desarrollador humano |
+| **Trigger** | (a) Se inicializa un `.roots/` nuevo, (b) se bumpea la versión del seed, (c) se detecta desync con upstream o canonical, (d) el humano pide "procesar el seed" explícitamente |
+| **Obligatorio** | Sí — es el punto de entrada para cualquier operación sobre el seed |
+
+**Formato de entrada:**
+```markdown
+# Hook: On Seed Process
+
+> Protocolo maestro al procesar/reprocesar el seed. Consolida sync
+> upstream, distribución, y verificación de CLAUDE.md.
+
+## Pasos
+
+1. **Sync con upstream público:**
+   - Fetch `https://raw.githubusercontent.com/ctmil/roots_seed/main/roots_seed.md`
+   - Comparar versión upstream vs versión del canonical local
+   - Si local < upstream → avisar al humano, proponer aplicar cambios
+   - Si local > upstream → evaluar si hay mejoras genéricas para PR
+   - Si no hay acceso al upstream → anotar en `journal/notes.md`, continuar
+
+2. **Verificar canonical del repo:**
+   - Leer `odoo_moldeo_roots/roots_seed.md` (o la ruta canonical configurada)
+   - Confirmar que el campo `**Versión:**` coincide con lo esperado
+   - Si hay ediciones locales no bumpeadas → avisar al humano
+
+3. **Distribuir a todas las copias:**
+   - Ejecutar `hooks/on-seed-update.md`
+   - Cada `.roots/roots_seed.md` queda alineado con el canonical
+   - Verificar con diff que no quedaron copias desincronizadas
+
+4. **Verificar/crear CLAUDE.md:**
+   - Si no existe `CLAUDE.md` en la raíz → crearlo con el template
+     definido en § "Integración con CLAUDE.md"
+   - Si existe → verificar que la lista de módulos con `.roots/`
+     está actualizada (agregar nuevos, marcar removidos)
+   - Si existe `.claude/` → verificar que sus hooks referencian
+     `.roots/` sin duplicar lógica
+
+5. **Verificar workbench/:**
+   - Para cada `.roots/{module}/` que no tenga `workbench/` → crearla
+   - No agregar contenido — es espacio del usuario
+
+6. **Registrar:**
+   - Agregar entrada en `journal/diary.md` o `docs/commits.md`
+     documentando el procesamiento del seed, versión, y acciones tomadas
+
+## Output esperado
+
+- Canonical local alineado (o con delta documentado) con upstream
+- Todas las copias `.roots/roots_seed.md` sincronizadas
+- `CLAUDE.md` actualizado con índice de módulos
+- Carpetas `workbench/` existentes en todos los módulos
+- Registro del procesamiento en journal o commits
 ```
 
 ---
@@ -1015,6 +1216,8 @@ Al iniciar sesión en un proyecto con `.roots/`:
 | Término de dominio sin definir | → Proponer agregar a glossary.md |
 | Cambio de esquema/campos | → Proponer agregar a migrations.md |
 | Final de sesión larga | → Ejecutar hooks/session-end.md |
+| Bootstrap o bump del seed | → Ejecutar hooks/on-seed-process.md |
+| Nuevo material en workbench/ | → Leer/mencionar al humano |
 
 ---
 
@@ -1026,9 +1229,9 @@ Al iniciar sesión en un proyecto con `.roots/`:
 
 MODULE_NAME=${1:-"module"}
 BASE_PATH=".roots/$MODULE_NAME"
-SEED_VERSION="1.1"
+SEED_VERSION="1.4"
 
-mkdir -p "$BASE_PATH"/{journal,debug,design,docs,tasks,hooks,skills}
+mkdir -p "$BASE_PATH"/{journal,debug,design,docs,tasks,hooks,skills,workbench}
 
 # Meta
 cat > ".roots/_meta.json" << EOF
@@ -1389,6 +1592,7 @@ echo "  - design/: decisions, sketchbook"
 echo "  - docs/: README, manual, documentation, architecture, glossary"
 echo "  - tasks/: tasks, todo"
 echo "  - skills/: prompts, workflows, patterns"
+echo "  - workbench/: materiales de referencia (vacío)"
 echo "  - hooks/: session-start, session-end, on-error, on-fix"
 echo "  - _meta.json: metadata de inicialización"
 ```
@@ -1412,5 +1616,6 @@ echo "  - _meta.json: metadata de inicialización"
 13. **Mantener IDs únicos** — Revisar último número antes de crear nuevo
 14. **Consistencia de formato** — Seguir las plantillas de este documento
 15. **_meta.json es automático** — No editarlo manualmente, es para herramientas
+16. **workbench/ es del usuario** — El agente consulta pero no inventa contenido ahí; revisar al inicio de cada sesión
 
 ---
