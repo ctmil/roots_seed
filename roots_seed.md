@@ -2,9 +2,10 @@
 
 > Plantilla maestra para crear estructura de documentación y memoria de desarrollo. Este archivo define los estándares de formato, estilo y protocolos de poblado.
 
-**Versión:** 1.4
+**Versión:** 1.5
 
 **Changelog:**
+- **1.5** (30 Abril 2026) — Nueva sección "Modos de trabajo" con dos modos: **client branch** (`.roots/{version}.{client}/`) y **source** (`.roots/{module}/`). El modo se pregunta al usuario al procesar el seed por primera vez y se persiste en `_meta.json.working_mode`. Actualizada "Estructura Base" con ambos layouts. `on-seed-process` ampliado con paso 0 de detección de modo. Nuevo protocolo de merge entre namespaces de distintos clientes/branches. `_meta.json` extendido con campos `working_mode`, `odoo_version`, `repo`.
 - **1.4** (24 Abril 2026) — Nueva carpeta `workbench/` para materiales de referencia del usuario. Nueva sección "Sync con canonical upstream (ctmil/roots_seed)" con protocolo de comparación de versiones y reglas de contribución. Nueva sección "Integración con CLAUDE.md y Claude Code (.claude/)" con jerarquía de contexto, reglas de no-duplicación, template de CLAUDE.md, y tabla de compatibilidad futura. Nuevo hook `on-seed-process.md` que consolida bootstrap completo: sync upstream, distribución, verificación CLAUDE.md, y creación de workbench. `session-start` ampliado para listar `workbench/` al inicio.
 - **1.3** (18 Abril 2026) — Regla de distribución del seed dentro de cada `.roots/`. Cada módulo/proyecto lleva una **copia local** del seed que lo generó, así es self-contained y reprocesable aunque se extraiga a otro repo. Nuevo hook `on-seed-update` para re-distribuir al canonical bumpear versión. `session-start` ahora compara copia local vs canonical y avisa si están desincronizadas.
 - **1.2** (18 Abril 2026) — Incorporados tres protocolos al seed, tool-agnostic (aplicables a cualquier asistente de IA o desarrollador humano):
@@ -25,6 +26,143 @@ La carpeta `.roots/` funciona como **memoria persistente** del proyecto, organiz
 - Definir skills y workflows reutilizables por módulo
 
 Esta estructura está diseñada para ser usada por **agentes de IA** y **desarrolladores humanos** por igual.
+
+---
+
+## Modos de trabajo (obligatorio preguntar)
+
+**Regla:** al procesar el seed por primera vez en un repo, el agente **DEBE** preguntar al usuario en qué modo trabaja. El modo determina cómo se estructura el namespace dentro de `.roots/` y cómo se comportan los merges.
+
+### Los dos modos
+
+| Modo | Namespace | Cuándo usar | Ejemplo |
+|------|-----------|-------------|---------|
+| **Client branch** | `.roots/{version}.{client}/` | Trabajando en un branch de cliente específico que luego se mergea al source | `.roots/19.0.tecnolosys/` |
+| **Source (full history)** | `.roots/{module}/` | Trabajando en el branch principal del módulo (source of truth) | `.roots/meli_oerp/` |
+
+### Modo Client Branch
+
+El desarrollador trabaja en un branch derivado del source, adaptando y configurando para un cliente específico. El namespace aísla la historia de ese cliente.
+
+**Estructura:**
+```
+.roots/
+└── {version}.{client}/
+    ├── _meta.json
+    ├── roots_seed.md
+    ├── {module_a}/
+    │   ├── context.md
+    │   ├── journal/
+    │   ├── debug/
+    │   └── ...
+    └── {module_b}/
+        └── ...
+```
+
+**Características:**
+- El namespace `{version}.{client}` identifica la versión del framework (ej: `19.0`) y el cliente/repo (ej: `tecnolosys`)
+- Múltiples clientes pueden coexistir: `.roots/19.0.cliente_a/`, `.roots/19.0.cliente_b/`
+- Al mergear al source, cada cliente trae su `.roots/` sin pisar el de otros
+- `_meta.json` incluye `"working_mode": "client"`, `"odoo_version": "19.0"`, `"repo": "tecnolosys"`
+
+**Cuándo se usa:**
+- Branches de implementación para clientes específicos
+- Forks con customizaciones
+- Branches de testing/staging que capturan contexto del entorno
+
+### Modo Source (Full History)
+
+El desarrollador trabaja directamente en el source del módulo. Es la fuente de verdad.
+
+**Estructura:**
+```
+.roots/
+├── _meta.json
+├── roots_seed.md
+├── {module_a}/
+│   ├── context.md
+│   ├── journal/
+│   ├── debug/
+│   └── ...
+└── {module_b}/
+    └── ...
+```
+
+**Características:**
+- Sin namespace extra — los módulos van directamente bajo `.roots/`
+- Es el `.roots/` canónico del proyecto
+- `_meta.json` incluye `"working_mode": "source"`
+
+**Cuándo se usa:**
+- Branch principal de desarrollo (ej: `19.0`, `main`)
+- Repositorio canónico del módulo
+- Mantenimiento del source sin contexto de cliente
+
+### Pregunta obligatoria al procesar el seed
+
+Al ejecutar `on-seed-process` por primera vez (bootstrap), el agente debe preguntar:
+
+```
+¿En qué modo estás trabajando?
+
+1. Client branch — Estoy en un branch de un cliente específico
+   (ej: branch 19.0-tecnolosys, fork de cliente)
+   → Se creará .roots/{version}.{client}/ con namespace aislado
+
+2. Source / full history — Estoy en el branch principal del módulo
+   (ej: branch 19.0, main)
+   → Se creará .roots/{module}/ directamente
+
+Si elegís (1), también se preguntará:
+  - Versión del framework (ej: 19.0)
+  - Nombre del cliente/repo (ej: tecnolosys)
+```
+
+La respuesta se persiste en `_meta.json` como `working_mode` y **no se vuelve a preguntar** en sesiones posteriores.
+
+### Merge entre modos
+
+| Escenario | Comportamiento |
+|-----------|----------------|
+| Client A → Source | `.roots/{version}.{client_a}/` coexiste con `.roots/{module}/` — no se pisan |
+| Client A + Client B | `.roots/{version}.{client_a}/` y `.roots/{version}.{client_b}/` coexisten sin conflicto |
+| Client → Client (mismo namespace) | Git merge estándar — los archivos append-only (diary, errors-log) se resuelven naturalmente |
+| Source → Client | El client hereda el `.roots/{module}/` del source como referencia read-only |
+
+**Regla de merge:** al detectar múltiples namespaces en `.roots/`, **no consolidar automáticamente**. Cada namespace es una historia independiente. Si el usuario quiere consolidar (ej: cerrar un client branch y llevar lo aprendido al source), debe ser explícito:
+
+```
+"Consolidar .roots/19.0.tecnolosys/ → .roots/meli_oerp/"
+```
+
+El agente entonces:
+1. Lee ambos `.roots/`
+2. Propone qué migrar (decisions, patterns, glossary son buenos candidatos; diary y errors-log son contextuales)
+3. El usuario aprueba item por item
+4. Se mergea el contenido seleccionado
+5. El namespace del client puede archivarse o eliminarse
+
+### _meta.json extendido
+
+```json
+{
+  "seed_version": "1.5",
+  "created_at": "2026-04-30T00:00:00",
+  "working_mode": "client",
+  "odoo_version": "19.0",
+  "repo": "tecnolosys",
+  "project": "19.0.tecnolosys",
+  "modules": ["meli_oerp", "meli_oerp_multiple", "meli_oerp_stock"]
+}
+```
+
+| Campo | Modo client | Modo source |
+|-------|-------------|-------------|
+| `working_mode` | `"client"` | `"source"` |
+| `odoo_version` | Versión del framework | Versión del framework |
+| `repo` | Nombre del cliente/repo | Nombre del proyecto |
+| `project` | `"{version}.{client}"` | Nombre del proyecto |
+| `modules` | Lista de módulos | Lista de módulos |
 
 ---
 
@@ -228,11 +366,29 @@ Problemas anticipados y cómo resolverlos:
 
 ## Estructura Base
 
+La estructura varía según el modo de trabajo (ver § "Modos de trabajo"):
+
+**Modo Source:**
 ```
 .roots/
-├── _meta.json             # Metadata: versión del seed, fecha, módulos
-│
+├── _meta.json
+├── roots_seed.md
 └── {module_name}/
+```
+
+**Modo Client Branch:**
+```
+.roots/
+└── {version}.{client}/
+    ├── _meta.json
+    ├── roots_seed.md
+    └── {module_name}/
+```
+
+Dentro de cada módulo, la estructura interna es idéntica en ambos modos:
+
+```
+{module_name}/
     ├── context.md             # Briefing rápido del módulo (30 seg)
     │
     ├── workbench/             # Materiales de referencia del usuario
@@ -1082,6 +1238,14 @@ humano que retome el repo.
 > upstream, distribución, y verificación de CLAUDE.md.
 
 ## Pasos
+
+0. **Detectar modo de trabajo (solo en bootstrap inicial):**
+   - Si `_meta.json` ya existe y tiene `working_mode` → usar ese modo, no preguntar
+   - Si no existe `_meta.json` o no tiene `working_mode` → preguntar al usuario:
+     - Client branch → pedir versión y nombre de cliente → crear `.roots/{version}.{client}/`
+     - Source → crear `.roots/{module}/` directamente
+   - Persistir la respuesta en `_meta.json.working_mode`
+   - Este paso NO se repite en sesiones posteriores
 
 1. **Sync con upstream público:**
    - Fetch `https://raw.githubusercontent.com/ctmil/roots_seed/main/roots_seed.md`
