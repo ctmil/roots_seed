@@ -2,9 +2,10 @@
 
 > Plantilla maestra para crear estructura de documentación y memoria de desarrollo. Este archivo define los estándares de formato, estilo y protocolos de poblado.
 
-**Versión:** 1.6
+**Versión:** 1.7
 
 **Changelog:**
+- **1.7** (30 Mayo 2026) — Nuevo **Modo Flat** (simplificado): `.roots/` directo en la raíz, sin namespace, para proyectos single-source con pocas/ninguna fuente remota embebida — el caso común. **Desacople de dos ejes** que v1.6 conflacionaba: el *layout del directorio* (`flat` vs `namespaced`) ahora es independiente de la *metadata de contexto* (`context_format`/`context_parsed`) — un repo flat puede declarar su contexto (ej. Odoo 17.0, dev) en `_meta.json` sin codificarlo en el path (registrar sin namespacear). Nueva **regla de decisión** del layout: lo define "¿necesito memoria multi-contexto concurrente?" (embeber N sources / multi-versión-cliente en paralelo / migración), NO "¿es Odoo?". Nuevo **Modo Migración**: un repo flat puede *forkear temporalmente* a namespaced durante una migración (ej. `.roots/17.0/` + `.roots/19.0/` lado a lado) y *colapsar de vuelta a flat* sobre la versión nueva. `_meta.json` extendido con `layout`. **Flat es el default del bootstrap** — la pregunta de modo solo se dispara ante señales de multi-source/multi-cliente. Script de inicialización a v1.7.
 - **1.6** (10 Mayo 2026) — Modos de trabajo replanteados como modelo híbrido multi-source. Nuevo **Context Format Registry** con contexto estructurado por dominio (Odoo como primer formato: `{major}.{minor}.{infra}.{project}`). Nuevo sistema de **Sources embebidos**: el cliente copia `.roots/` de cada source en `sources/`, con `_sources.json` como manifest de vinculación. **Cascada de precedencia** formalizada: cliente raíz > source embebido > source original. **Namespace de conflictos** con patrón `source.skill_name` y overrides del cliente. **Promoción semi-automática** de descubrimientos del cliente al source original. Nueva sección **Tool Compatibility** con filosofía tool-agnostic, 5 herramientas principales como referencia y merging strategies. `_meta.json` extendido con `context_format`, `context_parsed`, `sources`. Script de inicialización actualizado a v1.6.
 - **1.5** (30 Abril 2026) — Nueva sección "Modos de trabajo" con dos modos: **client branch** (`.roots/{version}.{client}/`) y **source** (`.roots/{module}/`). El modo se pregunta al usuario al procesar el seed por primera vez y se persiste en `_meta.json.working_mode`. Actualizada "Estructura Base" con ambos layouts. `on-seed-process` ampliado con paso 0 de detección de modo. Nuevo protocolo de merge entre namespaces de distintos clientes/branches. `_meta.json` extendido con campos `working_mode`, `odoo_version`, `repo`.
 - **1.4** (24 Abril 2026) — Nueva carpeta `workbench/` para materiales de referencia del usuario. Nueva sección "Sync con canonical upstream (ctmil/roots_seed)" con protocolo de comparación de versiones y reglas de contribución. Nueva sección "Integración con CLAUDE.md y Claude Code (.claude/)" con jerarquía de contexto, reglas de no-duplicación, template de CLAUDE.md, y tabla de compatibilidad futura. Nuevo hook `on-seed-process.md` que consolida bootstrap completo: sync upstream, distribución, verificación CLAUDE.md, y creación de workbench. `session-start` ampliado para listar `workbench/` al inicio.
@@ -30,18 +31,88 @@ Esta estructura está diseñada para ser usada por **agentes de IA** y **desarro
 
 ---
 
-## Modos de trabajo (obligatorio preguntar)
+## Modos de trabajo
 
-**Regla:** al procesar el seed por primera vez en un repo, el agente **DEBE** preguntar al usuario en qué modo trabaja. El modo determina cómo se estructura el namespace dentro de `.roots/` y cómo se comportan los merges.
+**Regla:** al procesar el seed por primera vez en un repo, el agente determina el modo. El **default es Flat** (el más simple — `.roots/` directo). El agente solo **pregunta** si detecta señales de un setup multi-source / multi-cliente (ver "¿Cuándo flat vs namespaced?"). El modo determina si `.roots/` lleva namespace interno y cómo se comportan los merges. Se persiste en `_meta.json` (`layout` + `working_mode`) y no se vuelve a preguntar.
 
-### Los dos modos
+### Los modos
 
-| Modo | Namespace | Cuándo usar | Ejemplo |
-|------|-----------|-------------|---------|
-| **Client branch** | `.roots/{context}.{project}/` | Trabajando en un branch de cliente/proyecto que consume uno o más sources | `.roots/17.0.sh.acme/` |
-| **Source** | `.roots/{module}/` | Trabajando en el branch principal del módulo (source of truth) | `.roots/meli_oerp/` |
+| Modo | Layout | Namespace | Cuándo usar | Ejemplo |
+|------|--------|-----------|-------------|---------|
+| **Flat** (default) | `flat` | ninguno — `.roots/` directo | Proyecto único, pocas/ninguna fuente remota embebida. El caso común. | `.roots/context.md`, `.roots/tasks/` |
+| **Source** | `namespaced` | `.roots/{module}/` | Repo source multi-módulo (fuente de verdad de varios módulos) | `.roots/meli_oerp/` |
+| **Client branch** | `namespaced` | `.roots/{context}.{project}/` | Branch de cliente que consume/embebe uno o más sources | `.roots/17.0.sh.acme/` |
+
+> Los modos **Source** y **Client branch** son ambos `namespaced` y comparten la maquinaria multi-source descrita abajo (sources embebidos, `_sources.json`, cascada de precedencia, namespace de conflictos, promoción). El modo **Flat** NO usa nada de eso — saltá a "Modo Flat" si tu repo es un proyecto único.
+
+### Modo Flat (simplificado — default)
+
+El caso más común: **un repo, un proyecto, una memoria**. `.roots/` lleva los archivos directamente, sin subdirectorio de namespace:
+
+```
+.roots/
+├── _meta.json
+├── roots_seed.md
+├── context.md
+├── journal/        (diary, notes, changelog)
+├── tasks/          (todo, tasks)
+├── debug/          (errors-log, fixes-log, migrations)
+├── design/         (decisions, sketchbook)
+├── docs/           (architecture, glossary, commits, ...)
+├── hooks/
+├── skills/
+└── workbench/
+```
+
+**Cuándo usar Flat:**
+- El repo es un proyecto/producto bespoke, no un módulo source consumido por N clientes.
+- No vas a **embeber `.roots/` de otras fuentes** (`sources/`) — o son muy pocas y las referenciás a mano.
+- No mantenés **múltiples versiones/clientes en paralelo** en el mismo working tree.
+
+**Qué NO trae Flat** (y no necesita): el subdir `{context}.{project}/`, el sistema `sources/` + `_sources.json`, la cascada de precedencia, el namespace de conflictos. Todo eso es maquinaria para multi-source; en flat es ceremonia sin valor.
+
+**Contexto en Flat:** un repo flat **igual puede declarar** su `context_format` / `context_parsed` en `_meta.json` (ej. "Odoo 17.0, dev") para que el agente razone sobre el entorno — **sin** codificarlo en el path. El contexto es *metadata*, no *layout* (ver "Context Format Registry").
+
+`_meta.json` incluye `"layout": "flat"` + `"working_mode": "source"` (un flat es un source colapsado a un solo proyecto).
+
+### ¿Cuándo flat vs namespaced? — la regla
+
+El layout NO lo decide el framework ("es Odoo → namespaced"). Lo decide **una sola pregunta: ¿necesito tener memoria de múltiples contextos viva al mismo tiempo?**
+
+- **No** → **Flat.** Un proyecto que evoluciona hacia adelante. La versión vieja pasa a ser historia (git + `journal/changelog` + `debug/migrations.md`), no un namespace paralelo que seguís consultando.
+- **Sí** → **Namespaced.** Tres disparadores típicos:
+  1. **Multi-source:** embebés los `.roots/` de N módulos source (cliente híbrido).
+  2. **Multi-versión/cliente en paralelo:** el mismo código mantenido en Odoo 16 para cliente A y 17 para B, simultáneo.
+  3. **Migración** (ver "Modo Migración"): durante la ventana, dos versiones conviven.
+
+La mayoría de los repos bespoke (un producto, una versión, hacia adelante) son **Flat**. El namespaced es para sources reutilizables y para casas de software que mantienen muchos clientes/versiones en paralelo.
+
+### Modo Migración (flat → namespaced temporal → colapso)
+
+Una migración (ej. Odoo 17 → 19) es un caso *temporal* de "memoria multi-contexto concurrente". Un repo normalmente **flat** puede **forkear temporalmente** a namespaced para la transición, y **colapsar de vuelta** al terminar:
+
+```
+# Antes (flat, en producción sobre 17):
+.roots/                          ← memoria viva del proyecto en 17
+
+# Durante la migración (namespaced temporal):
+.roots/17.0.{infra}/             ← fork de la memoria de 17 (referencia: "cómo funciona hoy")
+.roots/19.0.{infra}/             ← memoria nueva que se acumula al migrar
+
+# Después (colapso a flat sobre 19):
+.roots/                          ← 19 promovido a flat; 17 archivado (git history + migrations.md)
+```
+
+**Por qué sirve el namespace acá:** `{major}.{minor}` es exactamente el eje que la migración cambia. Partir la memoria por ese eje permite:
+- Mantener `.roots/17.0/` **intacto como source-of-truth del comportamiento actual** mientras construís el 19.
+- Que el agente lea **ambos** sin confundir (no aplicar un fix de 17 a un caso de 19; los ADRs quedan tagueados por versión).
+- Tratar la migración como un **fork de memoria**: las decisiones que sobreviven se migran, las version-specific se re-evalúan.
+
+Al cerrar la migración, **colapsás de vuelta a flat**: promovés `19.0/` a `.roots/` raíz y archivás `17.0/` (su valor histórico vive en git + `debug/migrations.md`). No te quedás namespaced para siempre si no tenés otro disparador (multi-source / multi-cliente).
 
 ### Modelo híbrido multi-source
+
+> Aplica a los modos **namespaced** (Source / Client branch). En **Flat** no aplica.
 
 Un proyecto cliente es siempre un **híbrido de uno o más sources**. El `.roots/` del cliente no es una isla — referencia y embebe los `.roots/` de cada source que consume:
 
@@ -209,29 +280,31 @@ El desarrollador trabaja directamente en el source del módulo. Es la fuente de 
 - Repositorio canónico del módulo
 - Mantenimiento del source sin contexto de cliente
 
-### Pregunta obligatoria al procesar el seed
+### Detección de modo al procesar el seed
 
-Al ejecutar `on-seed-process` por primera vez (bootstrap), el agente debe preguntar:
+Al ejecutar `on-seed-process` por primera vez (bootstrap), el agente determina el layout. **El default es Flat** — NO se pregunta si el repo es un proyecto único. El agente solo pregunta cuando detecta **señales de namespaced**:
+- El repo es un **módulo source reutilizable** (lo consumen otros proyectos/clientes), o
+- Va a **embeber `.roots/` de otras fuentes** (`sources/`), o
+- Mantiene **múltiples versiones/clientes en paralelo**, o
+- Está entrando en una **migración** (ver Modo Migración).
+
+Sin esas señales → Flat directo, sin preguntar. Con señales, el agente pregunta:
 
 ```
-¿En qué modo estás trabajando?
+Detecté señales de un setup multi-source/multi-cliente. ¿Qué layout uso?
 
-1. Client branch — Estoy en un branch de un cliente/proyecto específico
-   (ej: branch 17.0-acme, fork de cliente)
-   → Se creará .roots/{context}.{project}/ con namespace aislado
-   → Se preguntará el formato de contexto (Odoo, genérico, custom)
+0. Flat (default) — Un proyecto, una memoria. .roots/ directo, sin namespace.
+   → No se crea subdir. (Opcional: declarar context_format en _meta.json.)
 
-2. Source — Estoy en el branch principal del módulo
-   (ej: branch 19.0, main)
-   → Se creará .roots/{module}/ directamente
+1. Source — Repo source multi-módulo (fuente de verdad de varios módulos).
+   → Se crea .roots/{module}/ por módulo.
 
-Si elegís (1), también se preguntará:
-  - Formato de contexto (ver Context Format Registry)
-  - Datos específicos del formato elegido
-  - Sources a vincular (módulos cuyo .roots/ embeber)
+2. Client branch — Branch de cliente que consume/embebe sources.
+   → Se crea .roots/{context}.{project}/ con namespace aislado.
+   → Se preguntará: context_format (Odoo/genérico/custom) + sources a vincular.
 ```
 
-La respuesta se persiste en `_meta.json` como `working_mode` y **no se vuelve a preguntar** en sesiones posteriores.
+La respuesta se persiste en `_meta.json` (`layout` + `working_mode`) y **no se vuelve a preguntar** en sesiones posteriores. Un repo Flat puede pasar a namespaced después (ej. al arrancar una migración) — ver Modo Migración.
 
 ### Merge entre modos
 
@@ -260,7 +333,9 @@ El agente entonces:
 
 ## Context Format Registry
 
-El `{context}` en `.roots/{context}.{project}/` no es un string libre — tiene **estructura semántica según el dominio**. Esto permite que los agentes parseen el contexto y razonen sobre el entorno.
+El `{context}` en `.roots/{context}.{project}/` (layout **namespaced**) no es un string libre — tiene **estructura semántica según el dominio**, que los agentes parsean para razonar sobre el entorno.
+
+> **Layout vs metadata (v1.7):** el Context Format describe DOS cosas independientes — (1) cómo se *nombra* el subdir cuando el layout es `namespaced`, y (2) la *metadata* `context_format`/`context_parsed` del `_meta.json`. Un repo **Flat NO usa el subdir**, pero **puede declarar igual** `context_format`/`context_parsed` en su `_meta.json` para que el agente sepa "esto es Odoo 17.0, dev" sin codificarlo en el path. O sea: el contexto se puede **registrar sin namespacear**. El Registry de abajo define los formatos; aplican a la metadata en cualquier layout y al nombre del subdir solo en namespaced.
 
 ### Formatos registrados
 
@@ -332,10 +407,28 @@ Así el agente puede razonar sobre el entorno (sabe que es Odoo 17 en SH) sin ad
 
 ## _meta.json extendido
 
+**Flat (default)** — el caso simple; `context_format`/`context_parsed` son opcionales (metadata para razonar sobre el entorno, sin namespacear):
+
 ```json
 {
-  "seed_version": "1.6",
+  "seed_version": "1.7",
+  "created_at": "2026-05-30T00:00:00",
+  "layout": "flat",
+  "working_mode": "source",
+  "context_format": "odoo",
+  "context_parsed": { "major": 17, "minor": 0, "infra": "dev" },
+  "project": "mi_proyecto",
+  "modules": ["mi_proyecto"]
+}
+```
+
+**Namespaced (Client branch / Source multi-módulo)** — usa el subdir + maquinaria multi-source:
+
+```json
+{
+  "seed_version": "1.7",
   "created_at": "2026-05-10T00:00:00",
+  "layout": "namespaced",
   "working_mode": "client",
   "context_format": "odoo",
   "context_parsed": {
@@ -350,14 +443,17 @@ Así el agente puede razonar sobre el entorno (sabe que es Odoo 17 en SH) sin ad
 }
 ```
 
-| Campo | Modo client | Modo source |
-|-------|-------------|-------------|
-| `working_mode` | `"client"` | `"source"` |
-| `context_format` | `"odoo"`, `"generic"`, o custom | Opcional |
-| `context_parsed` | Objeto con campos parseados del contexto | Opcional |
-| `project` | `"{context}.{project}"` | Nombre del proyecto |
-| `modules` | Lista de módulos del cliente | Lista de módulos del source |
-| `sources` | Lista de source_ids vinculados (ref. `_sources.json`) | No aplica (es el source) |
+| Campo | Flat (default) | Source | Client branch |
+|-------|----------------|--------|---------------|
+| `layout` | `"flat"` | `"namespaced"` | `"namespaced"` |
+| `working_mode` | `"source"` | `"source"` | `"client"` |
+| `context_format` | opcional (metadata) | opcional | `"odoo"`/`"generic"`/custom |
+| `context_parsed` | opcional (metadata) | opcional | objeto parseado |
+| `project` | nombre del proyecto | nombre del proyecto | `"{context}.{project}"` |
+| `modules` | módulos del proyecto | módulos del source | módulos del cliente |
+| `sources` | normalmente ausente / `[]` | no aplica (es el source) | source_ids vinculados (ref. `_sources.json`) |
+
+> `layout` ausente ⇒ asumir `"flat"` (back-compat: los `.roots/` pre-v1.7 sin `layout` que tienen archivos directos bajo `.roots/` ya son flat de hecho).
 
 ---
 
@@ -594,9 +690,25 @@ Problemas anticipados y cómo resolverlos:
 
 ## Estructura Base
 
-La estructura varía según el modo de trabajo (ver § "Modos de trabajo"):
+La estructura varía según el layout (ver § "Modos de trabajo"):
 
-**Modo Source:**
+**Modo Flat (default):** archivos directos bajo `.roots/`, sin subdir de namespace.
+```
+.roots/
+├── _meta.json          ← "layout": "flat"
+├── roots_seed.md
+├── context.md
+├── journal/  (diary, notes, changelog)
+├── tasks/    (todo, tasks)
+├── debug/    (errors-log, fixes-log, migrations)
+├── design/   (decisions, sketchbook)
+├── docs/     (architecture, glossary, commits, manual, ...)
+├── hooks/
+├── skills/
+└── workbench/
+```
+
+**Modo Source (namespaced multi-módulo):**
 ```
 .roots/
 ├── _meta.json
@@ -1643,15 +1755,19 @@ Al iniciar sesión en un proyecto con `.roots/`:
 
 MODULE_NAME=${1:-"module"}
 BASE_PATH=".roots/$MODULE_NAME"
-SEED_VERSION="1.6"
+SEED_VERSION="1.7"
 
 mkdir -p "$BASE_PATH"/{journal,debug,design,docs,tasks,hooks,skills,workbench}
 
-# Meta
+# Meta — layout flat por default (v1.7). Para namespaced (Source multi-módulo
+# o Client branch) ver "Modos de trabajo": cambiar layout + agregar subdir.
 cat > ".roots/_meta.json" << EOF
 {
   "seed_version": "$SEED_VERSION",
   "created_at": "$(date -Iseconds)",
+  "layout": "flat",
+  "working_mode": "source",
+  "project": "$MODULE_NAME",
   "modules": ["$MODULE_NAME"]
 }
 EOF
