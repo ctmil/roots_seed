@@ -124,6 +124,10 @@
   svg.graph{width:100%;height:auto;background:var(--panel);border:1px solid var(--border);border-radius:10px}
   .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--muted);margin:8px 2px}
   .legend i{display:inline-block;width:18px;border-top:2px solid;vertical-align:middle;margin-right:5px}
+  /* home tree (bonsai generativo) */
+  .treehero{background:linear-gradient(180deg,#0d1117,#11161d);border:1px solid var(--border);border-radius:12px;padding:6px 6px 2px;margin-bottom:16px}
+  svg.tree{width:100%;height:auto;display:block}
+  .treecap{text-align:center;color:var(--muted);font-size:11px;padding:2px 0 6px}
 </style>
 </head>
 <body>
@@ -315,6 +319,7 @@ function renderNode(path){
   const node=nodeByPath(path);const view=$('#view');view.innerHTML='';
   // HOME: métricas + (hero global opcional)
   if(!path){
+    const th=homeTree(STATE.groves||[],STATE.repos||[]);if(th)view.append(th);
     const m=E('div','metrics');const mt=STATE.metrics;
     m.append(metric(mt.trees||mt.repos,'Trees'),metric(mt.groves||0,'Groves'),
       metric(mt.modules_with_memory,'módulos c/ memoria'),
@@ -376,6 +381,36 @@ function buildGraph(repos,rels){
   const wrap=E('div');const leg=E('div','legend');
   Object.entries(REL_COLORS).forEach(([t,c])=>{const s=E('span');const i=E('i');i.style.borderColor=c;s.append(i,document.createTextNode(t));leg.append(s);});
   wrap.append(svg,leg);return wrap;
+}
+function homeTree(groves,repos){
+  const byG={};repos.forEach(r=>{if(r.grove)(byG[r.grove]=byG[r.grove]||[]).push(r);});
+  const order=(groves||[]).map(g=>g.id).filter(id=>byG[id]);
+  if(!order.length)return null;
+  const W=920,H=330,cx=W/2,soilY=H-58,trunkTop=H-140;
+  const PAL=['#5fd874','#79c0ff','#d8b4ff','#e3b341','#ff8077','#7ee0c0','#f0a3c8','#9fb4ff','#c5e065','#b3bdc8'];
+  const svg=svgEl('svg',{'class':'tree',viewBox:'0 0 '+W+' '+H,preserveAspectRatio:'xMidYMid meet'});
+  svg.append(svgEl('line',{x1:40,y1:soilY,x2:W-40,y2:soilY,stroke:'#3d4753','stroke-dasharray':'3 7','stroke-width':1}));
+  [[-70,60],[-35,82],[35,82],[70,60],[0,74]].forEach(([dx,dy])=>
+    svg.append(svgEl('path',{d:'M'+cx+','+soilY+' q'+(dx*0.4)+','+(dy*0.6)+' '+dx+','+dy,fill:'none',stroke:'#6b5640','stroke-width':1.6,opacity:.55})));
+  svg.append(svgEl('path',{d:'M'+cx+','+soilY+' L'+cx+','+trunkTop,stroke:'#8a6d4b','stroke-width':11,'stroke-linecap':'round',fill:'none'}));
+  const N=order.length,SP=158;
+  order.forEach((gid,i)=>{
+    const g=(groves.find(x=>x.id===gid))||{id:gid};const trees=byG[gid],col=PAL[i%PAL.length];
+    const t=N>1?i/(N-1):.5,ang=(-SP/2+t*SP)*Math.PI/180;
+    const len=66+Math.min(trees.length,8)*8;
+    const ex=cx+Math.sin(ang)*len,ey=trunkTop-Math.cos(ang)*len;
+    svg.append(svgEl('path',{d:'M'+cx+','+trunkTop+' Q'+(cx+Math.sin(ang)*len*0.35)+','+(trunkTop-Math.cos(ang)*len*0.55)+' '+ex+','+ey,
+      fill:'none',stroke:'#8a6d4b','stroke-width':Math.max(2,Math.min(6,trees.length)),'stroke-linecap':'round',opacity:.85}));
+    trees.forEach((r,j)=>{const sa=ang+((j-(trees.length-1)/2)*0.22),ll=12+(j%3)*7;
+      const lx=ex+Math.sin(sa)*ll,ly=ey-Math.cos(sa)*ll;
+      const dot=svgEl('circle',{cx:lx,cy:ly,r:4.5,fill:col,opacity:.9,stroke:'#0b0f14','stroke-width':.5});
+      const ti=svgEl('title');ti.textContent=r.name+' · '+gid;dot.append(ti);svg.append(dot);});
+    const lab=svgEl('text',{x:ex,y:ey-15,fill:col,'font-size':11.5,'font-family':'ui-monospace,monospace','text-anchor':'middle','font-weight':'bold'});
+    lab.textContent=gid;svg.append(lab);
+  });
+  const wrap=E('div','treehero');svg.style.cursor='pointer';svg.onclick=()=>go('__forest__');
+  wrap.append(svg,E('div','treecap','🌲 el Forest — '+N+' Groves · '+repos.length+' Trees · click → Forest map'));
+  return wrap;
 }
 function renderForest(){
   const view=$('#view');view.innerHTML='';
