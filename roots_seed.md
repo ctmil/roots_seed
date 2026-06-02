@@ -2,9 +2,10 @@
 
 > Plantilla maestra para crear estructura de documentación y memoria de desarrollo. Este archivo define los estándares de formato, estilo y protocolos de poblado.
 
-**Versión:** 1.8
+**Versión:** 1.9
 
 **Changelog:**
+- **1.9** (02 Junio 2026) — Nueva sección **Forest Model** que formaliza y promueve al canónico el working_mode `workspace` (capa de coordinación por encima de N repos, antes extensión local). Define el vocabulario **Roots → Forest → Grove → Tree → Branch** y un schema multi-eje: cada Tree (repo) lleva `grove` (producto/suite primario), `also_groves` (tags de co-pertenencia genuina), `vendor` (autor/fabricante — **propiedad** con perfil opcional en `.roots/vendors/<slug>.md`), `kind` (`producto-suite`/`plataforma`/`agregador`/`external-upstream`/`seed`) y `org` (hosting). Las **dependencias se modelan como aristas** de un grafo dirigido (`relations[]`: `depends-on`/`extends`/`integrates`/`relates`), NUNCA como anidamiento ni tags — regla de oro: *grove = qué es · arista = qué usa · tag = también es de*. `forest.json` es el registro estructurado (rename de `fleet.json`, que queda como symlink por compat con el `fleet-dashboard`; conserva el array `repos[]`). No cambia el formato de `.roots/` por-repo.
 - **1.8** (02 Junio 2026) — Nueva sección **Toolkit complementario (`scripts/` + `skills/` + `tools/`)**: sistematiza que la memoria `.roots/` vive sobre un sustrato de repos y que el seed se distribuye junto a herramientas que lo montan, lo mejoran y lo visualizan. `scripts/` (montaje/operación de la flota: `setup-module.sh`, `setupbranch.sh`, `dashboard.sh` — patrón bare+worktrees), `skills/` (biblioteca **compartida** de estrategias bien diseñadas: merging de módulos Odoo, reporting md→PDF — distinta del `skills/` local de cada `.roots`) y `tools/` (apps; primera: `fleet-dashboard`, visor navegable que lee los `.roots` y mapea a un backend Odoo). Se **referencia**, no se inlinea código: cada elemento es self-contained con su README. No cambia el formato de `.roots/`.
 - **1.7** (30 Mayo 2026) — Nuevo **Modo Flat** (simplificado): `.roots/` directo en la raíz, sin namespace, para proyectos single-source con pocas/ninguna fuente remota embebida — el caso común. **Desacople de dos ejes** que v1.6 conflacionaba: el *layout del directorio* (`flat` vs `namespaced`) ahora es independiente de la *metadata de contexto* (`context_format`/`context_parsed`) — un repo flat puede declarar su contexto (ej. Odoo 17.0, dev) en `_meta.json` sin codificarlo en el path (registrar sin namespacear). Nueva **regla de decisión** del layout: lo define "¿necesito memoria multi-contexto concurrente?" (embeber N sources / multi-versión-cliente en paralelo / migración), NO "¿es Odoo?". Nuevo **Modo Migración**: un repo flat puede *forkear temporalmente* a namespaced durante una migración (ej. `.roots/17.0/` + `.roots/19.0/` lado a lado) y *colapsar de vuelta a flat* sobre la versión nueva. `_meta.json` extendido con `layout`. **Flat es el default del bootstrap** — la pregunta de modo solo se dispara ante señales de multi-source/multi-cliente. Script de inicialización a v1.7.
 - **1.6** (10 Mayo 2026) — Modos de trabajo replanteados como modelo híbrido multi-source. Nuevo **Context Format Registry** con contexto estructurado por dominio (Odoo como primer formato: `{major}.{minor}.{infra}.{project}`). Nuevo sistema de **Sources embebidos**: el cliente copia `.roots/` de cada source en `sources/`, con `_sources.json` como manifest de vinculación. **Cascada de precedencia** formalizada: cliente raíz > source embebido > source original. **Namespace de conflictos** con patrón `source.skill_name` y overrides del cliente. **Promoción semi-automática** de descubrimientos del cliente al source original. Nueva sección **Tool Compatibility** con filosofía tool-agnostic, 5 herramientas principales como referencia y merging strategies. `_meta.json` extendido con `context_format`, `context_parsed`, `sources`. Script de inicialización actualizado a v1.6.
@@ -43,8 +44,9 @@ Esta estructura está diseñada para ser usada por **agentes de IA** y **desarro
 | **Flat** (default) | `flat` | ninguno — `.roots/` directo | Proyecto único, pocas/ninguna fuente remota embebida. El caso común. | `.roots/context.md`, `.roots/tasks/` |
 | **Source** | `namespaced` | `.roots/{module}/` | Repo source multi-módulo (fuente de verdad de varios módulos) | `.roots/meli_oerp/` |
 | **Client branch** | `namespaced` | `.roots/{context}.{project}/` | Branch de cliente que consume/embebe uno o más sources | `.roots/17.0.sh.acme/` |
+| **Workspace** | `flat` raíz + `geoecon/` etc. | coordina N repos | El `.roots/` vive en la carpeta que **contiene** varios repos y los indexa/relaciona (no documenta un proyecto). | `.roots/forest.json`, `.roots/<grove>/` |
 
-> Los modos **Source** y **Client branch** son ambos `namespaced` y comparten la maquinaria multi-source descrita abajo (sources embebidos, `_sources.json`, cascada de precedencia, namespace de conflictos, promoción). El modo **Flat** NO usa nada de eso — saltá a "Modo Flat" si tu repo es un proyecto único.
+> Los modos **Source** y **Client branch** son ambos `namespaced` y comparten la maquinaria multi-source descrita abajo (sources embebidos, `_sources.json`, cascada de precedencia, namespace de conflictos, promoción). El modo **Flat** NO usa nada de eso — saltá a "Modo Flat" si tu repo es un proyecto único. El modo **Workspace** opera *por encima* de los repos (cada uno con su propio modo) — ver "Forest Model".
 
 ### Modo Flat (simplificado — default)
 
@@ -533,6 +535,76 @@ Ver `tools/<nombre>/README.md`.
 ### Relación con el spec
 
 El toolkit asume el patrón bare+worktrees, pero el **formato `.roots/` no depende de él**: cualquier proyecto (un solo repo, un solo dir) usa la misma estructura de memoria sin necesidad del toolkit. Adoptá las herramientas si te sirven; ignoralas si tu setup es más simple.
+
+---
+
+## Forest Model — coordinación de workspace (multi-repo)
+
+> Esta sección formaliza el working_mode **`workspace`**: un `.roots/` que no documenta *un* proyecto sino que **coordina N repos** desde la carpeta que los contiene. Es la capa que usan los `scripts/` y el `fleet-dashboard` del toolkit. **No reemplaza** los modos por-repo (Flat/Source/Client-branch) — vive *por encima* de ellos.
+
+### Cuándo aplica
+
+Cuando montás varios repos juntos (patrón bare+worktrees) y necesitás un lugar que **indexe y relacione** la flota sin duplicar las memorias que ya viven en cada repo. La regla de oro del nivel workspace: **indexar y apuntar, no duplicar** — el `.roots/` raíz coordina; las memorias reales siguen en `<repo>/<worktree>/.roots`.
+
+### Vocabulario (crece de las raíces)
+
+La metáfora arranca en `.roots` y sube:
+
+| Término | Es | Ejemplo |
+|---|---|---|
+| **Roots** (`.roots`) | la capa de memoria/conocimiento | `context.md`, `decisions.md`, `journal/` |
+| **Forest** | el workspace entero — todos los repos coordinados | la carpeta que contiene los repos |
+| **Grove** | un **producto/suite**: cluster de Trees con función común | Meli · OCAPI · GeoEcon |
+| **Tree** | un **repo** (montado bare+worktrees) | `meli_oerp`, `geoecon_map` |
+| **Branch** | un git branch / worktree del Tree | `17.0`, `mapdev` |
+
+> Calza con git: un worktree contiene un *working **tree*** y los branches son *ramas*.
+
+### Ejes de cada Tree (ortogonales)
+
+Un Tree se describe con etiquetas **independientes**; no confundir "qué es" con "quién lo hace", "dónde vive" o "qué usa":
+
+| Eje | Pregunta | Cardinalidad | Valores |
+|---|---|---|---|
+| `grove` | ¿de qué **producto** es parte? | **1 primario** | Meli, OCAPI, Fulfillment, GeoEcon… |
+| `also_groves` | ¿co-pertenece a otro producto? (raro) | 0..N tags | solo co-pertenencia genuina, **NO** dependencia |
+| `vendor` | ¿quién lo **crea/mantiene**? | 1 (propiedad) | `moldeo-interactive`, `oca`, `odoo-sa`, `3rd-party` |
+| `kind` | ¿qué **naturaleza** tiene? | 1 | enum abajo |
+| `org` | ¿dónde **vive** el repo? (hosting) | 1 | la org/namespace de hosting |
+
+**`kind` enum:** `producto-suite` (producto de usuario) · `plataforma` (base abstracta de la que dependen otros) · `agregador` (deployment que anida módulos de muchos Groves) · `external-upstream` (vendorizado, no lo autoramos: Odoo core, OCA) · `seed` (tooling/semilla de roots).
+
+**`vendor` = propiedad + perfil opcional:** `vendor` es un campo del Tree, NO un nodo estructural. Opcionalmente cada vendor/autor/persona tiene un perfil en `.roots/vendors/<slug>.md` (su "raíz propia" descriptiva) que la propiedad referencia. Un mismo actor puede ser vendor (autor) y Grove (producto) sin chocar.
+
+### Relaciones = grafo (la regla de oro)
+
+> **`grove` = "qué es" · arista = "qué usa" · `also_groves` = "también es de" (raro).**
+
+Las **dependencias NO se modelan como pertenencia ni como anidamiento** — son **aristas** de un grafo dirigido (DAG). Una base compartida (ej. una plataforma `connector_api`) es **dependida por Trees de productos distintos**; si la dependencia fuera membership/jerarquía romperíamos los productos (un nodo no puede tener dos padres; un tag de plataforma significaría a la vez "es parte de" y "depende de").
+
+`relations[]`: `{ "from": <tree/módulo>, "to": <tree/módulo/servicio>, "type": <tipo> }` — tipos: `depends-on`, `extends`, `integrates`, `relates`.
+
+### `forest.json` — registro estructurado
+
+Es el rename de `fleet.json`. **Se mantiene `fleet.json` como symlink** para no romper el `fleet-dashboard` (que lee `.roots/fleet.json` y su array `repos[]`) ni divergir si el tool es upstream. Por eso el array sigue siendo `repos[]` con `name`/`role`/`notes`; los ejes nuevos se agregan como campos adicionales (un tool viejo ignora lo que no conoce).
+
+```jsonc
+{
+  "vocabulary": "Roots > Forest > Grove > Tree > Branch",
+  "groves":  [ { "id": "ocapi", "label": "OCAPI", "kind": "plataforma", "vendor": "moldeo-interactive" } ],
+  "vendors": [ { "id": "moldeo-interactive", "label": "Moldeo Interactive", "profile": "vendors/moldeo-interactive.md" } ],
+  "repos": [               // = Trees (clave 'repos' por compat con el dashboard)
+    { "name": "meli_oerp_multiple", "org": "...", "grove": "meli", "vendor": "moldeo-interactive",
+      "kind": "producto-suite", "role": "source", "worktrees": ["17.0"], "bare_size": "4.3M" }
+  ],
+  "relations": [
+    { "from": "meli_oerp_multiple",       "to": "connector_api", "type": "depends-on" },
+    { "from": "connector_api_fulfillment","to": "connector_api", "type": "extends" }
+  ]
+}
+```
+
+> El nivel workspace se registra en `_meta.json` con `working_mode: "workspace"`. El `fleet-dashboard` puede dibujar `relations[]` como grafo (mejora opcional).
 
 ---
 
