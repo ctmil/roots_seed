@@ -71,7 +71,7 @@ Fuente de verdad estructurada del Forest. Trae:
 - `repos[]` = Trees, cada uno con ejes `grove` / `vendor` / `kind` / `org` (+ `role`/`worktrees`/`upstream` legacy).
 - `relations[]` = el grafo de dependencias.
 
-> Compat: si renombrás `fleet.json`→`forest.json`, dejá `fleet.json` como **symlink** para no romper el `fleet-dashboard` (lee `repos[]`). Schema completo: [`docs/forest-model.md`](docs/forest-model.md) (en el `.roots` del workspace).
+> Compat: si renombrás `fleet.json`→`forest.json`, dejá `fleet.json` como **symlink** para no romper el `forest-dashboard` (lee `repos[]`). Schema completo: [`docs/forest-model.md`](docs/forest-model.md) (en el `.roots` del workspace).
 
 ## 6. Recetas por dominio
 
@@ -90,7 +90,7 @@ Leer **por capas, no todo**: L0 índice → L1 slice activo → L2 doc de domini
 El `.roots` vive sobre un sustrato de repos; el seed se distribuye con herramientas que lo montan y visualizan:
 - **`scripts/`** — `setup-module.sh`, `setupbranch.sh`, `dashboard.sh` (patrón **bare + worktrees**: un `.bare` por Tree, un worktree por Branch).
 - **`skills/`** — biblioteca **compartida** de estrategias (merging de módulos Odoo, reporting md→PDF).
-- **`tools/fleet-dashboard/`** — visor navegable que lee los `.roots` y mapea a un backend Odoo.
+- **`tools/forest-dashboard/`** — visor navegable que lee los `.roots` y mapea a un backend Odoo.
 
 El formato `.roots/` **no depende** del toolkit: cualquier repo único lo usa sin él.
 

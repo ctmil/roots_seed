@@ -6,7 +6,7 @@
 
 ## Concepto
 
-La memoria `.roots/` no vive en el aire: vive en repos. Estos scripts arman el sustrato físico (repos como **bare + worktrees**, un `.bare` por repo y un worktree por versión/branch) y dan herramientas para coordinarlo. Complementan a `tools/fleet-dashboard/` (el visor).
+La memoria `.roots/` no vive en el aire: vive en repos. Estos scripts arman el sustrato físico (repos como **bare + worktrees**, un `.bare` por repo y un worktree por versión/branch) y dan herramientas para coordinarlo. Complementan a `tools/forest-dashboard/` (el visor).
 
 ## Scripts
 
@@ -14,7 +14,7 @@ La memoria `.roots/` no vive en el aire: vive en repos. Estos scripts arman el s
 |--------|----------|
 | `setup-module.sh` | Clona un repo como **bare** y agrega worktrees por branch. `./setup-module.sh <nombre> <git_url> <branch...>` |
 | `setupbranch.sh` | Agrega un worktree para un branch específico en un repo ya montado (auto-detecta: checkout si existe local/origin, crea si no). `./setupbranch.sh <modulo>[/<carpeta>] -b <branch> [<base>]` |
-| `dashboard.sh` | Levanta `tools/fleet-dashboard` apuntando al workspace y abre el navegador. `./dashboard.sh` (ver flags en el header del script) |
+| `dashboard.sh` | Levanta `tools/forest-dashboard` apuntando al workspace y abre el navegador. `./dashboard.sh` (ver flags en el header del script) |
 
 ## Uso
 
@@ -27,7 +27,7 @@ cp roots_seed/main/scripts/*.sh .        # traer las herramientas a la raíz
 ./dashboard.sh                            # visor de la flota
 ```
 
-> `dashboard.sh` espera encontrar el visor en `roots_seed/main/tools/fleet-dashboard/serve.py` relativo a la raíz del workspace. Ajustá el path si tu layout difiere.
+> `dashboard.sh` espera encontrar el visor en `roots_seed/main/tools/forest-dashboard/serve.py` relativo a la raíz del workspace. Ajustá el path si tu layout difiere.
 
 ## Patrón bare + worktrees
 

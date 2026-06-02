@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Servidor liviano del fleet-dashboard.
+"""Servidor liviano del forest-dashboard.
 
 - GET /            → index.html (la vista)
 - GET /state.json  → modelo de estado en vivo (cacheado con TTL)
@@ -135,7 +135,7 @@ def main():
     Handler.token = args.token
 
     srv = ThreadingHTTPServer((args.host, args.port), Handler)
-    print(f"▶ fleet-dashboard  root={collect.ROOT}")
+    print(f"▶ forest-dashboard  root={collect.ROOT}")
     print(f"  http://{args.host}:{args.port}/   (TTL={args.ttl}s)")
     if args.host == "0.0.0.0" and not args.token:
         print("  ⚠ bind 0.0.0.0 SIN token: cualquiera en la red ve el estado. Usá --token o túnel SSH.")

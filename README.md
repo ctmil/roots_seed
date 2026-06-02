@@ -38,7 +38,7 @@
 
 Not just for code: the same model spans software, design and narrative. See **[`recipes/`](recipes/)** — Odoo suites, a forest of design repos, narrative/game worlds, and a token-economy playbook.
 
-It ships with a small toolkit: **`scripts/`** mount the substrate (bare + worktrees), **`skills/`** are a shared library of well-designed strategies, and **`tools/`** are apps that read the memory — first among them the **`fleet-dashboard`**.
+It ships with a small toolkit: **`scripts/`** mount the substrate (bare + worktrees), **`skills/`** are a shared library of well-designed strategies, and **`tools/`** are apps that read the memory — first among them the **`forest-dashboard`**.
 
 ## The Forest vocabulary
 
@@ -70,7 +70,7 @@ roots_seed/
 ├── scripts/               ← mount & operate the Forest (setup-module, setupbranch, dashboard)
 ├── skills/                ← shared, well-designed strategies (Odoo module merging, md→PDF)
 ├── tools/
-│   └── fleet-dashboard/   ← browsable viewer that reads the .roots
+│   └── forest-dashboard/   ← browsable viewer that reads the .roots
 └── .roots/                ← this repo's own memory (dogfooding)
 ```
 

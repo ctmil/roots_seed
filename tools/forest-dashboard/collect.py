@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-"""Colector de estado de una flota de repos (bare+worktrees) + su memoria .roots.
+"""Colector de estado de un Forest de repos (Trees, bare+worktrees) + su memoria .roots.
 
 Produce el MODELO de estado (state.json) que es el contrato reusable: el mismo
 shape que un backend Odoo (odoo_moldeo_sync) debería emitir desde sus modelos
-para reusar la misma vista. La vista principal es un FEED AGREGADO de toda la
-flota, ordenado para lectura humana: CAMBIOS (journal) → TAREAS (tasks/todo) →
-DOCS (markdown) → colapsados (skills/hooks/debug).
+para reusar la misma vista. Trae el FEED AGREGADO (CAMBIOS → TAREAS → DOCS →
+skills/hooks/debug) y los ejes Forest (groves/vendors/relations + grove/vendor/
+kind/org por Tree) leídos de forest.json. Vocabulario: Roots > Forest > Grove >
+Tree > Branch.
 
-Root configurable:  FLEET_ROOT=/path  ó  --root /path  ó  cwd (default)
+Root configurable:  FOREST_ROOT=/path (ó FLEET_ROOT, compat)  ó  --root /path  ó  cwd
 Uso:  python3 collect.py --root /workspace [-o state.json]
 
 Sin dependencias externas (stdlib + git en PATH).
@@ -19,7 +20,7 @@ import subprocess
 import sys
 from datetime import datetime, timezone
 
-ROOT = os.path.abspath(os.environ.get("FLEET_ROOT") or os.getcwd())
+ROOT = os.path.abspath(os.environ.get("FOREST_ROOT") or os.environ.get("FLEET_ROOT") or os.getcwd())
 VERSION_RE = re.compile(r"^\d+\.\d+$")
 YEAR_NOW = datetime.now().year
 
@@ -324,17 +325,29 @@ def _ctx_as_doc(roots_dir):
 # --------------------------------------------------------------------------- #
 # Flota / proyectos / agregación
 # --------------------------------------------------------------------------- #
-def load_fleet_roles():
-    roles = {}
-    p = os.path.join(ROOT, ".roots", "fleet.json")
+def load_forest():
+    """Lee forest.json (fallback fleet.json/symlink). Devuelve roles por Tree
+    (con ejes grove/vendor/kind/org) + groves[]/vendors[]/relations[]."""
+    forest = {"roles": {}, "groves": [], "vendors": [], "relations": []}
+    p = os.path.join(ROOT, ".roots", "forest.json")
+    if not os.path.isfile(p):
+        p = os.path.join(ROOT, ".roots", "fleet.json")  # compat
     if os.path.isfile(p):
         try:
             with open(p, encoding="utf-8") as fh:
-                for r in json.load(fh).get("repos", []):
-                    roles[r["name"]] = {"role": r.get("role"), "notes": r.get("notes")}
+                data = json.load(fh)
+            for r in data.get("repos", []):
+                forest["roles"][r["name"]] = {
+                    "role": r.get("role"), "notes": r.get("notes"),
+                    "grove": r.get("grove"), "vendor": r.get("vendor"),
+                    "kind": r.get("kind"), "org": r.get("org"),
+                }
+            forest["groves"] = data.get("groves", [])
+            forest["vendors"] = data.get("vendors", [])
+            forest["relations"] = data.get("relations", [])
         except (OSError, json.JSONDecodeError, KeyError):
             pass
-    return roles
+    return forest
 
 
 def du_human(path):
@@ -348,9 +361,15 @@ def collect_repos(roles):
         repo_dir = os.path.join(ROOT, name)
         if not os.path.isdir(os.path.join(repo_dir, ".bare")):
             continue
+        meta = roles.get(name, {})
         repos.append({
             "name": name,
-            "role": roles.get(name, {}).get("role", "source"),
+            "role": meta.get("role") or "source",
+            # ejes Forest (None si el Tree no está en forest.json todavía)
+            "grove": meta.get("grove"),
+            "vendor": meta.get("vendor"),
+            "kind": meta.get("kind"),
+            "org": meta.get("org"),
             "upstream": run(["git", "-C", repo_dir, "config", "--get", "remote.origin.url"]) or None,
             "bare_size": du_human(os.path.join(repo_dir, ".bare")),
             "worktrees": [worktree_state(wt) for wt in list_worktrees(repo_dir)],
@@ -399,7 +418,7 @@ def collect_projects():
     return projects
 
 
-def compute_metrics(repos, modules):
+def compute_metrics(repos, modules, forest):
     coverage, wip, wt_total = {}, 0, 0
     for r in repos:
         for wt in r["worktrees"]:
@@ -409,7 +428,13 @@ def compute_metrics(repos, modules):
             else:
                 wip += 1
     return {
-        "repos": len(repos), "worktrees_total": wt_total, "wip_branches": wip,
+        # nomenclatura Forest (trees/branches/groves) + alias legacy por compat
+        "trees": len(repos), "repos": len(repos),
+        "branches_total": wt_total, "worktrees_total": wt_total,
+        "wip_branches": wip,
+        "groves": len(forest.get("groves", [])),
+        "vendors": len(forest.get("vendors", [])),
+        "relations": len(forest.get("relations", [])),
         "modules_with_memory": len(modules),
         "open_tasks_total": sum(m["tasks"]["open_total"] for m in modules),
         "version_coverage": {k: sorted(v) for k, v in sorted(coverage.items())},
@@ -456,8 +481,8 @@ def aggregate(modules):
 
 
 def collect_state():
-    roles = load_fleet_roles()
-    repos = collect_repos(roles)
+    forest = load_forest()
+    repos = collect_repos(forest["roles"])
     modules = find_module_memories(repos)
     # incluir la memoria de coordinación del workspace (./.roots) si existe
     ws_roots = os.path.join(ROOT, ".roots")
@@ -468,8 +493,13 @@ def collect_state():
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "workspace": os.path.basename(ROOT),
         "root": ROOT,
-        "metrics": compute_metrics(repos, modules),
-        "repos": repos,
+        "vocabulary": "Roots > Forest > Grove > Tree > Branch",
+        "metrics": compute_metrics(repos, modules, forest),
+        # ejes Forest
+        "groves": forest["groves"],
+        "vendors": forest["vendors"],
+        "relations": forest["relations"],
+        "repos": repos,          # = Trees (clave 'repos' por compat de contrato)
         "projects": collect_projects(),
         "modules": modules,
         **agg,

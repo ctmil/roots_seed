@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-# Levanta el fleet-dashboard apuntando a ESTE workspace y abre el browser.
+# Levanta el forest-dashboard apuntando a ESTE workspace y abre el browser.
 #
 # Uso:
 #   ./dashboard.sh                  # puerto 8787, abre el navegador
@@ -11,7 +11,7 @@ set -e
 # El server queda en primer plano; Ctrl-C lo corta.
 
 SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
-SERVE="$SCRIPT_DIR/roots_seed/main/tools/fleet-dashboard/serve.py"
+SERVE="$SCRIPT_DIR/roots_seed/main/tools/forest-dashboard/serve.py"
 PORT="${PORT:-8787}"
 URL="http://127.0.0.1:$PORT/"
 

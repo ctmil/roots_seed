@@ -2,12 +2,13 @@
 
 > Plantilla maestra para crear estructura de documentación y memoria de desarrollo. Este archivo define los estándares de formato, estilo y protocolos de poblado.
 
-**Versión:** 1.10
+**Versión:** 1.11
 
 **Changelog:**
+- **1.11** (03 Junio 2026) — **`forest-dashboard`** (re-planteo del visor con la nomenclatura Forest; antes `fleet-dashboard`). El colector lee los ejes nuevos de `forest.json` (`groves[]`/`vendors[]`/`relations[]` + `grove`/`vendor`/`kind`/`org` por Tree) y los emite en `state.json`. La vista suma una pestaña **Forest map** (Groves → Trees → Branches con badges `vendor`/`kind`) y un **grafo SVG de `relations`** (arc-diagram, aristas coloreadas por tipo). Rebrand: *flota→Forest · repo→Tree · worktree→Branch*. `fleet.json` sigue siendo symlink→`forest.json` (compat). El contrato `state.json` mantiene `repos[]` (port Odoo intacto).
 - **1.10** (02 Junio 2026) — **Recetas por dominio** + **manual completo** + **economía de tokens**. Nueva carpeta `recipes/` con 4 recetas aplicadas del modelo `.roots`/Forest: (1) suite de módulos de extensión Odoo (Grove=suite, Tree=módulo, relations=depends), (2) bosque de diseños (1 vendor-artista > N trees > diseños; puente `ai_context_md`↔`.roots`), (3) narrativa/juego como **domain pack** (`working_mode: narrative`: worldbible, fichas, arcos=branches, skills de personaje ≡ skills de IA), (4) economía de tokens. Tesis transversal: **3 primitivos (vendor · `relations[]` · branch) se reusan en N dominios**. Nuevo `manual.md` (puerta de entrada navegable). Nueva sección **Token economy & model benchmarking**: escalera de capas L0–L3, fórmula legible **CER** (útiles/cargados) + **FS** (si_leo_todo/cargados) + tiers de presupuesto, benchmark interno (`journal/benchmarks.md`) y repo de técnicas por modelo de IA (`skills/model-techniques.md`). No cambia el formato de `.roots/`.
-- **1.9** (02 Junio 2026) — Nueva sección **Forest Model** que formaliza y promueve al canónico el working_mode `workspace` (capa de coordinación por encima de N repos, antes extensión local). Define el vocabulario **Roots → Forest → Grove → Tree → Branch** y un schema multi-eje: cada Tree (repo) lleva `grove` (producto/suite primario), `also_groves` (tags de co-pertenencia genuina), `vendor` (autor/fabricante — **propiedad** con perfil opcional en `.roots/vendors/<slug>.md`), `kind` (`producto-suite`/`plataforma`/`agregador`/`external-upstream`/`seed`) y `org` (hosting). Las **dependencias se modelan como aristas** de un grafo dirigido (`relations[]`: `depends-on`/`extends`/`integrates`/`relates`), NUNCA como anidamiento ni tags — regla de oro: *grove = qué es · arista = qué usa · tag = también es de*. `forest.json` es el registro estructurado (rename de `fleet.json`, que queda como symlink por compat con el `fleet-dashboard`; conserva el array `repos[]`). No cambia el formato de `.roots/` por-repo.
-- **1.8** (02 Junio 2026) — Nueva sección **Toolkit complementario (`scripts/` + `skills/` + `tools/`)**: sistematiza que la memoria `.roots/` vive sobre un sustrato de repos y que el seed se distribuye junto a herramientas que lo montan, lo mejoran y lo visualizan. `scripts/` (montaje/operación de la flota: `setup-module.sh`, `setupbranch.sh`, `dashboard.sh` — patrón bare+worktrees), `skills/` (biblioteca **compartida** de estrategias bien diseñadas: merging de módulos Odoo, reporting md→PDF — distinta del `skills/` local de cada `.roots`) y `tools/` (apps; primera: `fleet-dashboard`, visor navegable que lee los `.roots` y mapea a un backend Odoo). Se **referencia**, no se inlinea código: cada elemento es self-contained con su README. No cambia el formato de `.roots/`.
+- **1.9** (02 Junio 2026) — Nueva sección **Forest Model** que formaliza y promueve al canónico el working_mode `workspace` (capa de coordinación por encima de N repos, antes extensión local). Define el vocabulario **Roots → Forest → Grove → Tree → Branch** y un schema multi-eje: cada Tree (repo) lleva `grove` (producto/suite primario), `also_groves` (tags de co-pertenencia genuina), `vendor` (autor/fabricante — **propiedad** con perfil opcional en `.roots/vendors/<slug>.md`), `kind` (`producto-suite`/`plataforma`/`agregador`/`external-upstream`/`seed`) y `org` (hosting). Las **dependencias se modelan como aristas** de un grafo dirigido (`relations[]`: `depends-on`/`extends`/`integrates`/`relates`), NUNCA como anidamiento ni tags — regla de oro: *grove = qué es · arista = qué usa · tag = también es de*. `forest.json` es el registro estructurado (rename de `fleet.json`, que queda como symlink por compat con el `forest-dashboard`; conserva el array `repos[]`). No cambia el formato de `.roots/` por-repo.
+- **1.8** (02 Junio 2026) — Nueva sección **Toolkit complementario (`scripts/` + `skills/` + `tools/`)**: sistematiza que la memoria `.roots/` vive sobre un sustrato de repos y que el seed se distribuye junto a herramientas que lo montan, lo mejoran y lo visualizan. `scripts/` (montaje/operación de la flota: `setup-module.sh`, `setupbranch.sh`, `dashboard.sh` — patrón bare+worktrees), `skills/` (biblioteca **compartida** de estrategias bien diseñadas: merging de módulos Odoo, reporting md→PDF — distinta del `skills/` local de cada `.roots`) y `tools/` (apps; primera: `forest-dashboard`, visor navegable que lee los `.roots` y mapea a un backend Odoo). Se **referencia**, no se inlinea código: cada elemento es self-contained con su README. No cambia el formato de `.roots/`.
 - **1.7** (30 Mayo 2026) — Nuevo **Modo Flat** (simplificado): `.roots/` directo en la raíz, sin namespace, para proyectos single-source con pocas/ninguna fuente remota embebida — el caso común. **Desacople de dos ejes** que v1.6 conflacionaba: el *layout del directorio* (`flat` vs `namespaced`) ahora es independiente de la *metadata de contexto* (`context_format`/`context_parsed`) — un repo flat puede declarar su contexto (ej. Odoo 17.0, dev) en `_meta.json` sin codificarlo en el path (registrar sin namespacear). Nueva **regla de decisión** del layout: lo define "¿necesito memoria multi-contexto concurrente?" (embeber N sources / multi-versión-cliente en paralelo / migración), NO "¿es Odoo?". Nuevo **Modo Migración**: un repo flat puede *forkear temporalmente* a namespaced durante una migración (ej. `.roots/17.0/` + `.roots/19.0/` lado a lado) y *colapsar de vuelta a flat* sobre la versión nueva. `_meta.json` extendido con `layout`. **Flat es el default del bootstrap** — la pregunta de modo solo se dispara ante señales de multi-source/multi-cliente. Script de inicialización a v1.7.
 - **1.6** (10 Mayo 2026) — Modos de trabajo replanteados como modelo híbrido multi-source. Nuevo **Context Format Registry** con contexto estructurado por dominio (Odoo como primer formato: `{major}.{minor}.{infra}.{project}`). Nuevo sistema de **Sources embebidos**: el cliente copia `.roots/` de cada source en `sources/`, con `_sources.json` como manifest de vinculación. **Cascada de precedencia** formalizada: cliente raíz > source embebido > source original. **Namespace de conflictos** con patrón `source.skill_name` y overrides del cliente. **Promoción semi-automática** de descubrimientos del cliente al source original. Nueva sección **Tool Compatibility** con filosofía tool-agnostic, 5 herramientas principales como referencia y merging strategies. `_meta.json` extendido con `context_format`, `context_parsed`, `sources`. Script de inicialización actualizado a v1.6.
 - **1.5** (30 Abril 2026) — Nueva sección "Modos de trabajo" con dos modos: **client branch** (`.roots/{version}.{client}/`) y **source** (`.roots/{module}/`). El modo se pregunta al usuario al procesar el seed por primera vez y se persiste en `_meta.json.working_mode`. Actualizada "Estructura Base" con ambos layouts. `on-seed-process` ampliado con paso 0 de detección de modo. Nuevo protocolo de merge entre namespaces de distintos clientes/branches. `_meta.json` extendido con campos `working_mode`, `odoo_version`, `repo`.
@@ -508,7 +509,7 @@ Plantillas `.sh` que se copian a la raíz de un **workspace** (la carpeta que co
 |--------|-----|
 | `setup-module.sh` | Clona un repo como bare + worktrees por branch |
 | `setupbranch.sh` | Agrega un worktree para un branch (auto-detecta existente/nuevo) |
-| `dashboard.sh` | Levanta el visor (`tools/fleet-dashboard`) apuntando al workspace |
+| `dashboard.sh` | Levanta el visor (`tools/forest-dashboard`) apuntando al workspace |
 
 Ver `scripts/README.md`.
 
@@ -529,7 +530,7 @@ Ver `skills/README.md`.
 
 Aplicaciones que **leen los `.roots`** y los exponen. Primera del toolkit:
 
-- **`fleet-dashboard/`** — visor web navegable (viñetas → drill-down recursivo, HERO de cambios + tabs de tareas/docs). Arquitectura en 3 capas: colector → `state.json` (contrato reusable) → vista. Pensado como **base para portar a un backend Odoo** (ej. `odoo_moldeo_sync`), donde el mismo `state.json` se emite desde modelos y la jerarquía mapea a un patrón de árbol (`odoo_moldeo_htree`).
+- **`forest-dashboard/`** — visor web navegable (viñetas → drill-down recursivo, HERO de cambios + tabs de tareas/docs). Arquitectura en 3 capas: colector → `state.json` (contrato reusable) → vista. Pensado como **base para portar a un backend Odoo** (ej. `odoo_moldeo_sync`), donde el mismo `state.json` se emite desde modelos y la jerarquía mapea a un patrón de árbol (`odoo_moldeo_htree`).
 
 Ver `tools/<nombre>/README.md`.
 
@@ -541,7 +542,7 @@ El toolkit asume el patrón bare+worktrees, pero el **formato `.roots/` no depen
 
 ## Forest Model — coordinación de workspace (multi-repo)
 
-> Esta sección formaliza el working_mode **`workspace`**: un `.roots/` que no documenta *un* proyecto sino que **coordina N repos** desde la carpeta que los contiene. Es la capa que usan los `scripts/` y el `fleet-dashboard` del toolkit. **No reemplaza** los modos por-repo (Flat/Source/Client-branch) — vive *por encima* de ellos.
+> Esta sección formaliza el working_mode **`workspace`**: un `.roots/` que no documenta *un* proyecto sino que **coordina N repos** desde la carpeta que los contiene. Es la capa que usan los `scripts/` y el `forest-dashboard` del toolkit. **No reemplaza** los modos por-repo (Flat/Source/Client-branch) — vive *por encima* de ellos.
 
 ### Cuándo aplica
 
@@ -587,7 +588,7 @@ Las **dependencias NO se modelan como pertenencia ni como anidamiento** — son 
 
 ### `forest.json` — registro estructurado
 
-Es el rename de `fleet.json`. **Se mantiene `fleet.json` como symlink** para no romper el `fleet-dashboard` (que lee `.roots/fleet.json` y su array `repos[]`) ni divergir si el tool es upstream. Por eso el array sigue siendo `repos[]` con `name`/`role`/`notes`; los ejes nuevos se agregan como campos adicionales (un tool viejo ignora lo que no conoce).
+Es el rename de `fleet.json`. El `forest-dashboard` lee `forest.json` (con fallback a `fleet.json`); **se mantiene `fleet.json` como symlink** para compat con tools viejos o forks upstream. El array sigue siendo `repos[]` con `name`/`role`/`notes`; los ejes nuevos (`grove`/`vendor`/`kind`/`org`) se agregan como campos adicionales (un tool viejo ignora lo que no conoce).
 
 ```jsonc
 {
@@ -605,7 +606,7 @@ Es el rename de `fleet.json`. **Se mantiene `fleet.json` como symlink** para no 
 }
 ```
 
-> El nivel workspace se registra en `_meta.json` con `working_mode: "workspace"`. El `fleet-dashboard` puede dibujar `relations[]` como grafo (mejora opcional).
+> El nivel workspace se registra en `_meta.json` con `working_mode: "workspace"`. El `forest-dashboard` **dibuja `relations[]` como grafo** en su pestaña *Forest map*.
 
 ---
 

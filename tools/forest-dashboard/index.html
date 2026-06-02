@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-  Dashboard de flota Moldeo — navegador de árbol sobre state.json (ver collect.py).
+  Roots · Forest Dashboard — navegador de árbol sobre state.json (ver collect.py).
   NAVEGABLE por VIÑETAS: home = grilla de cards (repos); click → página interna
   del nodo (HERO de Cambios + TABS Tareas/Docs + Skills/Hooks colapsados) + grilla
   de viñetas hijas (subproyectos = .roots anidados, recursivo por click + breadcrumb).
@@ -10,7 +10,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Moldeo · Fleet Dashboard</title>
+<title>Roots · Forest Dashboard</title>
 <style>
   :root{--bg:#0b0f14;--panel:#1a212b;--panel2:#252e3a;--border:#3d4753;
     --txt:#eef2f6;--muted:#b3bdc8;--accent:#79c0ff;
@@ -109,11 +109,28 @@
   #err{color:var(--red);padding:10px}
   .spin{display:inline-block;width:10px;height:10px;border:2px solid var(--muted);border-top-color:transparent;border-radius:50%;animation:r .8s linear infinite}
   @keyframes r{to{transform:rotate(360deg)}}
+  /* nav + forest map */
+  .navbtn.on{border-color:var(--accent);color:#fff;background:var(--panel2)}
+  .grove{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:12px}
+  .grove>.gt{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+  .grove .gname{color:#fff;font-weight:600;font-size:14px}
+  .btag{font-size:10px;border-radius:4px;padding:1px 6px;border:1px solid var(--border);color:var(--muted);white-space:nowrap}
+  .btag.kind{color:var(--yellow);border-color:var(--yellow)}
+  .btag.vendor{color:var(--purple);border-color:var(--purple)}
+  .tree-row{display:flex;align-items:center;gap:7px;padding:4px 0;flex-wrap:wrap;border-top:1px solid #21262d}
+  .tree-row:first-child{border-top:none}
+  .tree-row .tn{color:var(--txt);font-weight:600;font-size:13px}
+  .brch{font-size:10px;color:var(--muted);background:var(--panel2);border:1px solid var(--border);border-radius:3px;padding:0 5px}
+  svg.graph{width:100%;height:auto;background:var(--panel);border:1px solid var(--border);border-radius:10px}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--muted);margin:8px 2px}
+  .legend i{display:inline-block;width:18px;border-top:2px solid;vertical-align:middle;margin-right:5px}
 </style>
 </head>
 <body>
 <header>
-  <h1 id="home">⛵ Moldeo · Fleet Dashboard</h1>
+  <h1 id="home">🌲 Roots · Forest Dashboard</h1>
+  <button id="navFeed" class="navbtn">Feed</button>
+  <button id="navForest" class="navbtn">🌲 Forest map</button>
   <span class="pill" id="ws">—</span>
   <span class="sp"></span>
   <span class="pill" id="stamp">cargando…</span>
@@ -170,7 +187,7 @@ function fileRow(f){const wrap=E('div');const row=E('div','frow','› '+(f.title
 
 /* ---------- árbol ---------- */
 function buildTree(modules){
-  const root={name:'flota',path:'',children:{},mem:null};
+  const root={name:'Forest',path:'',children:{},mem:null};
   for(const m of modules){
     if(m.path==='.'||m.repo==='workspace'){root.mem=m;continue;}
     let node=root,acc=[];
@@ -288,7 +305,7 @@ function renderCollapsed(mems,mount){
 }
 
 function crumb(path){
-  const c=E('div','crumb');const a0=E('a',null,'⌂ flota');a0.onclick=()=>go('');c.append(a0);
+  const c=E('div','crumb');const a0=E('a',null,'⌂ Forest');a0.onclick=()=>go('');c.append(a0);
   let acc=[];if(path)for(const seg of path.split('/')){acc.push(seg);const key=acc.join('/');
     c.append(E('span',null,'/'));const a=E('a',null,seg);a.onclick=()=>go(key);c.append(a);}
   return c;
@@ -299,7 +316,8 @@ function renderNode(path){
   // HOME: métricas + (hero global opcional)
   if(!path){
     const m=E('div','metrics');const mt=STATE.metrics;
-    m.append(metric(mt.repos,'repos'),metric(mt.modules_with_memory,'módulos c/ memoria'),
+    m.append(metric(mt.trees||mt.repos,'Trees'),metric(mt.groves||0,'Groves'),
+      metric(mt.modules_with_memory,'módulos c/ memoria'),
       metric(mt.open_tasks_total,'tareas abiertas'),metric(mt.wip_branches,'branches WIP'));
     view.append(m);
   } else {
@@ -316,7 +334,7 @@ function renderNode(path){
   }
   // viñetas hijas (navegación recursiva)
   const ch=kids(node);
-  if(ch.length){view.append(E('h2','sec',path?'Subproyectos':'Repos · '+ch.length));view.append(grid(ch));}
+  if(ch.length){view.append(E('h2','sec',path?'Subproyectos':'Trees · '+ch.length));view.append(grid(ch));}
   // memoria del nodo (subtree): HERO + TABS + colapsados.
   // En el home (sin path) NO se vuelca el feed global: solo viñetas de repos.
   const mems=node._mems;
@@ -327,17 +345,79 @@ function renderNode(path){
   }
 }
 
+/* ---------- Forest map (Groves → Trees → Branches + grafo) ---------- */
+function badge(cls,txt){return E('span','btag'+(cls?' '+cls:''),txt);}
+const REL_COLORS={'depends-on':'#79c0ff','extends':'#5fd874','integrates':'#d8b4ff','relates':'#b3bdc8'};
+const SVGNS='http://www.w3.org/2000/svg';
+function svgEl(t,attrs){const e=document.createElementNS(SVGNS,t);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
+function buildGraph(repos,rels){
+  const groveOf={};(repos||[]).forEach(r=>groveOf[r.name]=r.grove||'');
+  const order=(STATE.groves||[]).map(g=>g.id);
+  const ids=[...new Set(rels.flatMap(e=>[e.from,e.to]))];
+  if(!ids.length)return E('div','muted','(sin relaciones)');
+  ids.sort((a,b)=>{const ga=order.indexOf(groveOf[a]),gb=order.indexOf(groveOf[b]);
+    return ((ga<0?99:ga)-(gb<0?99:gb))||a.localeCompare(b);});
+  const ROWH=30,PADY=22,LABELX=270,RIGHT=320,MAXB=240;
+  const yOf={};ids.forEach((id,i)=>yOf[id]=PADY+i*ROWH);
+  const H=PADY*2+ids.length*ROWH, W=LABELX+RIGHT;
+  const svg=svgEl('svg',{'class':'graph',viewBox:'0 0 '+W+' '+H,preserveAspectRatio:'xMidYMin meet'});
+  const defs=svgEl('defs');
+  Object.entries(REL_COLORS).forEach(([t,c])=>{const mk=svgEl('marker',{id:'ar-'+t,markerWidth:7,markerHeight:7,refX:5,refY:3,orient:'auto'});
+    mk.append(svgEl('path',{d:'M0,0 L6,3 L0,6 Z',fill:c}));defs.append(mk);});
+  svg.append(defs);
+  rels.forEach(e=>{const ya=yOf[e.from],yb=yOf[e.to];if(ya==null||yb==null)return;
+    const c=REL_COLORS[e.type]||REL_COLORS['relates'];const cx=LABELX-Math.min(40+Math.abs(ya-yb)*0.5,MAXB);
+    svg.append(svgEl('path',{d:'M'+LABELX+','+ya+' C'+cx+','+ya+' '+cx+','+yb+' '+LABELX+','+yb,
+      fill:'none',stroke:c,'stroke-width':1.5,opacity:.8,'marker-end':'url(#ar-'+e.type+')'}));});
+  ids.forEach(id=>{const y=yOf[id];
+    svg.append(svgEl('circle',{cx:LABELX,cy:y,r:3.5,fill:'#79c0ff'}));
+    const tx=svgEl('text',{x:LABELX+10,y:y+4,fill:'#eef2f6','font-size':12,'font-family':'ui-monospace,monospace'});
+    tx.textContent=id+(groveOf[id]?'  · '+groveOf[id]:'');svg.append(tx);});
+  const wrap=E('div');const leg=E('div','legend');
+  Object.entries(REL_COLORS).forEach(([t,c])=>{const s=E('span');const i=E('i');i.style.borderColor=c;s.append(i,document.createTextNode(t));leg.append(s);});
+  wrap.append(svg,leg);return wrap;
+}
+function renderForest(){
+  const view=$('#view');view.innerHTML='';
+  const repos=STATE.repos||[],groves=STATE.groves||[],rels=STATE.relations||[],mt=STATE.metrics||{};
+  const m=E('div','metrics');
+  m.append(metric(mt.trees||repos.length,'Trees'),metric(mt.groves||groves.length,'Groves'),
+    metric(mt.vendors||0,'vendors'),metric(mt.relations||rels.length,'relations'),
+    metric(mt.branches_total||mt.worktrees_total||0,'Branches'));
+  view.append(m);
+  view.append(E('h2','sec','Grafo de relaciones'));
+  view.append(buildGraph(repos,rels));
+  view.append(E('h2','sec','Groves → Trees → Branches'));
+  const gmeta=Object.fromEntries(groves.map(g=>[g.id,g]));
+  const by={};repos.forEach(r=>{const k=r.grove||'(sin grove)';(by[k]=by[k]||[]).push(r);});
+  const order=groves.map(g=>g.id).filter(id=>by[id]).concat(Object.keys(by).filter(k=>!gmeta[k]));
+  order.forEach(gid=>{const g=gmeta[gid]||{id:gid,label:gid};const box=E('div','grove');
+    const gt=E('div','gt');gt.append(E('span','gname','🌳 '+(g.label||g.id)));
+    if(g.kind)gt.append(badge('kind',g.kind));
+    if(g.vendor)gt.append(badge('vendor','✎ '+g.vendor));
+    gt.append(E('span','tcount',' '+by[gid].length+' trees'));box.append(gt);
+    by[gid].sort((a,b)=>a.name.localeCompare(b.name)).forEach(r=>{const row=E('div','tree-row');
+      row.append(E('span','tn','🪵 '+r.name));
+      if(r.kind&&(!g.kind||r.kind!==g.kind))row.append(badge('kind',r.kind));
+      if(r.vendor&&(!g.vendor||r.vendor!==g.vendor))row.append(badge('vendor','✎ '+r.vendor));
+      (r.worktrees||[]).forEach(wt=>row.append(E('span','brch','🌿 '+wt.branch)));box.append(row);});
+    view.append(box);});
+}
+
 /* ---------- routing ---------- */
 function go(path){location.hash=path?('#'+path):'#';}
 function currentPath(){return decodeURIComponent(location.hash.replace(/^#/,''));}
-window.addEventListener('hashchange',()=>{if(STATE)renderNode(currentPath());});
+function route(){const p=currentPath();const fm=(p==='__forest__');
+  const nf=$('#navFeed'),ng=$('#navForest');if(nf)nf.classList.toggle('on',!fm);if(ng)ng.classList.toggle('on',fm);
+  if(fm)renderForest();else renderNode(p);}
+window.addEventListener('hashchange',()=>{if(STATE)route();});
 
 function render(s){
   STATE=s;TREE=buildTree(s.modules||[]);
   $('#err').textContent='';
   $('#ws').textContent=s.workspace+(s._cache_hit?' · cache':' · fresh');
   $('#stamp').textContent=new Date(s.generated_at).toLocaleTimeString();
-  renderNode(currentPath());
+  route();
 }
 async function load(fresh){$('#stamp').innerHTML='<span class="spin"></span>';
   try{const p=new URLSearchParams();if(fresh)p.set('fresh','1');if(TOKEN)p.set('token',TOKEN);
@@ -348,6 +428,8 @@ function schedule(){clearInterval(timer);if($('#auto').checked)timer=setInterval
 $('#refresh').onclick=()=>load(true);
 $('#auto').onchange=schedule;
 $('#home').onclick=()=>go('');
+$('#navFeed').onclick=()=>go('');
+$('#navForest').onclick=()=>go('__forest__');
 load(true);schedule();
 </script>
 </body>
