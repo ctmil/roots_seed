@@ -4,29 +4,31 @@
 > A template + toolkit for giving AI agents and human developers a durable, structured memory that lives *with the code*.
 
 ```
-                              .-~~~~~-.
-                       .-~ ~ -(         )~ -.
-                     /                       \         F O R E S T
-                    |      G  R  O  V  E  S    |        the whole workspace —
-                     \   products  ·  suites  /        every repo, one canopy
-                       `- . _________ . -~`
-                            | | | | |
-                            | | | | |        ← Branches  (git branches / ramas)
-                            | | | | |
-                            |       |
-                            |  TREE |          Tree = one repo
-                            |  one  |          (mounted bare + worktrees)
-                            |  repo |
-         ___________________|       |___________________
-        (  ~ ~ ~ ~ ~  soil line  ·  .roots/  ~ ~ ~ ~ ~  )
-         `----.____         |       |         ____.----'
-                   `--.___  /|     |\  ___.--`
-                      .-`-./ |     | \.-`-.
-                   .-`     / |     | \     `-.
-                .-`       /  |     |  \       `-.
-                R  O  O  T  S    reach down into memory:
-          context · journal · decisions · tasks · skills · docs
+                    &&&  & &&&&&  &
+                &&& &\&|/&//&|\&& &&&
+              &&\&\_\&\|//_//&/_&&&&            🌲  F O R E S T
+             &_\&\&\&\|/|//_/&%&/_&&&&          the whole workspace —
+              && &&\\&\|///&&/ && &&&           a living canopy of Groves
+                &&& &\\\|///& &&&&              (each Grove = a product / suite)
+             &&    &&&\\\|///&&    &&
+                       \\\|///
+                        \\|//        ←  Branches   (git branches · ramas)
+                         \|/
+                         \|/
+                          |
+                          |          ←  Tree = one repo  (mounted bare + worktrees)
+                          |
+      ~~~~~~~~~~~~~~~~~~~~|~~~~~~~~~~~~~~~~~~~~~~   soil line  ·  .roots/
+                        _/|\_
+                      _/ /|\ \_
+                    _/  / | \  \__
+                  _/   /  |  \    \_
+                 /    /   |   \     \
+                R  O   O   T   S    reach down into memory:
+            context · journal · decisions · tasks · skills · docs
 ```
+
+> Like a bonsai: a small, deliberate tree whose **roots** are the point. (Art in the [cbonsai](https://gitlab.com/jallbrit/cbonsai) spirit, after Jane Street's [*TUI renaissance*](https://blog.janestreet.com/strace-ui-bonsai-term-and-the-tui-renaissance/).)
 
 ---
 
