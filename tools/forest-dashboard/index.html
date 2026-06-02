@@ -128,6 +128,10 @@
   .treehero{background:linear-gradient(180deg,#0d1117,#11161d);border:1px solid var(--border);border-radius:12px;padding:6px 6px 2px;margin-bottom:16px}
   svg.tree{width:100%;height:auto;display:block}
   .treecap{text-align:center;color:var(--muted);font-size:11px;padding:2px 0 6px}
+  .grovegrp{cursor:pointer}
+  .grovegrp .ghit{fill:transparent}
+  .grovegrp:hover .ghit{fill:#ffffff14}
+  .clrfil{color:var(--accent);cursor:pointer;font-size:11px;border:1px solid var(--accent);border-radius:5px;padding:1px 7px;margin-left:8px}
 </style>
 </head>
 <body>
@@ -150,7 +154,7 @@ const $=(s,el=document)=>el.querySelector(s);
 const E=(t,c,txt)=>{const e=document.createElement(t);if(c)e.className=c;if(txt!=null)e.textContent=txt;return e;};
 const TOKEN=new URLSearchParams(location.search).get('token');
 const HERO_FIRST=3, HERO_STEP=3;
-let STATE=null, TREE=null, pollMs=20000, timer=null;
+let STATE=null, TREE=null, pollMs=20000, timer=null, groveFilter=null;
 
 function fileURL(p){return '/file?path='+encodeURIComponent(p)+(TOKEN?'&token='+encodeURIComponent(TOKEN):'');}
 function iconImg(icon,cls){if(!icon)return null;const im=E('img','ic'+(cls?' '+cls:''));im.src=fileURL(icon);im.loading='lazy';im.onerror=()=>im.remove();return im;}
@@ -337,9 +341,18 @@ function renderNode(path){
     const desc=node.mem&&node.mem.summary&&node.mem.summary.description;
     if(desc)view.append(E('div','nodedesc',desc));
   }
-  // viñetas hijas (navegación recursiva)
-  const ch=kids(node);
-  if(ch.length){view.append(E('h2','sec',path?'Subproyectos':'Trees · '+ch.length));view.append(grid(ch));}
+  // viñetas hijas (navegación recursiva) — en la home, filtrables por Grove
+  let ch=kids(node);
+  if(!path&&groveFilter){const gb=STATE._groveByRepo||{};ch=ch.filter(n=>gb[n.name]===groveFilter);}
+  if(ch.length||(!path&&groveFilter)){
+    let hdr;
+    if(path)hdr=E('h2','sec','Subproyectos');
+    else if(groveFilter){hdr=E('h2','sec');hdr.append(E('span',null,'Trees · '+groveFilter+' ('+ch.length+')'));
+      const clr=E('span','clrfil','✕ ver todos');clr.onclick=()=>{groveFilter=null;renderNode('');};hdr.append(clr);}
+    else hdr=E('h2','sec','Trees · '+ch.length);
+    view.append(hdr);
+    if(ch.length)view.append(grid(ch));else view.append(E('div','muted','(ningún Tree con memoria en este Grove)'));
+  }
   // memoria del nodo (subtree): HERO + TABS + colapsados.
   // En el home (sin path) NO se vuelca el feed global: solo viñetas de repos.
   const mems=node._mems;
@@ -385,14 +398,14 @@ function buildGraph(repos,rels){
 const GPAL=['#5fd874','#79c0ff','#d8b4ff','#e3b341','#ff8077','#7ee0c0','#f0a3c8','#9fb4ff','#c5e065','#86d0e8'];
 function _hash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
 /* copa estilizada vista de frente (clean dark): tronco + canopy + brillo + sombra */
-function drawTreeGlyph(svg,x,y,s,col,title){
-  const g=svgEl('g');g.style.cursor='pointer';const ch=18*s,cw=10*s;
+function drawTreeGlyph(parent,x,y,s,col,title){
+  const g=svgEl('g');const ch=18*s,cw=10*s;
   g.append(svgEl('ellipse',{cx:x,cy:y+1.5,rx:cw*0.8,ry:2.4*s,fill:'#000',opacity:.28}));
   g.append(svgEl('rect',{x:x-1.1*s,y:y-6*s,width:2.2*s,height:6*s,fill:'#6b5640'}));
   g.append(svgEl('path',{d:'M'+x+','+(y-ch)+' C'+(x+cw)+','+(y-ch*0.35)+' '+(x+cw*0.7)+','+(y-4*s)+' '+x+','+(y-5*s)+' C'+(x-cw*0.7)+','+(y-4*s)+' '+(x-cw)+','+(y-ch*0.35)+' '+x+','+(y-ch)+' Z',
     fill:col,opacity:.93,stroke:'#0b0f14','stroke-width':0.6}));
   g.append(svgEl('circle',{cx:x-cw*0.25,cy:y-ch*0.55,r:cw*0.3,fill:'#fff',opacity:.16}));
-  const ti=svgEl('title');ti.textContent=title;g.append(ti);svg.append(g);
+  const ti=svgEl('title');ti.textContent=title;g.append(ti);parent.append(g);
 }
 /* Forest = paisaje en perspectiva (mixto): Groves = grupos de arbolitos rotulados,
    con profundidad (lejos chico/arriba, cerca grande/abajo). Senderos = relations. */
@@ -429,14 +442,18 @@ function homeTree(groves,repos){
   // clusters: de atrás (y menor) hacia adelante
   order.slice().sort((p,q)=>pos[p].y-pos[q].y).forEach(gid=>{const g=(groves.find(x=>x.id===gid))||{id:gid};
     const trees=byG[gid],col=colOf[gid],P=pos[gid],s=P.s,sp=15*s,w=(trees.length-1)*sp,x0=P.x-w/2;
+    const gg=svgEl('g',{'class':'grovegrp'});if(groveFilter&&gid!==groveFilter)gg.setAttribute('opacity','.28');
+    gg.append(svgEl('rect',{'class':'ghit',x:x0-12,y:P.y-30*s,width:w+24,height:64*s,rx:10}));
     trees.forEach((r,j)=>{const tx=x0+j*sp,ty=P.y-((_hash(r.name+gid)%6)-3)*s;
-      drawTreeGlyph(svg,tx,ty,s,col,r.name+' · '+gid+(r.vendor?(' · ✎'+r.vendor):''));});
+      drawTreeGlyph(gg,tx,ty,s,col,r.name+' · '+gid+(r.vendor?(' · ✎'+r.vendor):''));});
     const lab=svgEl('text',{x:P.x,y:P.y+16*s,fill:col,'font-size':12,'font-weight':'bold','text-anchor':'middle','font-family':'ui-monospace,monospace'});
-    lab.textContent=gid;svg.append(lab);
+    lab.textContent=(gid===groveFilter?'◉ ':'')+gid;gg.append(lab);
     const sub=svgEl('text',{x:P.x,y:P.y+28*s,fill:'#9aa6b2','font-size':9.5,'text-anchor':'middle','font-family':'ui-monospace,monospace'});
-    sub.textContent=trees.length+'🌳'+(g.kind?(' · '+g.kind):'');svg.append(sub);});
+    sub.textContent=trees.length+'🌳'+(g.kind?(' · '+g.kind):'');gg.append(sub);
+    if(gid!=='(sin grove)')gg.onclick=(ev)=>{ev.stopPropagation();selectGrove(gid);};
+    svg.append(gg);});
   const wrap=E('div','treehero');svg.style.cursor='pointer';svg.onclick=()=>go('__forest__');
-  wrap.append(svg,E('div','treecap','🌲 el Forest — '+metaIds.length+' Groves · '+repos.length+' Trees · senderos = relations · click → Forest map'));
+  wrap.append(svg,E('div','treecap','🌲 el Forest — '+metaIds.length+' Groves · '+repos.length+' Trees · click un Grove → filtra abajo · fondo → Forest map'));
   return wrap;
 }
 function renderForest(){
@@ -466,6 +483,13 @@ function renderForest(){
     view.append(box);});
 }
 
+/* ---------- interacción Forest ---------- */
+function selectGrove(gid){
+  groveFilter=(groveFilter===gid?null:gid);          // toggle
+  if(currentPath())go(''); else renderNode('');       // asegura estar en la home y re-renderiza
+  const v=$('#view');if(v&&groveFilter)v.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
 /* ---------- routing ---------- */
 function go(path){location.hash=path?('#'+path):'#';}
 function currentPath(){return decodeURIComponent(location.hash.replace(/^#/,''));}
@@ -476,6 +500,7 @@ window.addEventListener('hashchange',()=>{if(STATE)route();});
 
 function render(s){
   STATE=s;TREE=buildTree(s.modules||[]);
+  STATE._groveByRepo=Object.fromEntries((s.repos||[]).map(r=>[r.name,r.grove]));
   $('#err').textContent='';
   $('#ws').textContent=s.workspace+(s._cache_hit?' · cache':' · fresh');
   $('#stamp').textContent=new Date(s.generated_at).toLocaleTimeString();
