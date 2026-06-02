@@ -384,38 +384,59 @@ function buildGraph(repos,rels){
 }
 const GPAL=['#5fd874','#79c0ff','#d8b4ff','#e3b341','#ff8077','#7ee0c0','#f0a3c8','#9fb4ff','#c5e065','#86d0e8'];
 function _hash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
-/* Forest cenital: cada Grove es una parcela/claro; los Trees son copas vistas desde arriba */
+/* copa estilizada vista de frente (clean dark): tronco + canopy + brillo + sombra */
+function drawTreeGlyph(svg,x,y,s,col,title){
+  const g=svgEl('g');g.style.cursor='pointer';const ch=18*s,cw=10*s;
+  g.append(svgEl('ellipse',{cx:x,cy:y+1.5,rx:cw*0.8,ry:2.4*s,fill:'#000',opacity:.28}));
+  g.append(svgEl('rect',{x:x-1.1*s,y:y-6*s,width:2.2*s,height:6*s,fill:'#6b5640'}));
+  g.append(svgEl('path',{d:'M'+x+','+(y-ch)+' C'+(x+cw)+','+(y-ch*0.35)+' '+(x+cw*0.7)+','+(y-4*s)+' '+x+','+(y-5*s)+' C'+(x-cw*0.7)+','+(y-4*s)+' '+(x-cw)+','+(y-ch*0.35)+' '+x+','+(y-ch)+' Z',
+    fill:col,opacity:.93,stroke:'#0b0f14','stroke-width':0.6}));
+  g.append(svgEl('circle',{cx:x-cw*0.25,cy:y-ch*0.55,r:cw*0.3,fill:'#fff',opacity:.16}));
+  const ti=svgEl('title');ti.textContent=title;g.append(ti);svg.append(g);
+}
+/* Forest = paisaje en perspectiva (mixto): Groves = grupos de arbolitos rotulados,
+   con profundidad (lejos chico/arriba, cerca grande/abajo). Senderos = relations. */
 function homeTree(groves,repos){
   const byG={};repos.forEach(r=>{const k=r.grove||'(sin grove)';(byG[k]=byG[k]||[]).push(r);});
   const metaIds=(groves||[]).map(g=>g.id).filter(id=>byG[id]);
   const order=metaIds.concat(Object.keys(byG).filter(k=>!metaIds.includes(k)));
   if(!order.length)return null;
   const colOf={};order.forEach((id,i)=>colOf[id]=id==='(sin grove)'?'#8893a0':GPAL[i%GPAL.length]);
-  const W=920,cols=order.length<=3?order.length:(order.length<=8?4:5),rows=Math.ceil(order.length/cols);
-  const CW=W/cols,CH=142,H=rows*CH+8;
+  const W=920,H=430,horizon=104;
   const svg=svgEl('svg',{'class':'tree',viewBox:'0 0 '+W+' '+H,preserveAspectRatio:'xMidYMid meet'});
-  svg.append(svgEl('rect',{x:0,y:0,width:W,height:H,fill:'#0c1310'}));   // suelo del bosque
-  order.forEach((gid,i)=>{
-    const g=(groves.find(x=>x.id===gid))||{id:gid};const trees=byG[gid],col=colOf[gid];
-    const ox=(i%cols)*CW,oy=Math.floor(i/cols)*CH,pad=7;
-    const x=ox+pad,y=oy+pad,w=CW-pad*2,h=CH-pad*2;
-    const plot=svgEl('rect',{x,y,width:w,height:h,rx:11,fill:col+'14',stroke:col+'66','stroke-width':1});svg.append(plot);
-    const lab=svgEl('text',{x:x+10,y:y+18,fill:col,'font-size':12,'font-weight':'bold','font-family':'ui-monospace,monospace'});
-    lab.textContent='🌳 '+gid;svg.append(lab);
-    const cnt=svgEl('text',{x:x+w-8,y:y+18,fill:'#9aa6b2','font-size':10,'text-anchor':'end','font-family':'ui-monospace,monospace'});
-    cnt.textContent=trees.length+(g.kind?(' · '+g.kind):'');svg.append(cnt);
-    const ix=x+12,iy=y+30,iw=w-24,ih=h-42;
-    trees.forEach(r=>{const ha=_hash(r.name),hb=_hash(r.name+'~');
-      const px=ix+(ha%997)/997*iw,py=iy+(hb%991)/991*ih,cr=8;
-      const node=svgEl('g');node.style.cursor='pointer';
-      node.append(svgEl('circle',{cx:px,cy:py+1.5,r:cr,fill:'#000',opacity:.25}));      // sombra
-      node.append(svgEl('circle',{cx:px,cy:py,r:cr,fill:col,opacity:.9,stroke:'#0b0f14','stroke-width':1})); // copa
-      node.append(svgEl('circle',{cx:px-cr*0.3,cy:py-cr*0.3,r:cr*0.42,fill:'#fff',opacity:.20}));            // brillo
-      const ti=svgEl('title');ti.textContent=r.name+' · '+gid+(r.vendor?(' · ✎'+r.vendor):'');node.append(ti);
-      svg.append(node);});
-  });
+  const defs=svgEl('defs');const grad=svgEl('linearGradient',{id:'gr',x1:0,y1:0,x2:0,y2:1});
+  grad.append(svgEl('stop',{offset:'0%','stop-color':'#0e1620'}),svgEl('stop',{offset:'100%','stop-color':'#0a1310'}));
+  defs.append(grad);svg.append(defs);
+  svg.append(svgEl('rect',{x:0,y:0,width:W,height:H,fill:'#080b10'}));                       // cielo
+  svg.append(svgEl('rect',{x:0,y:horizon,width:W,height:H-horizon,fill:'url(#gr)'}));         // suelo
+  svg.append(svgEl('line',{x1:0,y1:horizon,x2:W,y2:horizon,stroke:'#2a333f','stroke-width':1}));
+  svg.append(svgEl('path',{d:'M0,'+horizon+' q170,-24 340,-4 t340,2 t260,4',fill:'none',stroke:'#1c2430','stroke-width':1,'stroke-dasharray':'2 6'})); // colinas
+  svg.append(svgEl('circle',{cx:W-58,cy:44,r:9,fill:'none',stroke:'#3a4655','stroke-width':1,'stroke-dasharray':'2 4'}));                              // luna
+  // bandas de profundidad
+  const nRows=order.length<=4?2:3;
+  const per=Math.ceil(order.length/nRows),pos={};
+  order.forEach((gid,i)=>{const row=Math.min(nRows-1,Math.floor(i/per));const tt=nRows>1?row/(nRows-1):0;
+    const baseY=horizon+46+tt*(H-horizon-116),scale=0.72+tt*0.5;
+    const start=row*per,inBand=order.slice(start,start+per),k=inBand.indexOf(gid),cb=inBand.length;
+    const gx=W*(k+1)/(cb+1)+((_hash(gid)%36)-18);
+    pos[gid]={x:gx,y:baseY,s:scale};});
+  // senderos = relations (agregadas a nivel Grove)
+  const seen={};
+  (STATE.relations||[]).forEach(e=>{const ga=(repos.find(r=>r.name===e.from)||{}).grove,gb=(repos.find(r=>r.name===e.to)||{}).grove;
+    if(!ga||!gb||ga===gb||!pos[ga]||!pos[gb])return;const key=ga+'>'+gb+'>'+e.type;if(seen[key])return;seen[key]=1;
+    const a=pos[ga],b=pos[gb],c=REL_COLORS[e.type]||REL_COLORS['relates'];const mx=(a.x+b.x)/2,my=Math.min(a.y,b.y)-34;
+    svg.append(svgEl('path',{d:'M'+a.x+','+(a.y-4)+' Q'+mx+','+my+' '+b.x+','+(b.y-4),fill:'none',stroke:c,'stroke-width':1.4,opacity:.4,'stroke-dasharray':'5 5'}));});
+  // clusters: de atrás (y menor) hacia adelante
+  order.slice().sort((p,q)=>pos[p].y-pos[q].y).forEach(gid=>{const g=(groves.find(x=>x.id===gid))||{id:gid};
+    const trees=byG[gid],col=colOf[gid],P=pos[gid],s=P.s,sp=15*s,w=(trees.length-1)*sp,x0=P.x-w/2;
+    trees.forEach((r,j)=>{const tx=x0+j*sp,ty=P.y-((_hash(r.name+gid)%6)-3)*s;
+      drawTreeGlyph(svg,tx,ty,s,col,r.name+' · '+gid+(r.vendor?(' · ✎'+r.vendor):''));});
+    const lab=svgEl('text',{x:P.x,y:P.y+16*s,fill:col,'font-size':12,'font-weight':'bold','text-anchor':'middle','font-family':'ui-monospace,monospace'});
+    lab.textContent=gid;svg.append(lab);
+    const sub=svgEl('text',{x:P.x,y:P.y+28*s,fill:'#9aa6b2','font-size':9.5,'text-anchor':'middle','font-family':'ui-monospace,monospace'});
+    sub.textContent=trees.length+'🌳'+(g.kind?(' · '+g.kind):'');svg.append(sub);});
   const wrap=E('div','treehero');svg.style.cursor='pointer';svg.onclick=()=>go('__forest__');
-  wrap.append(svg,E('div','treecap','🌲 el Forest desde arriba — '+order.filter(k=>k!=='(sin grove)').length+' Groves · '+repos.length+' Trees · click → Forest map'));
+  wrap.append(svg,E('div','treecap','🌲 el Forest — '+metaIds.length+' Groves · '+repos.length+' Trees · senderos = relations · click → Forest map'));
   return wrap;
 }
 function renderForest(){
