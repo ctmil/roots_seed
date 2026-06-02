@@ -2,9 +2,10 @@
 
 > Plantilla maestra para crear estructura de documentación y memoria de desarrollo. Este archivo define los estándares de formato, estilo y protocolos de poblado.
 
-**Versión:** 1.7
+**Versión:** 1.8
 
 **Changelog:**
+- **1.8** (02 Junio 2026) — Nueva sección **Toolkit complementario (`scripts/` + `skills/` + `tools/`)**: sistematiza que la memoria `.roots/` vive sobre un sustrato de repos y que el seed se distribuye junto a herramientas que lo montan, lo mejoran y lo visualizan. `scripts/` (montaje/operación de la flota: `setup-module.sh`, `setupbranch.sh`, `dashboard.sh` — patrón bare+worktrees), `skills/` (biblioteca **compartida** de estrategias bien diseñadas: merging de módulos Odoo, reporting md→PDF — distinta del `skills/` local de cada `.roots`) y `tools/` (apps; primera: `fleet-dashboard`, visor navegable que lee los `.roots` y mapea a un backend Odoo). Se **referencia**, no se inlinea código: cada elemento es self-contained con su README. No cambia el formato de `.roots/`.
 - **1.7** (30 Mayo 2026) — Nuevo **Modo Flat** (simplificado): `.roots/` directo en la raíz, sin namespace, para proyectos single-source con pocas/ninguna fuente remota embebida — el caso común. **Desacople de dos ejes** que v1.6 conflacionaba: el *layout del directorio* (`flat` vs `namespaced`) ahora es independiente de la *metadata de contexto* (`context_format`/`context_parsed`) — un repo flat puede declarar su contexto (ej. Odoo 17.0, dev) en `_meta.json` sin codificarlo en el path (registrar sin namespacear). Nueva **regla de decisión** del layout: lo define "¿necesito memoria multi-contexto concurrente?" (embeber N sources / multi-versión-cliente en paralelo / migración), NO "¿es Odoo?". Nuevo **Modo Migración**: un repo flat puede *forkear temporalmente* a namespaced durante una migración (ej. `.roots/17.0/` + `.roots/19.0/` lado a lado) y *colapsar de vuelta a flat* sobre la versión nueva. `_meta.json` extendido con `layout`. **Flat es el default del bootstrap** — la pregunta de modo solo se dispara ante señales de multi-source/multi-cliente. Script de inicialización a v1.7.
 - **1.6** (10 Mayo 2026) — Modos de trabajo replanteados como modelo híbrido multi-source. Nuevo **Context Format Registry** con contexto estructurado por dominio (Odoo como primer formato: `{major}.{minor}.{infra}.{project}`). Nuevo sistema de **Sources embebidos**: el cliente copia `.roots/` de cada source en `sources/`, con `_sources.json` como manifest de vinculación. **Cascada de precedencia** formalizada: cliente raíz > source embebido > source original. **Namespace de conflictos** con patrón `source.skill_name` y overrides del cliente. **Promoción semi-automática** de descubrimientos del cliente al source original. Nueva sección **Tool Compatibility** con filosofía tool-agnostic, 5 herramientas principales como referencia y merging strategies. `_meta.json` extendido con `context_format`, `context_parsed`, `sources`. Script de inicialización actualizado a v1.6.
 - **1.5** (30 Abril 2026) — Nueva sección "Modos de trabajo" con dos modos: **client branch** (`.roots/{version}.{client}/`) y **source** (`.roots/{module}/`). El modo se pregunta al usuario al procesar el seed por primera vez y se persiste en `_meta.json.working_mode`. Actualizada "Estructura Base" con ambos layouts. `on-seed-process` ampliado con paso 0 de detección de modo. Nuevo protocolo de merge entre namespaces de distintos clientes/branches. `_meta.json` extendido con campos `working_mode`, `odoo_version`, `repo`.
@@ -487,6 +488,51 @@ Cada herramienta integra contexto de forma diferente:
 - Integraciones adicionales pueden contribuirse como skills en el upstream (`ctmil/roots_seed`)
 - La idea es que la descripción sea tan clara y simple que cualquier IA nueva la entienda sin traducción
 - Pensar siempre en base a una **progresión infinita de IAs** — las referencias a las 5 principales sirven para ubicar a futuras herramientas
+
+---
+
+## Toolkit complementario (`scripts/` + `skills/` + `tools/`)
+
+La estructura `.roots/` es **tool-agnostic** y se sostiene sola, pero la memoria persistente no vive en el aire: vive en **repos**. El seed se publica junto a un toolkit que monta ese sustrato, lo mejora y lo visualiza. Estas herramientas son **complementarias y opcionales** — no cambian el formato de `.roots/`; lo operan, lo enriquecen y lo exponen.
+
+> **Principio:** el toolkit se **referencia, no se inlinea**. Cada herramienta es self-contained, con su propio README, y evoluciona aparte del spec. Esta sección sistematiza el concepto y apunta a los directorios; el código vive en ellos.
+
+### `scripts/` — montar y operar la flota
+
+Plantillas `.sh` que se copian a la raíz de un **workspace** (la carpeta que contiene los repos) y arman el sustrato físico de la memoria con el patrón **bare + worktrees** (un `.bare` por repo, un worktree por versión/branch — objetos git compartidos, espacio local optimizado):
+
+| Script | Rol |
+|--------|-----|
+| `setup-module.sh` | Clona un repo como bare + worktrees por branch |
+| `setupbranch.sh` | Agrega un worktree para un branch (auto-detecta existente/nuevo) |
+| `dashboard.sh` | Levanta el visor (`tools/fleet-dashboard`) apuntando al workspace |
+
+Ver `scripts/README.md`.
+
+### `skills/` — estrategias reutilizables (biblioteca compartida)
+
+Skills **cross-cutting** y bien diseñadas que viven en el seed para mejorar estrategias comunes. Son la biblioteca **compartida**, distinta del `skills/` que cada `.roots` tiene localmente (`prompts.md`/`workflows.md`/`patterns.md` propios del módulo): un módulo referencia o copia/adapta desde acá, y promueve de vuelta lo que resulte general.
+
+Primeras skills:
+
+| Skill | Para qué |
+|-------|----------|
+| `odoo-module-merging.md` | Merge de branches/clientes hacia repos oficiales Odoo: revisión por capas, patrones de conflicto cross-versión, promoción del `.roots` |
+| `md-to-pdf-reporting.md` | `manual.md` / `documentation.md` → PDF (pandoc / HTML+CSS / QWeb Odoo) — base del reporting |
+
+Ver `skills/README.md`.
+
+### `tools/` — apps sobre la memoria
+
+Aplicaciones que **leen los `.roots`** y los exponen. Primera del toolkit:
+
+- **`fleet-dashboard/`** — visor web navegable (viñetas → drill-down recursivo, HERO de cambios + tabs de tareas/docs). Arquitectura en 3 capas: colector → `state.json` (contrato reusable) → vista. Pensado como **base para portar a un backend Odoo** (ej. `odoo_moldeo_sync`), donde el mismo `state.json` se emite desde modelos y la jerarquía mapea a un patrón de árbol (`odoo_moldeo_htree`).
+
+Ver `tools/<nombre>/README.md`.
+
+### Relación con el spec
+
+El toolkit asume el patrón bare+worktrees, pero el **formato `.roots/` no depende de él**: cualquier proyecto (un solo repo, un solo dir) usa la misma estructura de memoria sin necesidad del toolkit. Adoptá las herramientas si te sirven; ignoralas si tu setup es más simple.
 
 ---
 

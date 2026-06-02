@@ -1,0 +1,13 @@
+{
+  "seed_version": "1.7",
+  "created_at": "2026-06-02T00:00:00",
+  "layout": "flat",
+  "working_mode": "source",
+  "project": "roots_seed",
+  "canonical_seed": "../roots_seed.md",
+  "_canonical_note": "El canonical del seed es el roots_seed.md en la raíz del repo; este .roots NO duplica esa copia de 82KB.",
+  "description": "Toolkit del seed agentic: la spec (roots_seed.md v1.8) + scripts/ (montaje de flota) + tools/ (apps).",
+  "scripts": ["setup-module.sh", "setupbranch.sh", "dashboard.sh"],
+  "skills": ["odoo-module-merging", "md-to-pdf-reporting"],
+  "tools": ["fleet-dashboard"]
+}
