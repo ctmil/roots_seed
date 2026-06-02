@@ -34,7 +34,9 @@
 
 ## What it is
 
-`.roots/` is a **persistent memory** folder you drop into a repo: decisions, error/fix logs, design docs, tasks, reusable skills — written for **AI agents and humans alike**, in a stable format so any tool can read and grow it. The canonical spec is **[`roots_seed.md`](roots_seed.md)** (currently **v1.9**).
+`.roots/` is a **persistent memory** folder you drop into a repo: decisions, error/fix logs, design docs, tasks, reusable skills — written for **AI agents and humans alike**, in a stable format so any tool can read and grow it. The canonical spec is **[`roots_seed.md`](roots_seed.md)** (currently **v1.10**); the navigable front door is **[`manual.md`](manual.md)**.
+
+Not just for code: the same model spans software, design and narrative. See **[`recipes/`](recipes/)** — Odoo suites, a forest of design repos, narrative/game worlds, and a token-economy playbook.
 
 It ships with a small toolkit: **`scripts/`** mount the substrate (bare + worktrees), **`skills/`** are a shared library of well-designed strategies, and **`tools/`** are apps that read the memory — first among them the **`fleet-dashboard`**.
 
@@ -62,7 +64,9 @@ See **[`roots_seed.md` → Forest Model](roots_seed.md)** for the full schema (`
 
 ```
 roots_seed/
-├── roots_seed.md          ← the canonical spec (read this)
+├── roots_seed.md          ← the canonical spec (normative)
+├── manual.md              ← navigable front door (start here)
+├── recipes/               ← applied patterns per domain (odoo / design / narrative / tokens)
 ├── scripts/               ← mount & operate the Forest (setup-module, setupbranch, dashboard)
 ├── skills/                ← shared, well-designed strategies (Odoo module merging, md→PDF)
 ├── tools/

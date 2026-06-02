@@ -2,9 +2,10 @@
 
 > Plantilla maestra para crear estructura de documentación y memoria de desarrollo. Este archivo define los estándares de formato, estilo y protocolos de poblado.
 
-**Versión:** 1.9
+**Versión:** 1.10
 
 **Changelog:**
+- **1.10** (02 Junio 2026) — **Recetas por dominio** + **manual completo** + **economía de tokens**. Nueva carpeta `recipes/` con 4 recetas aplicadas del modelo `.roots`/Forest: (1) suite de módulos de extensión Odoo (Grove=suite, Tree=módulo, relations=depends), (2) bosque de diseños (1 vendor-artista > N trees > diseños; puente `ai_context_md`↔`.roots`), (3) narrativa/juego como **domain pack** (`working_mode: narrative`: worldbible, fichas, arcos=branches, skills de personaje ≡ skills de IA), (4) economía de tokens. Tesis transversal: **3 primitivos (vendor · `relations[]` · branch) se reusan en N dominios**. Nuevo `manual.md` (puerta de entrada navegable). Nueva sección **Token economy & model benchmarking**: escalera de capas L0–L3, fórmula legible **CER** (útiles/cargados) + **FS** (si_leo_todo/cargados) + tiers de presupuesto, benchmark interno (`journal/benchmarks.md`) y repo de técnicas por modelo de IA (`skills/model-techniques.md`). No cambia el formato de `.roots/`.
 - **1.9** (02 Junio 2026) — Nueva sección **Forest Model** que formaliza y promueve al canónico el working_mode `workspace` (capa de coordinación por encima de N repos, antes extensión local). Define el vocabulario **Roots → Forest → Grove → Tree → Branch** y un schema multi-eje: cada Tree (repo) lleva `grove` (producto/suite primario), `also_groves` (tags de co-pertenencia genuina), `vendor` (autor/fabricante — **propiedad** con perfil opcional en `.roots/vendors/<slug>.md`), `kind` (`producto-suite`/`plataforma`/`agregador`/`external-upstream`/`seed`) y `org` (hosting). Las **dependencias se modelan como aristas** de un grafo dirigido (`relations[]`: `depends-on`/`extends`/`integrates`/`relates`), NUNCA como anidamiento ni tags — regla de oro: *grove = qué es · arista = qué usa · tag = también es de*. `forest.json` es el registro estructurado (rename de `fleet.json`, que queda como symlink por compat con el `fleet-dashboard`; conserva el array `repos[]`). No cambia el formato de `.roots/` por-repo.
 - **1.8** (02 Junio 2026) — Nueva sección **Toolkit complementario (`scripts/` + `skills/` + `tools/`)**: sistematiza que la memoria `.roots/` vive sobre un sustrato de repos y que el seed se distribuye junto a herramientas que lo montan, lo mejoran y lo visualizan. `scripts/` (montaje/operación de la flota: `setup-module.sh`, `setupbranch.sh`, `dashboard.sh` — patrón bare+worktrees), `skills/` (biblioteca **compartida** de estrategias bien diseñadas: merging de módulos Odoo, reporting md→PDF — distinta del `skills/` local de cada `.roots`) y `tools/` (apps; primera: `fleet-dashboard`, visor navegable que lee los `.roots` y mapea a un backend Odoo). Se **referencia**, no se inlinea código: cada elemento es self-contained con su README. No cambia el formato de `.roots/`.
 - **1.7** (30 Mayo 2026) — Nuevo **Modo Flat** (simplificado): `.roots/` directo en la raíz, sin namespace, para proyectos single-source con pocas/ninguna fuente remota embebida — el caso común. **Desacople de dos ejes** que v1.6 conflacionaba: el *layout del directorio* (`flat` vs `namespaced`) ahora es independiente de la *metadata de contexto* (`context_format`/`context_parsed`) — un repo flat puede declarar su contexto (ej. Odoo 17.0, dev) en `_meta.json` sin codificarlo en el path (registrar sin namespacear). Nueva **regla de decisión** del layout: lo define "¿necesito memoria multi-contexto concurrente?" (embeber N sources / multi-versión-cliente en paralelo / migración), NO "¿es Odoo?". Nuevo **Modo Migración**: un repo flat puede *forkear temporalmente* a namespaced durante una migración (ej. `.roots/17.0/` + `.roots/19.0/` lado a lado) y *colapsar de vuelta a flat* sobre la versión nueva. `_meta.json` extendido con `layout`. **Flat es el default del bootstrap** — la pregunta de modo solo se dispara ante señales de multi-source/multi-cliente. Script de inicialización a v1.7.
@@ -605,6 +606,58 @@ Es el rename de `fleet.json`. **Se mantiene `fleet.json` como symlink** para no 
 ```
 
 > El nivel workspace se registra en `_meta.json` con `working_mode: "workspace"`. El `fleet-dashboard` puede dibujar `relations[]` como grafo (mejora opcional).
+
+---
+
+## Recetas por dominio (`recipes/` + `manual.md`)
+
+El modelo `.roots`/Forest no es solo para Odoo: los mismos primitivos aplican a software, diseño y narrativa. El detalle aplicado vive en `recipes/` (referenciado, no inlineado); la puerta de entrada navegable es `manual.md`.
+
+**Tesis:** tres primitivos se reusan en N dominios →
+
+| Primitivo | Código (Odoo) | Diseño (Folio) | Narrativa/juego |
+|---|---|---|---|
+| **vendor** | quién mantiene el módulo | el artista/usuario | el autor/guionista |
+| **`relations[]`** | `depends-on` entre módulos | prototype→layout, work→author | personaje→NPC, escena→escena, concepto↔concepto |
+| **branch** | branch git | variante de diseño (`prototype.branch`) | arco de guión (canon/what-if/playtest) |
+
+Recetas (`recipes/`):
+1. **odoo-suite** — `Grove = suite · Tree = módulo · relations = depends`.
+2. **design-forest** — `1 vendor (artista) > N trees > diseños`; puente `ai_context_md` ↔ `.roots/context.md`.
+3. **narrative-game** — domain pack `working_mode: narrative` (worldbible, fichas, arcos=branches, **skills de personaje ≡ skills de IA**).
+4. **token-economy** — ver sección siguiente.
+
+> **Domain pack:** un overlay de dominio (carpetas extra como `worldbible/`, `arcs/`) sobre cualquier modo base, marcado en `_meta.json` (ej. `working_mode: "narrative"`). Reusa el esqueleto del seed; no lo reemplaza.
+
+---
+
+## Token economy & model benchmarking
+
+El `.roots` ahorra tokens por diseño: **leer por capas, no recargar el corpus cada turno**. Aplica a cualquier `.roots`.
+
+### Escalera de capas
+
+```
+L0  índice barato     context.md · _meta.json · forest.json · MEMORY    (casi siempre)
+L1  slice activo      tasks/todo.md + _meta.current_feature + 1–2 docs   (la tarea)
+L2  doc de dominio    drill on-demand: UN archivo de docs/                (cuando hace falta)
+L3  corpus completo   leer todo                                          (raro, explícito)
+```
+Regla: quedate en la capa más baja que resuelva la tarea. `hooks/` y `_meta.current_feature` existen para cargar el slice correcto sin barrer todo.
+
+### Fórmula (dos números legibles)
+
+- **CER** (Context Efficiency Ratio) = `tokens_útiles / tokens_cargados` — densidad de lo leído.
+- **FS** (Frugality Score) = `tokens_si_leo_todo / tokens_cargados` — "leí 1/N del corpus".
+- **Tiers** (tokens cargados): trivial ≤5k (L0) · normal ≤20k (L0+L1) · deep ≤80k (L0+L1+L2) · full sin tope (L3, justificar).
+
+### Benchmark + técnicas
+
+- `journal/benchmarks.md` — fila por sesión: `fecha · modelo · tarea · tokens_in/out · capas · FS · calidad(1–5) · nota`.
+- `skills/model-techniques.md` — destilado por modelo (cuándo usar Opus/Sonnet/Haiku, patrones de prompt, caché ~5min, cuándo delegar a subagentes, cuándo subir a L3).
+- Loop: **medir → destilar técnica → aplicar → medir**. El conocimiento de cómo gastar tokens bien se persiste, no se reaprende.
+
+Detalle: `recipes/token-economy.md`.
 
 ---
 
