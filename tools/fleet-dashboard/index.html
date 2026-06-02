@@ -12,9 +12,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Moldeo · Fleet Dashboard</title>
 <style>
-  :root{--bg:#0d1117;--panel:#161b22;--panel2:#1c2230;--border:#30363d;
-    --txt:#c9d1d9;--muted:#8b949e;--accent:#58a6ff;
-    --green:#3fb950;--yellow:#d29922;--red:#f85149;--purple:#bc8cff;}
+  :root{--bg:#0b0f14;--panel:#1a212b;--panel2:#252e3a;--border:#3d4753;
+    --txt:#eef2f6;--muted:#b3bdc8;--accent:#79c0ff;
+    --green:#5fd874;--yellow:#e3b341;--red:#ff8077;--purple:#d8b4ff;}
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--txt);
     font:14px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
@@ -47,7 +47,7 @@
   .vin .h{display:flex;align-items:center;gap:9px}
   .vin .t{color:#fff;font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .vin .v{color:var(--muted);font-size:11px}
-  .vin .d{color:var(--muted);font-size:11.5px;line-height:1.4;flex:1;
+  .vin .d{color:var(--txt);opacity:.82;font-size:11.5px;line-height:1.4;flex:1;
     display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
   .vin .f{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
   .b{font-size:11px;border-radius:4px;padding:1px 7px;border:1px solid var(--border);color:var(--muted);white-space:nowrap}
@@ -69,16 +69,19 @@
   .change{padding:9px 0;border-top:1px solid #21262d}
   .change:first-child{border-top:none}
   .change .top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-  .cdate{color:var(--accent);font-weight:600;font-size:12px}
-  .cmod{color:var(--purple);font-size:11px}
-  .csum{color:var(--txt)}
-  .cbody{color:var(--muted);font-size:12px;margin-top:3px}
+  .cdate{color:var(--accent);font-weight:700;font-size:12px}
+  .cmod{color:var(--purple);font-size:11px;font-weight:600}
+  .csum{color:#fff;font-weight:500}
+  .cbody{color:var(--txt);font-size:12.5px;margin-top:4px;opacity:.9}
   /* tabs */
   .tabs{display:flex;gap:6px;border-bottom:1px solid var(--border);margin-bottom:12px;flex-wrap:wrap}
-  .tab{padding:7px 14px;cursor:pointer;border:1px solid transparent;border-bottom:none;color:var(--muted);border-radius:8px 8px 0 0}
+  .tab{padding:7px 14px;cursor:pointer;border:1px solid transparent;border-bottom:none;color:var(--txt);border-radius:8px 8px 0 0;font-weight:600}
   .tab.on{background:var(--panel);border-color:var(--border);color:#fff}
+  .tab.danger{color:var(--red)}
+  .tab.danger.on{border-color:var(--red);color:var(--red)}
   .tcount{font-size:11px;color:var(--muted)}
   .mgroup{background:var(--panel);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;padding:8px 12px}
+  .mgroup.err{border-color:var(--red);box-shadow:inset 3px 0 0 var(--red)}
   .mgroup .gh{display:flex;align-items:center;gap:8px;margin-bottom:4px}
   .task{color:var(--txt);padding:2px 0 2px 18px;font-size:13px}
   .frow{cursor:pointer;padding:3px 0;color:var(--accent)}
@@ -235,41 +238,50 @@ function renderHero(mems,mount){
   more(HERO_FIRST);   // arranca mostrando 3; luego suma de a 3
   mount.append(hero);
 }
+function mgroupHeader(m,extra){const gh=E('div','gh');const im=iconImg(m.icon);if(im)gh.append(im);
+  gh.append(E('span','t',m.module+' · '+m.version));if(extra)gh.append(extra);return gh;}
+function errCount(m){return (m.summary&&m.summary.errors_active)||0;}
+
 function renderTabs(mems,mount){
   const withTasks=mems.filter(m=>m.tasks&&m.tasks.open_total>0).sort((a,b)=>b.mtime-a.mtime);
   const withDocs=mems.filter(m=>m.docs&&m.docs.length).sort((a,b)=>b.mtime-a.mtime);
-  const tabsEl=E('div','tabs');const body=E('div');
+  const withDebug=mems.filter(m=>m.debug&&m.debug.length).sort((a,b)=>errCount(b)-errCount(a)||b.mtime-a.mtime);
   const tasksN=mems.reduce((a,m)=>a+(m.tasks?m.tasks.open_total:0),0);
+  const errN=mems.reduce((a,m)=>a+errCount(m),0);
+  const tabsEl=E('div','tabs');const body=E('div');
   const tabs=[
     {id:'tareas',label:'Tareas',count:tasksN,render:()=>{
       if(!withTasks.length)return E('div','muted','(sin tareas abiertas)');
-      const w=E('div');withTasks.forEach(m=>{const g=E('div','mgroup');const gh=E('div','gh');
-        const im=iconImg(m.icon);if(im)gh.append(im);gh.append(E('span','t',m.module+' · '+m.version));
-        gh.append(E('span','b tasks','◑ '+m.tasks.open_total));g.append(gh);
+      const w=E('div');withTasks.forEach(m=>{const g=E('div','mgroup');
+        g.append(mgroupHeader(m,E('span','b tasks','◑ '+m.tasks.open_total)));
         m.tasks.open.forEach(x=>g.append(E('div','task','☐ '+x)));
         if(m.tasks.open_total>m.tasks.open.length)g.append(E('div','muted','… +'+(m.tasks.open_total-m.tasks.open.length)+' más'));
         w.append(g);});return w;}},
     {id:'docs',label:'Docs',count:withDocs.reduce((a,m)=>a+m.docs.length,0),render:()=>{
       if(!withDocs.length)return E('div','muted','(sin docs)');
-      const w=E('div');withDocs.forEach(m=>{const g=E('div','mgroup');const gh=E('div','gh');
-        const im=iconImg(m.icon);if(im)gh.append(im);gh.append(E('span','t',m.module+' · '+m.version));
-        if(m.index_html){const a=E('a','desc','ver descripción ↗');a.href=fileURL(m.index_html);a.target='_blank';a.rel='noopener';gh.append(a);}
-        g.append(gh);m.docs.forEach(f=>g.append(fileRow(f)));w.append(g);});return w;}},
+      const w=E('div');withDocs.forEach(m=>{const g=E('div','mgroup');
+        const a=m.index_html?(()=>{const x=E('a','desc','ver descripción ↗');x.href=fileURL(m.index_html);x.target='_blank';x.rel='noopener';return x;})():null;
+        g.append(mgroupHeader(m,a));m.docs.forEach(f=>g.append(fileRow(f)));w.append(g);});return w;}},
+    {id:'debug',label:'Debug',count:errN,danger:errN>0,render:()=>{
+      if(!withDebug.length)return E('div','muted','(sin debug)');
+      const w=E('div');withDebug.forEach(m=>{const g=E('div','mgroup'+(errCount(m)?' err':''));
+        const ea=errCount(m);g.append(mgroupHeader(m,ea?E('span','b errors','⚠ '+ea+' activos'):null));
+        m.debug.forEach(f=>g.append(fileRow(f)));w.append(g);});return w;}},
   ];
-  let active='tareas';
+  let active=errN>0?'debug':'tareas';   // recalcar Debug cuando hay errores activos
   function paint(){body.innerHTML='';const t=tabs.find(x=>x.id===active);body.append(t.render());
     [...tabsEl.children].forEach(c=>c.classList.toggle('on',c.dataset.id===active));}
-  tabs.forEach(t=>{const el=E('div','tab');el.dataset.id=t.id;el.append(E('span',null,t.label),E('span','tcount',' '+t.count));
+  tabs.forEach(t=>{const el=E('div','tab'+(t.danger?' danger':''));el.dataset.id=t.id;
+    el.append(E('span',null,t.label),E('span','tcount',' '+t.count));
     el.onclick=()=>{active=t.id;paint();};tabsEl.append(el);});
   mount.append(tabsEl,body);paint();
 }
 function renderCollapsed(mems,mount){
-  const list=mems.filter(m=>(m.skills&&m.skills.length)||(m.hooks&&m.hooks.length)||(m.debug&&m.debug.length));
+  const list=mems.filter(m=>(m.skills&&m.skills.length)||(m.hooks&&m.hooks.length));
   if(!list.length)return;
-  const d=E('details','coll');d.append(E('summary',null,'Skills · Hooks · Debug ('+list.length+' módulos)'));
-  list.forEach(m=>{const g=E('div','mgroup');const gh=E('div','gh');const im=iconImg(m.icon);if(im)gh.append(im);
-    gh.append(E('span','t',m.module+' · '+m.version));g.append(gh);
-    [['skills',m.skills],['hooks',m.hooks],['debug',m.debug]].forEach(([lbl,arr])=>{if(!arr||!arr.length)return;
+  const d=E('details','coll');d.append(E('summary',null,'Skills · Hooks ('+list.length+' módulos)'));
+  list.forEach(m=>{const g=E('div','mgroup');g.append(mgroupHeader(m));
+    [['skills',m.skills],['hooks',m.hooks]].forEach(([lbl,arr])=>{if(!arr||!arr.length)return;
       g.append(E('div','grouplbl',lbl.toUpperCase()));arr.forEach(f=>g.append(fileRow(f)));});
     d.append(g);});
   mount.append(d);
@@ -297,6 +309,7 @@ function renderNode(path){
     if(node.mem&&node.mem.version)head.append(E('span','vv',node.mem.version));
     if(node.mem&&node.mem.index_html){const a=E('a','desc','ver descripción ↗');a.href=fileURL(node.mem.index_html);a.target='_blank';a.rel='noopener';head.append(a);}
     if(node.mem&&node.mem.git){const g=node.mem.git;let t=g.branch||'';if(g.dirty)t+=' ●'+g.dirty;if(g.ahead)t+=' ↑'+g.ahead;if(g.behind)t+=' ↓'+g.behind;head.append(E('span','wchip',t));}
+    if(node._errors)head.append(E('span','b errors','⚠ '+node._errors+' errores activos'));
     view.append(head);
     const desc=node.mem&&node.mem.summary&&node.mem.summary.description;
     if(desc)view.append(E('div','nodedesc',desc));

@@ -238,6 +238,22 @@ def odoo_assets(module_dir):
 PRUNE_DIRS = {".git", ".bare", "node_modules", "__pycache__"}
 
 
+def is_ns_container(roots):
+    """True si el .roots es un contenedor namespaced (deployment): sin context.md
+    y con subdirs que tienen _meta.json (= namespaces de cliente). Esos alimentan
+    la sección de proyectos, no la de módulos. Todo otro .roots es módulo."""
+    if os.path.isfile(os.path.join(roots, "context.md")):
+        return False
+    try:
+        for sub in os.listdir(roots):
+            d = os.path.join(roots, sub)
+            if os.path.isdir(d) and os.path.isfile(os.path.join(d, "_meta.json")):
+                return True
+    except OSError:
+        pass
+    return False
+
+
 def _record_module(module_dir, roots, repo, version, git):
     """Registro de una memoria de módulo (un .roots con context.md)."""
     icon, index_html = odoo_assets(module_dir)
@@ -291,7 +307,7 @@ def find_module_memories(repos):
                 dirnames[:] = [d for d in dirnames if d not in PRUNE_DIRS]
                 if ".roots" in dirnames:
                     roots = os.path.join(dirpath, ".roots")
-                    if os.path.isfile(os.path.join(roots, "context.md")):
+                    if not is_ns_container(roots):
                         mems.append(_record_module(dirpath, roots, repo, version, git))
                     dirnames.remove(".roots")  # no descender dentro del .roots
     return mems
