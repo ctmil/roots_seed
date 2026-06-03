@@ -57,7 +57,7 @@
   .b.docs{color:var(--purple);border-color:var(--purple)}
   .b.errors{color:var(--red);border-color:var(--red)}
   .b.kids{color:var(--green);border-color:var(--green)}
-  .b.date{margin-left:auto;border:none}
+  .b.date{margin-left:auto;border:none;min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   /* página de nodo */
   .nodehead{display:flex;align-items:center;gap:12px;margin-bottom:6px}
   .nodehead .tt{font-size:20px;color:#fff;font-weight:600}
@@ -250,8 +250,8 @@ function makeVin(node){
   if(node._openTasks)f.append(E('span','b tasks','◑ '+node._openTasks));
   if(node._docs)f.append(E('span','b docs','📄 '+node._docs));
   if(node._errors)f.append(E('span','b errors','⚠ '+node._errors));
-  const last=(aggCambios(node._mems)[0]||{}).date_raw;
-  if(last)f.append(E('span','b date',last));
+  let last=(aggCambios(node._mems)[0]||{}).date_raw;
+  if(last){last=last.split(/[—(]/)[0].trim().slice(0,24);f.append(E('span','b date',last));}
   v.append(f);return v;
 }
 function grid(nodes){const g=E('div','grid');nodes.forEach(n=>g.append(makeVin(n)));return g;}
