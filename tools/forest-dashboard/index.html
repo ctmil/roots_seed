@@ -134,6 +134,14 @@
   .grovegrp .ghit{fill:transparent}
   .grovegrp:hover .ghit{fill:#ffffff14}
   .clrfil{color:var(--accent);cursor:pointer;font-size:11px;border:1px solid var(--accent);border-radius:5px;padding:1px 7px;margin-left:8px}
+  .brlist{display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px 2px;justify-content:center}
+  .brchip{display:flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--border);border-radius:6px;padding:3px 9px;font-size:12px}
+  .brchip:hover{border-color:var(--accent)}
+  .brsw{width:10px;height:10px;border-radius:3px;flex:none}
+  .brchip .brn{color:#eef2f6;font-weight:600}
+  .brchip .bbd{color:var(--yellow);font-size:10px}
+  .brchip .bact{color:var(--muted);font-size:10px}
+  .brchip.dead .brn{color:#7a8590}
 </style>
 </head>
 <body>
@@ -488,25 +496,25 @@ function treeView(repo,node){
   // tronco
   svg.append(svgEl('path',{d:'M'+cx+','+soilY+' L'+cx+','+trunkTop,stroke:'#8a6d4b','stroke-width':14,'stroke-linecap':'round',fill:'none'}));
   // branches = git branches/worktrees
-  const N=wts.length,SP=Math.min(150,46+N*16);
-  wts.forEach((wt,i)=>{const t=N>1?i/(N-1):.5,ang=(-SP/2+t*SP)*Math.PI/180,len=94;
+  const N=wts.length,SP=Math.min(172,34+N*17),brCol=[];
+  wts.forEach((wt,i)=>{const t=N>1?i/(N-1):.5,ang=(-SP/2+t*SP)*Math.PI/180,len=84+(i%2)*26;
     const ex=cx+Math.sin(ang)*len,ey=trunkTop-Math.cos(ang)*len;
     const child=node&&node.children?node.children[wt.dir]:null,has=!!child;
     const tasks=has?child._openTasks:0,docs=has?child._docs:0,errs=has?child._errors:0;
+    const bc=has?GPAL[i%GPAL.length]:'#5a6470';brCol[i]=bc;
     svg.append(svgEl('path',{d:'M'+cx+','+trunkTop+' Q'+(cx+Math.sin(ang)*len*0.35)+','+(trunkTop-Math.cos(ang)*len*0.5)+' '+ex+','+ey,
-      fill:'none',stroke:has?'#8a6d4b':'#4a5560','stroke-width':has?5:2.5,'stroke-linecap':'round',opacity:has?.9:.5}));
-    const nLeaf=has?Math.max(1,Math.min(9,1+Math.round((tasks+docs)/3))):0;
-    for(let k=0;k<nLeaf;k++){const a2=ang+((k-(nLeaf-1)/2)*0.26),ll=12+(k%3)*7;
-      svg.append(svgEl('circle',{cx:ex+Math.sin(a2)*ll,cy:ey-Math.cos(a2)*ll,r:4.5,fill:col,opacity:.9,stroke:'#0b0f14','stroke-width':.5}));}
+      fill:'none',stroke:has?'#8a6d4b':'#4a5560','stroke-width':has?4.5:2,'stroke-linecap':'round',opacity:has?.85:.45}));
+    const nLeaf=has?Math.max(1,Math.min(8,1+Math.round((tasks+docs)/3))):0;
+    for(let k=0;k<nLeaf;k++){const a2=ang+((k-(nLeaf-1)/2)*0.28),ll=11+(k%3)*7;
+      svg.append(svgEl('circle',{cx:ex+Math.sin(a2)*ll,cy:ey-Math.cos(a2)*ll,r:4.3,fill:bc,opacity:.92,stroke:'#0b0f14','stroke-width':.5}));}
     if(errs)svg.append(svgEl('circle',{cx:ex+9,cy:ey-9,r:4.5,fill:'#ff8077',stroke:'#0b0f14','stroke-width':.5}));
-    const g=svgEl('g');g.style.cursor=child?'pointer':'default';
-    const lab=svgEl('text',{x:ex,y:ey-16,fill:has?'#eef2f6':'#7a8590','font-size':11.5,'font-weight':'bold','text-anchor':'middle','font-family':'ui-monospace,monospace'});
-    lab.textContent='🌿 '+wt.branch;g.append(lab);
-    let bd='';if(wt.ahead)bd+='↑'+wt.ahead;if(wt.behind)bd+=' ↓'+wt.behind;if(wt.dirty)bd+=' ●'+wt.dirty;
-    if(bd.trim()){const b=svgEl('text',{x:ex,y:ey-4,fill:'#e3b341','font-size':9.5,'text-anchor':'middle','font-family':'ui-monospace,monospace'});b.textContent=bd.trim();g.append(b);}
-    const ti=svgEl('title');ti.textContent=wt.branch+(has?(' · '+tasks+' tareas · '+docs+' docs'+(errs?(' · '+errs+' errores'):'')):' · sin .roots');g.append(ti);
-    if(child)g.onclick=()=>go(child.path);
-    svg.append(g);});
+    // marca de color en la punta (ancla con el chip de la leyenda)
+    svg.append(svgEl('circle',{cx:ex,cy:ey,r:2.6,fill:bc,stroke:'#0b0f14','stroke-width':.6}));
+    if(N<=5){const lab=svgEl('text',{x:ex,y:ey-15,fill:has?'#eef2f6':'#7a8590','font-size':11,'font-weight':'bold','text-anchor':'middle','font-family':'ui-monospace,monospace'});
+      lab.textContent=wt.branch;svg.append(lab);
+      let bd='';if(wt.ahead)bd+='↑'+wt.ahead;if(wt.behind)bd+=' ↓'+wt.behind;if(wt.dirty)bd+=' ●'+wt.dirty;
+      if(bd.trim()){const b=svgEl('text',{x:ex,y:ey-3,fill:'#e3b341','font-size':9.5,'text-anchor':'middle','font-family':'ui-monospace,monospace'});b.textContent=bd.trim();svg.append(b);}}
+  });
   // label del Tree en el tronco
   const tl=svgEl('text',{x:cx,y:(trunkTop+soilY)/2,fill:'#fff','font-size':13,'font-weight':'bold','text-anchor':'middle','font-family':'ui-monospace,monospace'});
   tl.textContent='🪵 '+repo.name;svg.append(tl);
@@ -519,8 +527,19 @@ function treeView(repo,node){
     svg.append(svgEl('circle',{cx:x,cy:y-14,r:3,fill:c}));
     const tx=svgEl('text',{x:x,y:y-2,fill:'#c8d0d8','font-size':10.5,'text-anchor':'middle','font-family':'ui-monospace,monospace'});tx.textContent=e.to;svg.append(tx);
     const ty=svgEl('text',{x:x,y:y+10,fill:c,'font-size':8.5,'text-anchor':'middle','font-family':'ui-monospace,monospace'});ty.textContent=e.type;svg.append(ty);});
-  const wrap=E('div','treehero');
-  wrap.append(svg,E('div','treecap','🌳 '+repo.name+' — '+wts.length+' branches · '+M+' deps (raíces) · '+dependents.length+' usado-por · click una rama → su worktree'));
+  const wrap=E('div','treehero');wrap.append(svg);
+  // leyenda de branches — siempre legible y escala con cualquier N
+  const bl=E('div','brlist');
+  wts.forEach((wt,i)=>{const child=node&&node.children?node.children[wt.dir]:null,has=!!child;
+    const chip=E('div','brchip'+(has?'':' dead'));chip.style.cursor=has?'pointer':'default';
+    const sw=E('span','brsw');sw.style.background=brCol[i]||'#5a6470';chip.append(sw);
+    chip.append(E('span','brn','🌿 '+wt.branch));
+    let bd='';if(wt.ahead)bd+='↑'+wt.ahead;if(wt.behind)bd+=' ↓'+wt.behind;if(wt.dirty)bd+=' ●'+wt.dirty;
+    if(bd.trim())chip.append(E('span','bbd',bd.trim()));
+    chip.append(E('span','bact',has?('◑'+child._openTasks+' 📄'+child._docs+(child._errors?(' ⚠'+child._errors):'')):'sin .roots'));
+    if(child)chip.onclick=()=>go(child.path);
+    bl.append(chip);});
+  wrap.append(bl,E('div','treecap','🌳 '+repo.name+' — '+wts.length+' branches · '+M+' deps (raíces) · '+dependents.length+' usado-por · click una rama → su worktree'));
   return wrap;
 }
 function renderForest(){
