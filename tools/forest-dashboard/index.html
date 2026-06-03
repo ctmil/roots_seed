@@ -27,8 +27,10 @@
   button:hover{border-color:var(--accent);color:#fff}
   label.auto{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:5px}
   main{padding:16px;max-width:1200px;margin:0 auto}
-  .ic{width:20px;height:20px;border-radius:5px;vertical-align:middle;object-fit:cover;background:#0008;flex:none}
-  .ic.lg{width:34px;height:34px}
+  .ic{width:24px;height:24px;border-radius:5px;vertical-align:middle;object-fit:cover;background:#0008;flex:none}
+  .ic.lg{width:42px;height:42px}
+  .ic.card{width:32px;height:32px;border-radius:7px}
+  .icfb{display:inline-flex;align-items:center;justify-content:center;font-size:17px;line-height:1;background:var(--panel2);border:1px solid var(--border)}
   /* breadcrumb */
   .crumb{display:flex;gap:6px;align-items:center;flex-wrap:wrap;color:var(--muted);font-size:12px;margin-bottom:14px}
   .crumb a{color:var(--accent);text-decoration:none;cursor:pointer}
@@ -225,7 +227,9 @@ function aggCambios(mems){const out=[];for(const m of mems)for(const e of (m.jou
 function vinTitle(node){return node.mem?(node.mem.module+(node.mem.version?'':'')):node.name;}
 function makeVin(node){
   const v=E('div','vin');v.onclick=()=>go(node.path);
-  const h=E('div','h');const icon=node.mem&&node.mem.icon;const im=iconImg(icon);if(im)h.append(im);
+  const h=E('div','h');const icon=node.mem&&node.mem.icon;
+  if(icon){const im=iconImg(icon,'card');if(im)h.append(im);}
+  else h.append(E('div','ic card icfb',node.mem?'🪵':'📁'));
   h.append(E('span','t',vinTitle(node)));
   v.append(h);
   const sub=node.mem&&node.mem.version?node.mem.version:(Object.keys(node.children).length+' subproyectos');
@@ -250,7 +254,7 @@ function renderHero(mems,mount){
   const rows=E('div');hero.append(rows);
   if(!list.length)rows.append(E('div','muted','(sin cambios)'));
   const addRow=c=>{const ch=E('div','change');const top=E('div','top');
-    const im=iconImg(c.icon);if(im)top.append(im);
+    const im=iconImg(c.icon);if(im)top.append(im);else top.append(E('div','ic icfb','🪵'));
     top.append(E('span','cdate',c.date_raw||''));
     top.append(E('span','cmod',c.module+(c.version?(' · '+c.version):'')));
     top.append(E('span','csum',c.summary||''));ch.append(top);
@@ -263,7 +267,8 @@ function renderHero(mems,mount){
   more(HERO_FIRST);   // arranca mostrando 3; luego suma de a 3
   mount.append(hero);
 }
-function mgroupHeader(m,extra){const gh=E('div','gh');const im=iconImg(m.icon);if(im)gh.append(im);
+function mgroupHeader(m,extra){const gh=E('div','gh');
+  if(m.icon){const im=iconImg(m.icon);if(im)gh.append(im);}else gh.append(E('div','ic icfb','🪵'));
   gh.append(E('span','t',m.module+' · '+m.version));if(extra)gh.append(extra);return gh;}
 function errCount(m){return (m.summary&&m.summary.errors_active)||0;}
 
