@@ -19,4 +19,3 @@ Todas las recetas reusan los mismos tres primitivos del modelo, más la capa tra
 2. **[design-forest.md](./design-forest.md)** — Bosque de diseños (Folio/Lab): `1 vendor (artista) > N trees > diseños`. Puente `ai_context_md` ↔ `.roots`.
 3. **[narrative-game.md](./narrative-game.md)** — Guión + escenarios + RPG: fichas, lore, NPCs, arcos como branches, skills de personaje ≡ skills de IA.
 4. **[token-economy.md](./token-economy.md)** — Economía de tokens: escalera de capas, fórmula (CER/FS), benchmarking interno y repo de técnicas por modelo de IA.
-5. **[live-ai-game.md](./live-ai-game.md)** — Juego de rol vivo con backend IA (ej. Goblin Overlord): split canon/live (git vs Fly.io), wagons como commits, entity spines con LOD, subagentes Forest-aware, migración incremental en 4 fases.
