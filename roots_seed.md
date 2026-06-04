@@ -810,6 +810,21 @@ Si el canonical local evoluciona con convenciones útiles para la comunidad:
 3. **Sin `.roots/`, `CLAUDE.md` es autónomo.** Si un proyecto no tiene `.roots/` (es legacy o simple), `CLAUDE.md` documenta stack y directivas directamente. No se fuerza la creación de `.roots/` en proyectos que no lo necesitan.
 4. **Con `.roots/`, `CLAUDE.md` es ligero.** Sólo contiene: (a) directivas globales que aplican a todo el proyecto (ej: reglas de routing Odoo), (b) índice de módulos con `.roots/`, (c) referencia al seed.
 
+### Allowlist de permisos (`.claude/settings.json`)
+
+Para que el agente pueda correr sin atender prompts de permisos, el `.claude/settings.json`
+del proyecto mantiene un `permissions.allow` de **patrones amplios por familia** (`Bash(git *)`,
+`Bash(python3 *)`, scripts de la flota, `Read` de sources read-only), **no** comandos exactos
+(las entradas hiper-específicas hacen que cada variante vuelva a preguntar).
+
+- **Evoluciona con la estructura `.roots`/workspace:** al sumar scripts (ej. en `.roots/*/scripts/`),
+  rutas de sources read-only o nuevos flujos, se actualiza el allowlist en consecuencia.
+- **Skill `allowlist-sync`** (`.claude/skills/allowlist-sync/`): escanea el uso real + la estructura
+  y mergea patrones generalizados en `settings.json`. Invocarlo cuando reaparezcan prompts o cambie
+  la estructura.
+- **Trade-off explícito:** patrones como `Bash(python3 *)`/`Bash(curl *)`/`Bash(rm *)` habilitan
+  ejecución/borrado amplios — decisión consciente del dueño del workspace; documentarlo, no esconderlo.
+
 ### Regla al procesar el seed (obligatoria)
 
 Al hacer bootstrap o bump del seed, verificar `CLAUDE.md`:
