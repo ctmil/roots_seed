@@ -2,9 +2,10 @@
 
 > Plantilla maestra para crear estructura de documentación y memoria de desarrollo. Este archivo define los estándares de formato, estilo y protocolos de poblado.
 
-**Versión:** 1.11
+**Versión:** 1.12
 
 **Changelog:**
+- **1.12** (04 Junio 2026) — Nueva sección **Agentes y skills — biblioteca importable (on-demand)**. Dos capas + base: **store** en `<repo>/.roots/{agents,skills}/` (**trackeado** → versionado, evoluciona, copiable), **activación** en `<repo>/.claude/{agents,skills}/` (local, **no trackeado** → copiás ahí lo que querés usar de forma general), y **base** cross-cliente en `roots_seed/{agents,skills}/`. Regla: **no precargar todo** — el seed informa qué existe; se importa a demanda. Ciclo: diseñar en `.roots/agents/` del workspace → activar en `.claude/` y probar → promover a `roots_seed/` → referenciar acá. Subagentes Forest-aware por *concern* (ej. `odoo-architect`, `bug-hunter`, `odoo-migrator`, `designer`).
 - **1.11** (03 Junio 2026) — **`forest-dashboard`** (re-planteo del visor con la nomenclatura Forest; antes `fleet-dashboard`). El colector lee los ejes nuevos de `forest.json` (`groves[]`/`vendors[]`/`relations[]` + `grove`/`vendor`/`kind`/`org` por Tree) y los emite en `state.json`. La vista suma una pestaña **Forest map** (Groves → Trees → Branches con badges `vendor`/`kind`) y un **grafo SVG de `relations`** (arc-diagram, aristas coloreadas por tipo). Rebrand: *flota→Forest · repo→Tree · worktree→Branch*. `fleet.json` sigue siendo symlink→`forest.json` (compat). El contrato `state.json` mantiene `repos[]` (port Odoo intacto).
 - **1.10** (02 Junio 2026) — **Recetas por dominio** + **manual completo** + **economía de tokens**. Nueva carpeta `recipes/` con 4 recetas aplicadas del modelo `.roots`/Forest: (1) suite de módulos de extensión Odoo (Grove=suite, Tree=módulo, relations=depends), (2) bosque de diseños (1 vendor-artista > N trees > diseños; puente `ai_context_md`↔`.roots`), (3) narrativa/juego como **domain pack** (`working_mode: narrative`: worldbible, fichas, arcos=branches, skills de personaje ≡ skills de IA), (4) economía de tokens. Tesis transversal: **3 primitivos (vendor · `relations[]` · branch) se reusan en N dominios**. Nuevo `manual.md` (puerta de entrada navegable). Nueva sección **Token economy & model benchmarking**: escalera de capas L0–L3, fórmula legible **CER** (útiles/cargados) + **FS** (si_leo_todo/cargados) + tiers de presupuesto, benchmark interno (`journal/benchmarks.md`) y repo de técnicas por modelo de IA (`skills/model-techniques.md`). No cambia el formato de `.roots/`.
 - **1.9** (02 Junio 2026) — Nueva sección **Forest Model** que formaliza y promueve al canónico el working_mode `workspace` (capa de coordinación por encima de N repos, antes extensión local). Define el vocabulario **Roots → Forest → Grove → Tree → Branch** y un schema multi-eje: cada Tree (repo) lleva `grove` (producto/suite primario), `also_groves` (tags de co-pertenencia genuina), `vendor` (autor/fabricante — **propiedad** con perfil opcional en `.roots/vendors/<slug>.md`), `kind` (`producto-suite`/`plataforma`/`agregador`/`external-upstream`/`seed`) y `org` (hosting). Las **dependencias se modelan como aristas** de un grafo dirigido (`relations[]`: `depends-on`/`extends`/`integrates`/`relates`), NUNCA como anidamiento ni tags — regla de oro: *grove = qué es · arista = qué usa · tag = también es de*. `forest.json` es el registro estructurado (rename de `fleet.json`, que queda como symlink por compat con el `forest-dashboard`; conserva el array `repos[]`). No cambia el formato de `.roots/` por-repo.
@@ -659,6 +660,41 @@ Regla: quedate en la capa más baja que resuelva la tarea. `hooks/` y `_meta.cur
 - Loop: **medir → destilar técnica → aplicar → medir**. El conocimiento de cómo gastar tokens bien se persiste, no se reaprende.
 
 Detalle: `recipes/token-economy.md`.
+
+---
+
+## Agentes y skills — biblioteca importable (on-demand)
+
+> Los **skills** y los **subagentes** (formato Claude Code) forman una **biblioteca canónica que crece** en `roots_seed/{skills,agents}/` y se **referencia** desde este `roots_seed.md`. Cada repo guarda su copia en **`.roots/{skills,agents}/`** — porque **`.roots` siempre va trackeado/commiteado** (versionado, evoluciona, viaja con la distribución del seed). `.claude/{skills,agents}/` es **solo activación**: copiás ahí lo que querés que Claude Code use **de forma general**; es local y **no necesita trackearse**.
+
+**Dos capas + base (no confundir):**
+
+| Capa | Dónde | ¿Trackeado? | Rol |
+|---|---|---|---|
+| **Store** | `<repo>/.roots/{agents,skills}/` | **sí** (con el repo) | donde **viven** y evolucionan; fuente de verdad local; copiables |
+| **Activación** | `<repo>/.claude/{agents,skills}/` | no (local) | copiás aquí lo que querés usar; Claude Code lee de acá |
+| **Base** | `roots_seed/{agents,skills}/` | sí (seed) | biblioteca cross-cliente de la que todos se nutren |
+
+**Por qué importar on-demand:** la base puede volverse enorme. No se precarga todo en cada cliente: el seed informa *qué existe y dónde*; copiás a `.roots/` lo que ese repo necesita y **activás en `.claude/`** lo que vas a usar (encaja con la *escala de capas* de Token economy: la biblioteca es L2/L3, no L0).
+
+**Ciclo de vida:**
+1. **Diseñar** en `.roots/agents/` (o `.roots/skills/`) del workspace; **activar** copiando a `.claude/` y probar en uso real.
+2. **Promover** la versión probada a la base del seed (`roots_seed/{agents,skills}/`).
+3. **Referenciar** acá para que todo cliente lo descubra.
+4. En cada cliente: la copia vive en su `.roots/` (tracked) y se **activa on-demand** en `.claude/` cuando hace falta.
+
+**Subagente** (`<name>.md`): persona experta con **su propio contexto**, `tools` restringidas y `model`. Catálogo inicial (Forest-aware: leen `forest.json`/`.roots`, respetan `grove`/`vendor` y los sources read-only):
+
+| Agente | Para | Modelo |
+|---|---|---|
+| `odoo-architect` | arquitectura: modelos, herencia, ADRs | opus |
+| `bug-hunter` | diagnóstico + fix mínimo de bugs | sonnet |
+| `odoo-migrator` | backport/forward-port 16↔17↔18↔19 | opus |
+| `designer` | UI/UX: layouts Folio, geoecon_map, dark theme (Figma MCP) | sonnet |
+
+**Skill** (`<name>/SKILL.md`): procedimiento/conocimiento reutilizable; un agente puede usar skills (ej. `odoo-migrator` usa `odoo-module-merging`).
+
+> El `forest-dashboard` y el toolkit ya siguen este patrón (referenciados, no inlineados). Los agentes se **diseñan en `.roots/agents/`** y, ya probados, se promueven al seed.
 
 ---
 
