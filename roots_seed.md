@@ -2,9 +2,15 @@
 
 > Plantilla maestra para crear estructura de documentación y memoria de desarrollo. Este archivo define los estándares de formato, estilo y protocolos de poblado.
 
-**Versión:** 1.12
+> ⚠️ **Antes de usar o procesar este seed, consultá SIEMPRE los últimos cambios del upstream fuente
+> [`github.com/ctmil/roots_seed`](https://github.com/ctmil/roots_seed).** Este archivo puede ser una
+> **copia distribuida** y estar desactualizada respecto del canonical (compará el campo `Versión` /
+> changelog). El seed evoluciona — no asumas que esta copia es la última. Ver § "Sync con canonical upstream".
+
+**Versión:** 1.13
 
 **Changelog:**
+- **1.13** (08 Junio 2026) — Nueva carpeta **`collective/`**: memoria **permanente** de influencias/referencias de terceros que nutren al proyecto (personas, ideas, sitios, obras, organizaciones, libros). Es la contraparte permanente del `workbench/` (efímero) — la diferencia es la **permanencia**; lo que en workbench merece quedar se **promueve** a collective. Ramifica hacia adentro en subcarpetas emergentes (no se fuerza `code/inspiration`): para código funciona como **contrib**, para proyectos creativos como **fuentes de inspiración** atribuidas. Subcarpeta **`library/`** de primera clase (bibliografía comentada como corpus + graduación a ficha por libro). Cada ficha lleva **atribución/copyright**, **Contacto** (mail/tel/WhatsApp/IG) y **Medios** (imágenes/videos, local o remoto) con regla de privacidad. El `.roots/` como **nuevo formato de escritura**: la ficha es texto vivo con bitácora de seguimiento. Refuerzo de la directiva de consultar siempre el upstream `ctmil/roots_seed`.
 - **1.12** (04 Junio 2026) — Nueva sección **Agentes y skills — biblioteca importable (on-demand)**. Dos capas + base: **store** en `<repo>/.roots/{agents,skills}/` (**trackeado** → versionado, evoluciona, copiable), **activación** en `<repo>/.claude/{agents,skills}/` (local, **no trackeado** → copiás ahí lo que querés usar de forma general), y **base** cross-cliente en `roots_seed/{agents,skills}/`. Regla: **no precargar todo** — el seed informa qué existe; se importa a demanda. Ciclo: diseñar en `.roots/agents/` del workspace → activar en `.claude/` y probar → promover a `roots_seed/` → referenciar acá. Subagentes Forest-aware por *concern* (ej. `odoo-architect`, `bug-hunter`, `odoo-migrator`, `designer`).
 - **1.11** (03 Junio 2026) — **`forest-dashboard`** (re-planteo del visor con la nomenclatura Forest; antes `fleet-dashboard`). El colector lee los ejes nuevos de `forest.json` (`groves[]`/`vendors[]`/`relations[]` + `grove`/`vendor`/`kind`/`org` por Tree) y los emite en `state.json`. La vista suma una pestaña **Forest map** (Groves → Trees → Branches con badges `vendor`/`kind`) y un **grafo SVG de `relations`** (arc-diagram, aristas coloreadas por tipo). Rebrand: *flota→Forest · repo→Tree · worktree→Branch*. `fleet.json` sigue siendo symlink→`forest.json` (compat). El contrato `state.json` mantiene `repos[]` (port Odoo intacto).
 - **1.10** (02 Junio 2026) — **Recetas por dominio** + **manual completo** + **economía de tokens**. Nueva carpeta `recipes/` con 4 recetas aplicadas del modelo `.roots`/Forest: (1) suite de módulos de extensión Odoo (Grove=suite, Tree=módulo, relations=depends), (2) bosque de diseños (1 vendor-artista > N trees > diseños; puente `ai_context_md`↔`.roots`), (3) narrativa/juego como **domain pack** (`working_mode: narrative`: worldbible, fichas, arcos=branches, skills de personaje ≡ skills de IA), (4) economía de tokens. Tesis transversal: **3 primitivos (vendor · `relations[]` · branch) se reusan en N dominios**. Nuevo `manual.md` (puerta de entrada navegable). Nueva sección **Token economy & model benchmarking**: escalera de capas L0–L3, fórmula legible **CER** (útiles/cargados) + **FS** (si_leo_todo/cargados) + tiers de presupuesto, benchmark interno (`journal/benchmarks.md`) y repo de técnicas por modelo de IA (`skills/model-techniques.md`). No cambia el formato de `.roots/`.
@@ -774,6 +780,64 @@ done
 
 ---
 
+## Collective — influencias y referencias del proyecto (permanente)
+
+**Regla:** cada `.roots/{module}` (y/o el nivel grove/proyecto) puede incluir una carpeta `collective/`:
+la **memoria permanente** de las **referencias de terceros** que nutren al proyecto — personas, ideas,
+sitios, obras, organizaciones, libros. Es el registro de *de quién/qué nos nutrimos*, con atribución.
+
+**`collective` ≠ `workbench` — la diferencia es la PERMANENCIA:**
+
+| | `workbench/` | `collective/` |
+|---|---|---|
+| Naturaleza | mesa de trabajo | memoria / linaje / contrib |
+| Permanencia | **efímero** (se borra sistemáticamente) | **se conserva** |
+| Contenido | material que el usuario tira para una tarea | referencias curadas y atribuidas |
+| Redistribución | local al módulo, no se copia | parte de la memoria versionada del repo |
+
+Lo que en `workbench/` inspira algo y **merece quedar** → se **promueve** a una ficha en `collective/`.
+
+### Ramificación (categorías emergentes)
+`collective/` **ramifica hacia adentro** en subcarpetas según lo que el autor necesite seguir de cerca.
+**No** hay categorías fijas (no se fuerza `code/`/`inspiration/`): emergen del proyecto. Cada subcarpeta
+es una *familia* de referencias con su `README.md` (qué agrupa + formato de nombre) + fichas `.md`.
+Para **código**, `collective/` funciona como un **contrib** (aportes/implementaciones de referencia de
+terceros); para proyectos **creativos**, como **fuentes de inspiración** atribuidas. Mismo formato.
+
+### `library/` — biblioteca (primera clase)
+Las referencias a **libros/publicaciones** son cimiento, no decoración. Recomendación:
+- **Espina única `library/bibliografia.md`**: bibliografía *comentada* (corpus numerado; por entrada:
+  tabla `Autor · Editorial · Año · Disciplina · Enlace · Portada` + **Resumen** + **Conexión con el
+  proyecto**). Se mantiene como **un texto único** porque los libros **dialogan entre sí**; se renderiza
+  a PDF (pipeline md→PDF).
+- **Graduación**: un libro pasa a `library/<slug>.md` (ficha propia) sólo cuando acumula bitácora de
+  lectura / citas / ensayo, y la bibliografía lo **enlaza**.
+
+### Atribución, contacto y medios (obligatorio)
+Como `.roots/` se **versiona y se sube**, todo lo de `collective/` es público en el repo:
+1. **Cada entrada acredita autoría y derechos** (autor, fuente, uso/licencia). El autor **elige el
+   formato de cita/nombre** y lo mantiene consistente por subcarpeta.
+2. **Contacto + medios** son parte de la ficha (para volver a la fuente y sostener el vínculo):
+   bloque `Contacto` (mail · teléfono/WhatsApp · Instagram/redes · web) y bloque `Medios y referencias`
+   (imágenes · videos · trabajos/enlaces). **Local o remoto**: `![alt](assets/…)` o `![alt](https://…)`.
+3. **Privacidad** — handles/mails de proyecto son públicos (van sin problema). Datos personales
+   sensibles (teléfono/WhatsApp privado) → el autor decide: **omitir**, **`gitignorear`**, o anotar
+   "consultar". No exponer contacto privado de terceros sin acuerdo.
+4. **Binarios pesados** (video, alta resolución) → `gitignore` selectivo o sólo el link; las fichas
+   `.md` y miniaturas livianas se commitean. Medios locales: `collective/<familia>/assets/`.
+
+### Fichas (formatos de referencia)
+No es un formulario rígido — el `.roots/` es un **nuevo formato de escritura**: la ficha es texto vivo
+que crece con el seguimiento del autor (sección "Seguimiento (vivo)" tipo bitácora, lo último arriba).
+Modelos base:
+- **Persona / idea / sitio / obra** — identidad · contacto · medios · qué aporta al proyecto · vínculos · seguimiento.
+- **Organización / taller / proyecto amigo** — qué es y hace · contacto · medios · qué aporta · seguimiento.
+- **Libro** — datos bibliográficos · derechos · resumen · conexión con el proyecto · citas · bitácora.
+
+> Cuando una referencia del collective inspira una decisión → enlazarla desde `design/decisions.md`.
+
+---
+
 ## Sync con canonical upstream (ctmil/roots_seed)
 
 **Regla:** el canonical del seed se publica como copia open-source en:
@@ -928,7 +992,8 @@ La estructura varía según el layout (ver § "Modos de trabajo"):
 ├── docs/     (architecture, glossary, commits, manual, ...)
 ├── hooks/
 ├── skills/
-└── workbench/
+├── workbench/   ← materiales de trabajo efímeros
+└── collective/  ← influencias/referencias permanentes (≠ workbench)
 ```
 
 **Modo Source (namespaced multi-módulo):**
@@ -965,8 +1030,14 @@ Dentro de cada módulo, la estructura interna es idéntica en ambos modos:
 {module_name}/
     ├── context.md             # Briefing rápido del módulo (30 seg)
     │
-    ├── workbench/             # Materiales de referencia del usuario
+    ├── workbench/             # Materiales de referencia del usuario (efímero, se borra)
     │   └── (archivos libres)  # Imágenes, PDFs, videos, análisis, etc.
+    │
+    ├── collective/           # Influencias/referencias permanentes (≠ workbench)
+    │   ├── README.md          # concepto + ramificación + contacto/medios + atribución
+    │   ├── {familia}/         # subcarpetas emergentes (personas, orgs, ...) c/README + fichas
+    │   │   └── assets/        # medios locales (gitignore selectivo para pesados)
+    │   └── library/           # biblioteca: bibliografia.md (corpus comentado) + fichas graduadas
     │
     ├── journal/               # Bitácora - registros temporales
     │   ├── changelog.md       # Historial de versiones (para clientes)
