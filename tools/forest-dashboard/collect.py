@@ -141,6 +141,46 @@ def index_md(dirpath):
     return out
 
 
+def parse_collective(roots_dir, cap=60):
+    """Lee collective/ (memoria permanente de influencias/referencias, ≠ workbench):
+    familias = subcarpetas, cada una con su README (título) + fichas .md. Devuelve
+    {path, title, description, families:[{name,title,description,entries:[...]}], entries:[...]}.
+    Ignora README/_modelo*/assets. La biblioteca (library/bibliografia.md, etc.) entra como una familia más."""
+    cdir = os.path.join(roots_dir, "collective")
+    if not os.path.isdir(cdir):
+        return None
+    readme = os.path.join(cdir, "README.md")
+    out = {
+        "path": rel(cdir),
+        "title": _first_match(readme, r"^#\s+(.*)", 1) or "Collective",
+        "description": _first_match(readme, r"^>\s+(.*)", 1),
+        "families": [], "entries": [],
+    }
+    skip = PRUNE_DIRS | {"assets"}
+    for name in sorted(os.listdir(cdir)):
+        p = os.path.join(cdir, name)
+        if os.path.isfile(p) and name.endswith(".md") and name != "README.md":
+            out["entries"].append({"path": rel(p), "name": name,
+                                   "title": _first_match(p, r"^#\s+(.*)", 1) or name})
+        elif os.path.isdir(p) and name not in skip:
+            fam = {"name": name, "path": rel(p),
+                   "title": _first_match(os.path.join(p, "README.md"), r"^#\s+(.*)", 1) or name,
+                   "description": _first_match(os.path.join(p, "README.md"), r"^>\s+(.*)", 1),
+                   "entries": []}
+            for dp, dns, fns in os.walk(p):
+                dns[:] = [d for d in dns if d not in skip]
+                for f in sorted(fns):
+                    if (f.endswith(".md") and f != "README.md"
+                            and not f.startswith("_modelo")):
+                        fp = os.path.join(dp, f)
+                        fam["entries"].append({"path": rel(fp), "name": f,
+                                               "title": _first_match(fp, r"^#\s+(.*)", 1) or f})
+                if len(fam["entries"]) >= cap:
+                    break
+            out["families"].append(fam)
+    return out
+
+
 def summarize_roots(roots_dir):
     if not os.path.isdir(roots_dir):
         return None
@@ -276,6 +316,7 @@ def _record_module(module_dir, roots, repo, version, git):
         "skills": index_md(os.path.join(roots, "skills")),
         "hooks": index_md(os.path.join(roots, "hooks")),
         "debug": index_md(os.path.join(roots, "debug")),
+        "collective": parse_collective(roots),
     }
 
 

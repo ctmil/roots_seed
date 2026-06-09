@@ -284,6 +284,9 @@ function renderTabs(mems,mount){
   const withTasks=mems.filter(m=>m.tasks&&m.tasks.open_total>0).sort((a,b)=>b.mtime-a.mtime);
   const withDocs=mems.filter(m=>m.docs&&m.docs.length).sort((a,b)=>b.mtime-a.mtime);
   const withDebug=mems.filter(m=>m.debug&&m.debug.length).sort((a,b)=>errCount(b)-errCount(a)||b.mtime-a.mtime);
+  const hasColl=m=>m.collective&&((m.collective.families&&m.collective.families.length)||(m.collective.entries&&m.collective.entries.length));
+  const withColl=mems.filter(hasColl).sort((a,b)=>b.mtime-a.mtime);
+  const collN=withColl.reduce((a,m)=>a+m.collective.entries.length+m.collective.families.reduce((x,f)=>x+(f.entries.length||1),0),0);
   const tasksN=mems.reduce((a,m)=>a+(m.tasks?m.tasks.open_total:0),0);
   const errN=mems.reduce((a,m)=>a+errCount(m),0);
   const tabsEl=E('div','tabs');const body=E('div');
@@ -305,6 +308,17 @@ function renderTabs(mems,mount){
       const w=E('div');withDebug.forEach(m=>{const g=E('div','mgroup'+(errCount(m)?' err':''));
         const ea=errCount(m);g.append(mgroupHeader(m,ea?E('span','b errors','⚠ '+ea+' activos'):null));
         m.debug.forEach(f=>g.append(fileRow(f)));w.append(g);});return w;}},
+    {id:'collective',label:'Collective',count:collN,render:()=>{
+      if(!withColl.length)return E('div','muted','(sin collective — influencias/referencias del proyecto)');
+      const w=E('div');withColl.forEach(m=>{const g=E('div','mgroup');
+        g.append(mgroupHeader(m,E('span','b docs','✦ '+(m.collective.title||'Collective'))));
+        (m.collective.entries||[]).forEach(f=>g.append(fileRow(f)));
+        (m.collective.families||[]).forEach(fam=>{
+          g.append(E('div','grouplbl',(fam.title||fam.name)));
+          if(fam.entries&&fam.entries.length)fam.entries.forEach(f=>g.append(fileRow(f)));
+          else g.append(fileRow({path:fam.path+'/README.md',title:fam.description||fam.name}));
+        });
+        w.append(g);});return w;}},
   ];
   let active=errN>0?'debug':'tareas';   // recalcar Debug cuando hay errores activos
   function paint(){body.innerHTML='';const t=tabs.find(x=>x.id===active);body.append(t.render());
