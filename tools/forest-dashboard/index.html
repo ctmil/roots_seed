@@ -55,6 +55,10 @@
   .b{font-size:11px;border-radius:4px;padding:1px 7px;border:1px solid var(--border);color:var(--muted);white-space:nowrap}
   .b.tasks{color:var(--accent);border-color:var(--accent)}
   .b.docs{color:var(--purple);border-color:var(--purple)}
+  .cprev{display:flex;gap:9px;align-items:center;margin:3px 0 7px 16px}
+  .cthumb{width:40px;height:40px;object-fit:cover;border-radius:5px;border:1px solid var(--border);flex:0 0 auto}
+  .cmeta{display:flex;flex-wrap:wrap;gap:6px}
+  .cpill{font-size:11px;color:var(--muted);background:var(--panel2);border:1px solid var(--border);border-radius:11px;padding:1px 8px}
   .b.errors{color:var(--red);border-color:var(--red)}
   .b.kids{color:var(--green);border-color:var(--green)}
   .b.date{margin-left:auto;border:none;min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -202,6 +206,16 @@ async function loadFile(path,mount){if(mount.dataset.loaded){mount.classList.tog
   catch(e){mount.textContent='error: '+e.message;}}
 function fileRow(f){const wrap=E('div');const row=E('div','frow','› '+(f.title||f.name));
   const mount=E('div','fbody hidden');row.onclick=()=>loadFile(f.path,mount);wrap.append(row,mount);return wrap;}
+function collPreview(p){const d=E('div','cprev');
+  if(p.image){const im=E('img','cthumb');im.src=/^https?:/.test(p.image)?p.image:fileURL(p.image);
+    im.loading='lazy';im.onerror=()=>im.remove();d.append(im);}
+  const c=E('div','cmeta');
+  if(p.instagram)c.append(E('span','cpill','◎ '+p.instagram));
+  if(p.mail)c.append(E('span','cpill','✉ '+p.mail));
+  if(c.childNodes.length)d.append(c);
+  return d.childNodes.length?d:null;}
+function collRow(f){const fr=fileRow(f);const pv=f.preview&&collPreview(f.preview);
+  if(pv)fr.insertBefore(pv,fr.childNodes[1]);return fr;}
 
 /* ---------- árbol ---------- */
 function buildTree(modules){
@@ -312,11 +326,11 @@ function renderTabs(mems,mount){
       if(!withColl.length)return E('div','muted','(sin collective — influencias/referencias del proyecto)');
       const w=E('div');withColl.forEach(m=>{const g=E('div','mgroup');
         g.append(mgroupHeader(m,E('span','b docs','✦ '+(m.collective.title||'Collective'))));
-        (m.collective.entries||[]).forEach(f=>g.append(fileRow(f)));
+        (m.collective.entries||[]).forEach(f=>g.append(collRow(f)));
         (m.collective.families||[]).forEach(fam=>{
           g.append(E('div','grouplbl',(fam.title||fam.name)));
-          if(fam.entries&&fam.entries.length)fam.entries.forEach(f=>g.append(fileRow(f)));
-          else g.append(fileRow({path:fam.path+'/README.md',title:fam.description||fam.name}));
+          if(fam.entries&&fam.entries.length)fam.entries.forEach(f=>g.append(collRow(f)));
+          else g.append(collRow({path:fam.path+'/README.md',title:fam.description||fam.name,preview:fam.preview}));
         });
         w.append(g);});return w;}},
   ];

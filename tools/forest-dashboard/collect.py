@@ -141,6 +141,36 @@ def index_md(dirpath):
     return out
 
 
+def _ficha_preview(path):
+    """Preview liviano de una ficha del collective: imagen (![]() o fila Portada),
+    mail, instagram. Ignora placeholders del modelo ({...}/<...>)."""
+    try:
+        with open(path, encoding="utf-8", errors="replace") as fh:
+            txt = fh.read()
+    except OSError:
+        return None
+    p = {}
+    m = re.search(r"!\[[^\]]*\]\(([^)]+)\)", txt)
+    if m:
+        src = m.group(1).strip()
+        if all(c not in src for c in "{}<>…") and ("/" in src or "." in src):
+            p["image"] = src
+    if "image" not in p:
+        m = re.search(r"\*\*Portada\*\*\s*\|\s*([^|]+)\|", txt)
+        if m:
+            u = re.search(r"(https?://\S+|covers/\S+\.\w+|assets/\S+\.\w+)", m.group(1))
+            if u and "<" not in u.group(1):
+                p["image"] = u.group(1)
+    m = re.search(r"[\w.+-]+@[\w-]+\.[\w.-]+", txt)
+    if m:
+        p["mail"] = m.group(0)
+    m = re.search(r"Instagram[^@\n]*?(@[\w.]+)", txt) or re.search(r"instagram\.com/([\w.]+)", txt)
+    if m:
+        ig = m.group(1)
+        p["instagram"] = ig if ig.startswith("@") else "@" + ig
+    return p or None
+
+
 def parse_collective(roots_dir, cap=60):
     """Lee collective/ (memoria permanente de influencias/referencias, ≠ workbench):
     familias = subcarpetas, cada una con su README (título) + fichas .md. Devuelve
@@ -161,11 +191,14 @@ def parse_collective(roots_dir, cap=60):
         p = os.path.join(cdir, name)
         if os.path.isfile(p) and name.endswith(".md") and name != "README.md":
             out["entries"].append({"path": rel(p), "name": name,
-                                   "title": _first_match(p, r"^#\s+(.*)", 1) or name})
+                                   "title": _first_match(p, r"^#\s+(.*)", 1) or name,
+                                   "preview": _ficha_preview(p)})
         elif os.path.isdir(p) and name not in skip:
+            fam_readme = os.path.join(p, "README.md")
             fam = {"name": name, "path": rel(p),
-                   "title": _first_match(os.path.join(p, "README.md"), r"^#\s+(.*)", 1) or name,
-                   "description": _first_match(os.path.join(p, "README.md"), r"^>\s+(.*)", 1),
+                   "title": _first_match(fam_readme, r"^#\s+(.*)", 1) or name,
+                   "description": _first_match(fam_readme, r"^>\s+(.*)", 1),
+                   "preview": _ficha_preview(fam_readme),
                    "entries": []}
             for dp, dns, fns in os.walk(p):
                 dns[:] = [d for d in dns if d not in skip]
@@ -174,7 +207,8 @@ def parse_collective(roots_dir, cap=60):
                             and not f.startswith("_modelo")):
                         fp = os.path.join(dp, f)
                         fam["entries"].append({"path": rel(fp), "name": f,
-                                               "title": _first_match(fp, r"^#\s+(.*)", 1) or f})
+                                               "title": _first_match(fp, r"^#\s+(.*)", 1) or f,
+                                               "preview": _ficha_preview(fp)})
                 if len(fam["entries"]) >= cap:
                     break
             out["families"].append(fam)
