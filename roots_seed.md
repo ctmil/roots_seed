@@ -615,6 +615,27 @@ Es el rename de `fleet.json`. El `forest-dashboard` lee `forest.json` (con fallb
 
 > El nivel workspace se registra en `_meta.json` con `working_mode: "workspace"`. El `forest-dashboard` **dibuja `relations[]` como grafo** en su pestaña *Forest map*.
 
+### Semáforo de sync (multi-sesión sobre el mismo source)
+
+Cuando varias sesiones (agénticas o humanas) trabajan sobre los **mismos worktrees** de un Tree
+(módulo bare + N branches/versiones), una puede pisar cambios **sin commitear** de otra. Para
+coordinar sin commits ni locks de git, el seed define un **semáforo liviano por módulo**:
+
+- **Un flag por Tree, en el CONTENEDOR de sus branches** (NO recursivo por branch — sería lento y
+  dejaría flags *stale* si una sesión muere): `<wt_container>/<module>/.SYNCING`.
+- **Contenido** (lectura/escritura instantánea): `FREE` (liberado) | `LOCKED|by=…|since=ISO8601|scope=…|task=…`.
+- **Flujo**: antes de portar/sincronizar un módulo cross-versión → `check`; si `LOCKED` por otro y
+  reciente, **esperar**; si `FREE` → `acquire`, hacer el sync, `release` (deja `FREE`).
+- **Vista forest**: `list` escanea todos los `.SYNCING` (no hay archivo agregado que mantener
+  en sync — los flags por-módulo SON la fuente de verdad).
+- **Stale**: un `LOCKED` más viejo que un umbral (def. 2h) se considera abandonado y se puede tomar
+  (`SYNC_FORCE=1`). Identidad de sesión por `SYNC_WHO`.
+- Los `.SYNCING` son **runtime** (fuera de git, no se commitean). Helper de referencia:
+  `scripts/sync-lock.sh {check|acquire|release|list}`.
+
+> Por qué contenedor y no por-branch: un sync cross-versión toca **todas** las branches del módulo,
+> así que el flag natural es a nivel módulo (un archivo, rápido), no 1-por-branch (N archivos, stale).
+
 ---
 
 ## Recetas por dominio (`recipes/` + `manual.md`)
