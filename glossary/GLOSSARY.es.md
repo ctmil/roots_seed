@@ -103,5 +103,16 @@
 | **language lock** | La regla sin-ruido: el seed canónico está en inglés, pero cada deployment conserva su propio `lang`. Al procesar el seed el agente auto-detecta el idioma del contenido `.roots/` existente y lo persiste; actualizar/re-distribuir el seed NUNCA traduce ni reescribe la memoria existente. | lang · on-seed-process · on-seed-update |
 | **sistema de glosario** | El vocabulario multilingüe del seed en `glossary/`: `glossary.json` (canónico, key EN + es/fr) genera las tablas `GLOSSARY.<lang>.md` vía `gen.py`. Da terminología Forest consistente en cualquier `lang`. | lang · glossary.md (por-módulo) · language lock |
 
+## Dominios de recetas
+
+| Término | Definición | Ver también |
+|---|---|---|
+| **receta** | Un patrón aplicado del modelo `.roots`/Forest para un dominio, bajo `recipes/` (suite Odoo, bosque de diseños, narrativa/juego, economía de tokens). Muestra los mismos 3 primitivos (vendor · relations[] · branch) reusados en N dominios. | branch (primitivo) · vendor · relations[] · domain pack |
+| **ai_context_md (puente de diseño)** | En la receta del bosque de diseños (Folio/Lab), un campo del prototipo que lleva un `.roots/context.md` embebido — el puente entre el patrón `.roots` y los datos del producto en runtime. | context.md · receta · vendor |
+| **worldbible/** | En la receta de narrativa/juego (`working_mode: narrative`), la biblia del mundo: lore, facciones, lugares y el setting canónico de la historia/juego. | receta · domain pack · ficha de entidad |
+| **arco narrativo (branch)** | En la receta narrativa, un arco/ruta de guion modelado como branch: `branch_type: canon \| what-if \| playtest`, con `merged_into` y `created_by: human\|AI` — un fork de la historia y de la lógica. | branch (primitivo) · worldbible/ · receta |
+| **skill de personaje ≡ skill de IA** | Intuición clave de la receta narrativa: una habilidad de personaje y un skill de IA son ambos *definiciones de capacidad* que viven en `skills/` — una ficha de habilidad de PJ con mecánicas, o un NPC como persona+prompt. | arco narrativo (branch) · ficha de entidad · receta |
+| **ficha de entidad** | En la receta narrativa, un archivo por entidad (`kind: PC \| NPC \| scene \| item \| faction \| concept`) — la ficha 'card', vinculada en el grafo narrativo `relations.json`. | worldbible/ · skill de personaje ≡ skill de IA · relations[] |
+
 ---
-<!-- 48 terms · primary_lang=en · languages=en,es,fr -->
+<!-- 54 terms · primary_lang=en · languages=en,es,fr -->

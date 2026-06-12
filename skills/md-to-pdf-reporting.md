@@ -1,60 +1,60 @@
 # md → PDF reporting
 
-> Convertir documentación de la memoria (`docs/manual.md`, `docs/documentation.md`) a reportes PDF presentables. Tres enfoques según necesidad: rápido, branded, o integrado a Odoo.
+> Convert memory documentation (`docs/manual.md`, `docs/documentation.md`) to presentable PDF reports. Three approaches depending on need: quick, branded, or Odoo-integrated.
 
 ---
 
-## Cuándo usar
+## When to use
 
-- Entregar un **manual de usuario** o **documentación técnica** como PDF a un cliente.
-- Generar reportes desde la memoria `.roots` de un módulo.
-- Sentar la base del **reporting de `odoo_moldeo_sync`** (mismo contenido md, render PDF desde el backend).
+- Deliver a **user manual** or **technical documentation** as a PDF to a client.
+- Generate reports from a module's `.roots` memory.
+- Lay the groundwork for **`odoo_moldeo_sync` reporting** (same md content, PDF render from the backend).
 
-## Entradas / contexto requerido
+## Inputs / required context
 
-- El/los `.md` fuente (siguen el formato del seed: título `#`, `>` descripción, secciones).
-- Imágenes referenciadas (ej. `workbench/` o `static/`) con paths resolubles.
-- Opcional: hoja de estilo / plantilla de branding.
+- The source `.md` file(s) (following the seed format: `#` title, `>` description, sections).
+- Referenced images (e.g. `workbench/` or `static/`) with resolvable paths.
+- Optional: style sheet / branding template.
 
-## Enfoques
+## Approaches
 
-### A) Pandoc → PDF (rápido, técnico) — *default*
+### A) Pandoc → PDF (quick, technical) — *default*
 
 ```bash
 pandoc docs/manual.md -o manual.pdf \
   --toc --pdf-engine=tectonic -V geometry:margin=2.5cm
 ```
-- Pros: una línea, TOC automático, buen tipografiado. Ideal para `documentation.md`.
-- Requiere: `pandoc` + un engine LaTeX (`tectonic`/`xelatex`) o `--pdf-engine=weasyprint`.
+- Pros: one line, automatic TOC, good typesetting. Ideal for `documentation.md`.
+- Requires: `pandoc` + a LaTeX engine (`tectonic`/`xelatex`) or `--pdf-engine=weasyprint`.
 
 ### B) Markdown → HTML + CSS → PDF (branded)
 
 ```bash
 pandoc docs/manual.md -o manual.html --standalone --css report.css
-weasyprint manual.html manual.pdf     # respeta CSS, headers/footers @page
+weasyprint manual.html manual.pdf     # respects CSS, headers/footers @page
 ```
-- Pros: control total de estilo (logo, colores Moldeo, portada). Ideal para **manual.md** orientado a cliente.
-- El render HTML intermedio reusa el mismo motor markdown que el `fleet-dashboard` (coherencia).
+- Pros: full style control (logo, Moldeo colors, cover page). Ideal for client-facing **manual.md**.
+- The intermediate HTML render reuses the same markdown engine as the `fleet-dashboard` (consistency).
 
-### C) QWeb dentro de Odoo (integrado) — para `odoo_moldeo_sync`
+### C) QWeb inside Odoo (integrated) — for `odoo_moldeo_sync`
 
-- El md → HTML (server-side) se inyecta en un `report` QWeb (`<template>` con `t-raw` del HTML sanitizado) y Odoo emite el PDF con wkhtmltopdf.
-- Pros: vive en el backend, hereda layout/branding de la compañía, se dispara desde un botón/acción. Es el camino para el reporting de dashboards.
+- The md → HTML (server-side) is injected into a QWeb `report` (`<template>` with `t-raw` of the sanitized HTML) and Odoo emits the PDF via wkhtmltopdf.
+- Pros: lives in the backend, inherits the company layout/branding, triggered from a button/action. This is the path for dashboard reporting.
 
-## Pasos (genérico)
+## Steps (generic)
 
-1. Resolver paths de imágenes (relativos al `.md`; copiar `static/`/`workbench/` junto al fuente si hace falta).
-2. Elegir enfoque (A/B/C) según branding/integración.
-3. Generar y **verificar** el PDF (TOC, imágenes, saltos de página).
-4. Si es recurrente, encapsular en un script (`scripts/`) o en una acción Odoo.
+1. Resolve image paths (relative to the `.md`; copy `static/`/`workbench/` next to the source if needed).
+2. Choose an approach (A/B/C) depending on branding/integration.
+3. Generate and **verify** the PDF (TOC, images, page breaks).
+4. If recurring, encapsulate it in a script (`scripts/`) or in an Odoo action.
 
-## Verificación
+## Verification
 
-- El PDF abre, tiene TOC/portada esperados, imágenes presentes, sin texto cortado.
-- Para C: el reporte se dispara desde la acción y respeta el layout de la compañía.
+- The PDF opens, has the expected TOC/cover, images present, no clipped text.
+- For C: the report is triggered from the action and respects the company layout.
 
-## Notas / decisiones abiertas
+## Notes / open decisions
 
-- **Elección de motor**: A para velocidad/interno; B para entregables branded; C cuando deba vivir en Odoo. Documentar la elección en el `decisions.md` del módulo.
-- Mantener `manual.md` (cómo USAR) y `documentation.md` (cómo FUNCIONA) separados — generan reportes con audiencias distintas.
-- Futuro: una skill hermana podría generar `changelog.md` → notas de versión PDF para clientes.
+- **Engine choice**: A for speed/internal; B for branded deliverables; C when it must live in Odoo. Document the choice in the module's `decisions.md`.
+- Keep `manual.md` (how to USE) and `documentation.md` (how it WORKS) separate — they generate reports for different audiences.
+- Future: a sibling skill could generate `changelog.md` → PDF release notes for clients.

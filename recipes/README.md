@@ -1,21 +1,21 @@
-# Recetas de uso por dominio
+# Recipes by domain
 
-> Patrones aplicados del modelo `.roots` / Forest a dominios concretos. Cada receta muestra **cómo estructurar `.roots`** para un caso real. El spec vive en [`../roots_seed.md`](../roots_seed.md); el manual completo en [`../manual.md`](../manual.md).
+> Applied patterns of the `.roots` / Forest model to concrete domains. Each recipe shows **how to structure `.roots`** for a real case. The spec lives in [`../roots_seed.md`](../roots_seed.md); the full manual in [`../manual.md`](../manual.md).
 
-## La idea de fondo: 3 primitivos, N dominios
+## The underlying idea: 3 primitives, N domains
 
-Todas las recetas reusan los mismos tres primitivos del modelo, más la capa transversal de tokens:
+Every recipe reuses the same three primitives of the model, plus the cross-cutting token layer:
 
-| Primitivo | Qué es | Se reusa como… |
+| Primitive | What it is | Reused as… |
 |---|---|---|
-| **vendor** | autoría (propiedad + perfil opcional `vendors/<slug>.md`) | quién mantiene un módulo · el artista · el autor del guión |
-| **`relations[]`** | grafo dirigido `{from, to, type}` | `depends-on` entre módulos · prototype→layout · personaje→NPC, escena→escena |
-| **branch** | bifurcación con `stage`/`merged_into`/`created_by: human\|AI` | branch git · variante de diseño (`folio.prototype.branch`) · arco de guión |
-| *(transversal)* **escalera de capas** | leer por capas, no todo | la economía de tokens (receta #4) mide y optimiza |
+| **vendor** | authorship (ownership + optional profile `vendors/<slug>.md`) | who maintains a module · the artist · the script author |
+| **`relations[]`** | directed graph `{from, to, type}` | `depends-on` between modules · prototype→layout · character→NPC, scene→scene |
+| **branch** | fork with `stage`/`merged_into`/`created_by: human\|AI` | git branch · design variant (`folio.prototype.branch`) · script arc |
+| *(cross-cutting)* **layer ladder** | read by layers, not everything | the token economy (recipe #4) measures and optimizes |
 
-## Recetas
+## Recipes
 
-1. **[odoo-suite.md](./odoo-suite.md)** — Suite de módulos de extensión Odoo (ej. Meli). `Grove = suite · Tree = módulo · relations = depends`.
-2. **[design-forest.md](./design-forest.md)** — Bosque de diseños (Folio/Lab): `1 vendor (artista) > N trees > diseños`. Puente `ai_context_md` ↔ `.roots`.
-3. **[narrative-game.md](./narrative-game.md)** — Guión + escenarios + RPG: fichas, lore, NPCs, arcos como branches, skills de personaje ≡ skills de IA.
-4. **[token-economy.md](./token-economy.md)** — Economía de tokens: escalera de capas, fórmula (CER/FS), benchmarking interno y repo de técnicas por modelo de IA.
+1. **[odoo-suite.md](./odoo-suite.md)** — Suite of Odoo extension modules (e.g. Meli). `Grove = suite · Tree = module · relations = depends`.
+2. **[design-forest.md](./design-forest.md)** — Design forest (Folio/Lab): `1 vendor (artist) > N trees > designs`. Bridge `ai_context_md` ↔ `.roots`.
+3. **[narrative-game.md](./narrative-game.md)** — Script + scenarios + RPG: sheets, lore, NPCs, arcs as branches, character skills ≡ AI skills.
+4. **[token-economy.md](./token-economy.md)** — Token economy: layer ladder, formula (CER/FS), internal benchmarking and a repo of techniques per AI model.

@@ -1,62 +1,62 @@
-# Receta — Economía de tokens, benchmarking y técnicas por modelo
+# Recipe — Token economy, benchmarking and techniques per model
 
-> Cómo `.roots` ahorra tokens: **leer por capas, no todo cada turno**. Más una fórmula legible, un benchmark interno, y un repo de técnicas para optimizar el uso de distintos modelos de IA. Capa transversal a todas las recetas.
+> How `.roots` saves tokens: **read by layers, not everything each turn**. Plus a legible formula, an internal benchmark, and a repo of techniques to optimize the use of different AI models. A layer cross-cutting to all recipes.
 
-## El mecanismo: la escalera de capas
+## The mechanism: the layer ladder
 
-El ahorro NO es comprimir texto: es **no recargar el corpus entero en cada turno**. `.roots` está pensado en capas; el agente sube de capa solo cuando hace falta.
+The saving is NOT compressing text: it is **not reloading the whole corpus each turn**. `.roots` is designed in layers; the agent climbs a layer only when needed.
 
 ```
-L0  índice barato     MEMORY.md · context.md · forest.json · _meta.json     (casi siempre)
-L1  slice activo      tasks/todo.md + _meta.current_feature + 1–2 docs       (la tarea)
-L2  doc de dominio    drill on-demand: UN archivo de docs/ o worldbible/      (cuando hace falta)
-L3  corpus completo   leer todo / muchos archivos                            (raro, explícito)
+L0  cheap index      MEMORY.md · context.md · forest.json · _meta.json     (almost always)
+L1  active slice     tasks/todo.md + _meta.current_feature + 1–2 docs       (the task)
+L2  domain doc       on-demand drill: ONE file from docs/ or worldbible/     (when needed)
+L3  full corpus      read everything / many files                           (rare, explicit)
 ```
 
-**Regla:** quedate en la capa más baja que resuelva la tarea. Los `hooks/` (session-start, on-topic-shift) y el `current_feature` de `_meta.json` existen justo para cargar el slice correcto sin barrer todo.
+**Rule:** stay at the lowest layer that solves the task. The `hooks/` (session-start, on-topic-shift) and the `current_feature` of `_meta.json` exist precisely to load the right slice without sweeping everything.
 
-## Fórmula (dos números legibles)
+## Formula (two legible numbers)
 
-- **CER — Context Efficiency Ratio** = `tokens_útiles / tokens_cargados`
-  *(de lo que cargué, cuánto realmente usé. Bajo CER = leíste de más.)*
-- **FS — Frugality Score** = `tokens_si_leo_todo / tokens_cargados`
-  *("leí 1/N del corpus". FS 10 = usaste 1/10 del total disponible.)*
+- **CER — Context Efficiency Ratio** = `useful_tokens / loaded_tokens`
+  *(of what I loaded, how much I actually used. Low CER = you read too much.)*
+- **FS — Frugality Score** = `tokens_if_I_read_everything / loaded_tokens`
+  *("I read 1/N of the corpus". FS 10 = you used 1/10 of the total available.)*
 
-**Tiers de presupuesto por tarea** (tokens cargados, orientativo):
+**Budget tiers per task** (loaded tokens, indicative):
 
-| Tier | Presupuesto | Capas típicas | Ejemplo |
+| Tier | Budget | Typical layers | Example |
 |---|---|---|---|
-| trivial | ≤ 5k | L0 | "¿qué versión es el seed?" |
-| normal | ≤ 20k | L0 + L1 | implementar un fix acotado |
-| deep | ≤ 80k | L0 + L1 + L2 | feature nuevo, refactor de un subsistema |
-| full | sin tope | L3 | auditoría / migración masiva (justificar) |
+| trivial | ≤ 5k | L0 | "what version is the seed?" |
+| normal | ≤ 20k | L0 + L1 | implement a scoped fix |
+| deep | ≤ 80k | L0 + L1 + L2 | new feature, refactor of a subsystem |
+| full | no cap | L3 | audit / massive migration (justify it) |
 
-Elegís tier → te mantenés en la capa más baja que lo cumpla. Si te pasás de tier, registralo (no truncar en silencio).
+You pick a tier → you stay at the lowest layer that meets it. If you exceed the tier, log it (don't truncate silently).
 
-## Benchmark interno — `journal/benchmarks.md`
+## Internal benchmark — `journal/benchmarks.md`
 
-Una fila por sesión/tarea relevante:
+One row per relevant session/task:
 
-| fecha | modelo | tarea | tokens_in | tokens_out | capas | FS | calidad (1–5) | nota |
+| date | model | task | tokens_in | tokens_out | layers | FS | quality (1–5) | note |
 |---|---|---|---|---|---|---|---|---|
-| 2026-06-02 | opus-4.8 | fix ORM | 18k | 3k | L0+L1 | 8 | 5 | bastó context+1 doc |
-| 2026-06-02 | haiku-4.5 | clasificar módulos | 6k | 1k | L0 | 14 | 4 | índice alcanzó |
+| 2026-06-02 | opus-4.8 | ORM fix | 18k | 3k | L0+L1 | 8 | 5 | context+1 doc was enough |
+| 2026-06-02 | haiku-4.5 | classify modules | 6k | 1k | L0 | 14 | 4 | index was enough |
 
-Con el tiempo es un **dataset de "qué funcionó"**: qué modelo + qué capas + qué tier rindió mejor por tipo de tarea.
+Over time it becomes a **dataset of "what worked"**: which model + which layers + which tier performed best per task type.
 
-## Repo de técnicas por modelo — `skills/model-techniques.md`
+## Techniques repo per model — `skills/model-techniques.md`
 
-Destilado del benchmark. Por modelo (Opus / Sonnet / Haiku y otros vendors):
-- **Cuándo usar cuál:** Haiku para clasificar/extraer barato (L0); Sonnet para implementación media; Opus para diseño/razonamiento profundo.
-- **Patrones de prompt** que rinden con cada uno.
-- **Caché:** la TTL de caché del prompt (~5 min) — no romper el prefijo cacheado con lecturas innecesarias; agrupar trabajo dentro de la ventana.
-- **Delegación:** cuándo tirar a subagentes (fan-out de búsqueda/lectura) en vez de cargar todo en el contexto principal.
-- **Cuándo subir a L3:** señales de que el índice no alcanza.
+Distilled from the benchmark. Per model (Opus / Sonnet / Haiku and other vendors):
+- **When to use which:** Haiku for cheap classify/extract (L0); Sonnet for medium implementation; Opus for design/deep reasoning.
+- **Prompt patterns** that perform with each one.
+- **Cache:** the prompt cache TTL (~5 min) — don't break the cached prefix with unnecessary reads; group work within the window.
+- **Delegation:** when to hand off to subagents (search/read fan-out) instead of loading everything into the main context.
+- **When to climb to L3:** signals that the index is not enough.
 
-## El loop de mejora
+## The improvement loop
 
 ```
-medir (benchmarks.md) → destilar técnica (model-techniques.md) → aplicar (escalera de capas) → medir…
+measure (benchmarks.md) → distill technique (model-techniques.md) → apply (layer ladder) → measure…
 ```
 
-> Mismo espíritu que el resto del seed: el conocimiento operativo (acá: cómo gastar tokens bien) se **persiste y se mejora**, no se reaprende cada sesión. Promovido al seed v1.10 porque aplica a cualquier `.roots`, no solo a este workspace.
+> Same spirit as the rest of the seed: operational knowledge (here: how to spend tokens well) is **persisted and improved**, not relearned each session. Promoted to seed v1.10 because it applies to any `.roots`, not just this workspace.

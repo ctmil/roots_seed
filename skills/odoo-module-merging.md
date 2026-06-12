@@ -1,54 +1,54 @@
 # Odoo module merging
 
-> Estrategia para mergear branches de trabajo (`claude/*`) o branches de cliente hacia los repos oficiales Odoo, y para forward/back-portar entre versiones, minimizando roturas y preservando la memoria `.roots`.
+> Strategy for merging work branches (`claude/*`) or client branches into the official Odoo repos, and for forward/back-porting across versions, minimizing breakage and preserving the `.roots` memory.
 
 ---
 
-## Cuándo usar
+## When to use
 
-- Llevar un branch de feature/fix a la rama oficial de versión (`17.0`, `19.0`, …).
-- Forward-port (16→17→18→19) o back-port de un cambio.
-- Consolidar el `.roots` de un branch de cliente al source (ver "Promoción").
+- Bring a feature/fix branch into the official version branch (`17.0`, `19.0`, …).
+- Forward-port (16→17→18→19) or back-port a change.
+- Consolidate a client branch's `.roots` into the source (see "Promotion").
 
-## Entradas / contexto requerido
+## Inputs / required context
 
-- Repo montado bare+worktrees (ver `scripts/`), worktree del branch y de la rama destino.
-- El cheatsheet de migración del proyecto si existe (ej. `moldeomint/17.0/.roots/migration.md`).
-- El `.roots` del módulo (para registrar fixes/decisiones).
+- Repo mounted as bare+worktrees (see `scripts/`), worktree of the branch and of the target branch.
+- The project's migration cheatsheet if it exists (e.g. `moldeomint/17.0/.roots/migration.md`).
+- The module's `.roots` (to record fixes/decisions).
 
-## Pasos
+## Steps
 
-1. **Sincronizar**: `git -C <repo> fetch origin --prune`. Rebasar el branch sobre la base actual o preparar el merge.
-2. **Revisar el diff por capas** (no todo junto) — cada capa tiene conflictos típicos distintos:
-   - **`__manifest__.py`** — versión, `depends`, `data`. Conflicto casi seguro en `version`.
-   - **`__init__.py` / imports** — orden de imports de modelos.
-   - **Vistas XML** — ids duplicados, y diferencias de schema por versión (ver tabla).
-   - **`security/ir.model.access.csv`** — líneas duplicadas/orden; merge por unión, sin duplicar `id`.
-   - **Datos / `data/*.xml`** — `noupdate`, secuencias.
-3. **Resolver con los patrones Odoo** (abajo). Ante `ParseError` al actualizar, sospechar siempre del schema de vistas de la versión destino.
-4. **Actualizar el `.roots`**: registrar el fix en `debug/fixes-log.md`, decisiones de arquitectura en `design/decisions.md`, y migraciones de datos/campos en `debug/migrations.md`.
-5. **Verificar** (ver abajo) antes de pushear.
-6. **Promover descubrimientos**: si el merge reveló un patrón/decisión útil para todos, promoverlo al source (`design/decisions.md` / `skills/patterns.md`). El `diary` y `errors-log` quedan contextuales (no se promueven).
+1. **Sync**: `git -C <repo> fetch origin --prune`. Rebase the branch onto the current base or prepare the merge.
+2. **Review the diff by layers** (not all at once) — each layer has its own typical conflicts:
+   - **`__manifest__.py`** — version, `depends`, `data`. Conflict almost guaranteed in `version`.
+   - **`__init__.py` / imports** — model import order.
+   - **XML views** — duplicate ids, and per-version schema differences (see table).
+   - **`security/ir.model.access.csv`** — duplicate/ordered lines; merge by union, without duplicating `id`.
+   - **Data / `data/*.xml`** — `noupdate`, sequences.
+3. **Resolve with the Odoo patterns** (below). On a `ParseError` when updating, always suspect the target version's view schema.
+4. **Update the `.roots`**: record the fix in `debug/fixes-log.md`, architecture decisions in `design/decisions.md`, and data/field migrations in `debug/migrations.md`.
+5. **Verify** (see below) before pushing.
+6. **Promote discoveries**: if the merge revealed a pattern/decision useful for everyone, promote it to the source (`design/decisions.md` / `skills/patterns.md`). The `diary` and `errors-log` stay contextual (not promoted).
 
-## Patrones de conflicto Odoo (cross-versión)
+## Odoo conflict patterns (cross-version)
 
-| Síntoma | Causa | Resolución |
+| Symptom | Cause | Resolution |
 |---------|-------|------------|
-| `ParseError` al `-u` en v17+ | `edit="false"` en `<list>`/`<tree>` inline | quitar `edit`; usar `readonly="True"` por campo |
-| `<tree>` deprecado | renombrado a `<list>` en v17 | migrar tag a `<list>` |
-| `attrs={...}` ignorado/roto | eliminado en v17 (dep.) / v18 (out) | atributos directos (`invisible="..."`, `readonly="..."`) |
-| Campo "no existe en el modelo padre" | `<list edit="false">` confunde el comodelo (v17) | quitar `edit="false"` |
-| Conflicto en `version` del manifest | bump simultáneo | tomar el mayor; renumerar según convención del repo |
+| `ParseError` on `-u` in v17+ | `edit="false"` in inline `<list>`/`<tree>` | drop `edit`; use `readonly="True"` per field |
+| Deprecated `<tree>` | renamed to `<list>` in v17 | migrate the tag to `<list>` |
+| `attrs={...}` ignored/broken | removed in v17 (dep.) / v18 (out) | direct attributes (`invisible="..."`, `readonly="..."`) |
+| Field "does not exist on the parent model" | `<list edit="false">` confuses the comodel (v17) | drop `edit="false"` |
+| Conflict in the manifest `version` | simultaneous bump | take the higher one; renumber per repo convention |
 
-> Mantener esta tabla sincronizada con el `migration.md` del proyecto (es el cheatsheet detallado).
+> Keep this table in sync with the project's `migration.md` (the detailed cheatsheet).
 
-## Verificación
+## Verification
 
-- `-u <module>` (o instalación limpia) sin `ParseError` ni tracebacks.
-- Tests del módulo si existen.
-- Smoke manual de las vistas tocadas.
+- `-u <module>` (or clean install) without `ParseError` or tracebacks.
+- Module tests if they exist.
+- Manual smoke-test of the touched views.
 
-## Notas / decisiones abiertas
+## Notes / open decisions
 
-- **Merge vs rebase**: rebase para branches de feature cortos (historia limpia); merge para integrar branches de cliente de larga vida (preserva contexto). Decidir por caso y anotar en `decisions.md`.
-- La consolidación del `.roots` de un cliente al source es **explícita y por item** (decisions/patterns/glossary buenos candidatos; diary/errors-log no).
+- **Merge vs rebase**: rebase for short feature branches (clean history); merge to integrate long-lived client branches (preserves context). Decide per case and note it in `decisions.md`.
+- Consolidating a client's `.roots` into the source is **explicit and per item** (decisions/patterns/glossary good candidates; diary/errors-log not).

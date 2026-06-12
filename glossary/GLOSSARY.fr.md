@@ -103,5 +103,16 @@
 | **verrou de langue** | La règle sans-bruit : le seed canonical est en anglais, mais chaque déploiement conserve son propre `lang`. Au traitement du seed, l'agent auto-détecte la langue du contenu `.roots/` existant et la persiste ; mettre à jour/redistribuer le seed ne traduit ni ne réécrit JAMAIS la mémoire existante. | lang · on-seed-process · on-seed-update |
 | **système de glossaire** | Le vocabulaire multilingue du seed dans `glossary/` : `glossary.json` (canonical, clé EN + es/fr) génère les tables `GLOSSARY.<lang>.md` via `gen.py`. Fournit une terminologie Forest cohérente dans n'importe quelle `lang`. | lang · glossary.md (par module) · verrou de langue |
 
+## Domaines de recettes
+
+| Terme | Définition | Voir aussi |
+|---|---|---|
+| **recette** | Un motif appliqué du modèle `.roots`/Forest pour un domaine, sous `recipes/` (suite Odoo, forêt de designs, narration/jeu, économie de tokens). Montre les mêmes 3 primitifs (vendor · relations[] · branch) réutilisés sur N domaines. | branch (primitif) · vendor · relations[] · domain pack |
+| **ai_context_md (pont design)** | Dans la recette de la forêt de designs (Folio/Lab), un champ du prototype contenant un `.roots/context.md` embarqué — le pont entre le motif `.roots` et les données produit à l'exécution. | context.md · recette · vendor |
+| **worldbible/** | Dans la recette narration/jeu (`working_mode: narrative`), la bible du monde : lore, factions, lieux et l'univers canonique de l'histoire/du jeu. | recette · domain pack · fiche d'entité |
+| **arc narratif (branch)** | Dans la recette narrative, un arc/une route de scénario modélisé comme branche : `branch_type: canon \| what-if \| playtest`, avec `merged_into` et `created_by: human\|AI` — un fork de l'histoire et de la logique. | branch (primitif) · worldbible/ · recette |
+| **skill de personnage ≡ skill d'IA** | Intuition clé de la recette narrative : une capacité de personnage et un skill d'IA sont tous deux des *définitions de capacité* dans `skills/` — une fiche d'aptitude de PJ avec mécaniques, ou un PNJ comme personne+prompt. | arc narratif (branch) · fiche d'entité · recette |
+| **fiche d'entité** | Dans la recette narrative, un fichier par entité (`kind: PC \| NPC \| scene \| item \| faction \| concept`) — la fiche « card », reliée dans le graphe narratif `relations.json`. | worldbible/ · skill de personnage ≡ skill d'IA · relations[] |
+
 ---
-<!-- 48 terms · primary_lang=en · languages=en,es,fr -->
+<!-- 54 terms · primary_lang=en · languages=en,es,fr -->

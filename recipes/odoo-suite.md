@@ -1,13 +1,13 @@
-# Receta — Suite de módulos de extensión Odoo
+# Recipe — Suite of Odoo extension modules
 
-> Caso real: la suite **Meli** (`meli_oerp*`) — un producto compuesto por un módulo core + módulos de extensión que dependen de él y de plataformas compartidas (OCAPI). Cómo estructurar `.roots` para esto.
+> Real case: the **Meli** suite (`meli_oerp*`) — a product made up of a core module + extension modules that depend on it and on shared platforms (OCAPI). How to structure `.roots` for this.
 
-## Mapeo al modelo Forest
+## Mapping to the Forest model
 
-- **Grove** = la suite (`meli`). Tiene `vendor` (moldeo-interactive) y `kind: producto-suite`.
-- **Tree** = cada módulo-repo (`meli_oerp`, `meli_oerp_accounting`, …). Cada uno con su `.roots` en **modo source/flat**.
-- **`relations[]`** = los `depends` reales de los manifests (verídicos, no inventados).
-- Plataforma compartida (`odoo_connector_api`, OCAPI) = otro Grove con `kind: plataforma`; la suite **depende** de él vía aristas (no lo "contiene").
+- **Grove** = the suite (`meli`). It has a `vendor` (moldeo-interactive) and `kind: producto-suite`.
+- **Tree** = each module-repo (`meli_oerp`, `meli_oerp_accounting`, …). Each one with its `.roots` in **source/flat mode**.
+- **`relations[]`** = the real `depends` from the manifests (truthful, not invented).
+- Shared platform (`odoo_connector_api`, OCAPI) = another Grove with `kind: plataforma`; the suite **depends** on it via edges (it does not "contain" it).
 
 ```
 meli/  (Grove · vendor: moldeo-interactive · kind: producto-suite)
@@ -18,17 +18,17 @@ meli/  (Grove · vendor: moldeo-interactive · kind: producto-suite)
                                                   meli_oerp_accounting, odoo_connector_api
 ```
 
-## Qué pone cada módulo-Tree en su `.roots` (Odoo-específico)
+## What each module-Tree puts in its `.roots` (Odoo-specific)
 
-| Archivo | Contenido para un módulo Odoo |
+| File | Content for an Odoo module |
 |---|---|
-| `context.md` | Qué hace el módulo, **qué extiende** (`_inherit` de qué modelos), versión Odoo objetivo, en qué deployment vive. |
-| `design/decisions.md` | ADRs Odoo: por qué `_inherit` vs `_inherits`, campos computados vs almacenados, herencia de vistas (`xpath`). |
-| `docs/migration.md` | Cheatsheet de backport/forward-port **16 ↔ 17 ↔ 18 ↔ 19** (lo que cambia entre versiones de la API). |
-| `debug/errors-log.md` · `fixes-log.md` | Gotchas de ORM, name-clashes, problemas de `depends`/orden de carga. |
-| `docs/commits.md` | Bitácora de commits SOURCE por feature. |
+| `context.md` | What the module does, **what it extends** (`_inherit` of which models), target Odoo version, which deployment it lives in. |
+| `design/decisions.md` | Odoo ADRs: why `_inherit` vs `_inherits`, computed vs stored fields, view inheritance (`xpath`). |
+| `docs/migration.md` | Backport/forward-port cheatsheet **16 ↔ 17 ↔ 18 ↔ 19** (what changes between API versions). |
+| `debug/errors-log.md` · `fixes-log.md` | ORM gotchas, name-clashes, `depends`/load-order issues. |
+| `docs/commits.md` | SOURCE commit log per feature. |
 
-## En `forest.json` (a nivel Forest)
+## In `forest.json` (at the Forest level)
 
 ```jsonc
 {
@@ -44,13 +44,13 @@ meli/  (Grove · vendor: moldeo-interactive · kind: producto-suite)
 }
 ```
 
-## Regla de oro aplicada
+## Golden rule applied
 
-`meli_oerp_multiple` **es** del Grove `meli` (membership único), y **usa** `odoo_connector_api` (arista `depends-on`). NO se taguea como Grove `ocapi` ni se anida bajo él — eso confundiría "es parte de" con "depende de". La plataforma OCAPI es un hub del que dependen módulos de varios Groves (Meli, Fulfillment, GeoEcon, Moldeo): por eso la dependencia es **arista**, no pertenencia.
+`meli_oerp_multiple` **is** part of the `meli` Grove (single membership), and **uses** `odoo_connector_api` (a `depends-on` edge). It is NOT tagged as Grove `ocapi` nor nested under it — that would conflate "is part of" with "depends on". The OCAPI platform is a hub depended on by modules of several Groves (Meli, Fulfillment, GeoEcon, Moldeo): that's why the dependency is an **edge**, not membership.
 
-## Montaje (toolkit)
+## Setup (toolkit)
 
 ```bash
 ./setup-module.sh meli_oerp git@github.com:ctmil/meli_oerp.git 16.0 17.0 18.0 19.0
 ```
-Cada versión Odoo se monta como worktree/Branch hermano (bare+worktrees). El `.roots` del módulo puede usar **Modo Migración** (forkear temporalmente a `.roots/17.0/` + `.roots/19.0/`) durante un backport y colapsar de vuelta a flat.
+Each Odoo version is mounted as a sibling worktree/Branch (bare+worktrees). The module's `.roots` can use **Migration Mode** (temporarily forking to `.roots/17.0/` + `.roots/19.0/`) during a backport and collapse back to flat.

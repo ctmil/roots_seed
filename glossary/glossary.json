@@ -15,7 +15,8 @@
     "distribution": { "en": "Seed distribution", "es": "Distribución del seed", "fr": "Distribution du seed" },
     "economy": { "en": "Token economy", "es": "Economía de tokens", "fr": "Économie de tokens" },
     "lifecycle": { "en": "Lifecycle hooks", "es": "Hooks de ciclo de vida", "fr": "Hooks de cycle de vie" },
-    "i18n": { "en": "Language & i18n", "es": "Idioma e i18n", "fr": "Langue et i18n" }
+    "i18n": { "en": "Language & i18n", "es": "Idioma e i18n", "fr": "Langue et i18n" },
+    "domains": { "en": "Recipe domains", "es": "Dominios de recetas", "fr": "Domaines de recettes" }
   },
   "terms": {
     "roots": {
@@ -353,6 +354,48 @@
       "en": { "term": "glossary system", "def": "The seed's multilingual vocabulary at `glossary/`: `glossary.json` (canonical, EN key + es/fr) generates `GLOSSARY.<lang>.md` tables via `gen.py`. Gives consistent Forest terminology in any `lang`." },
       "es": { "term": "sistema de glosario", "def": "El vocabulario multilingüe del seed en `glossary/`: `glossary.json` (canónico, key EN + es/fr) genera las tablas `GLOSSARY.<lang>.md` vía `gen.py`. Da terminología Forest consistente en cualquier `lang`." },
       "fr": { "term": "système de glossaire", "def": "Le vocabulaire multilingue du seed dans `glossary/` : `glossary.json` (canonical, clé EN + es/fr) génère les tables `GLOSSARY.<lang>.md` via `gen.py`. Fournit une terminologie Forest cohérente dans n'importe quelle `lang`." }
+    },
+    "recipe": {
+      "category": "domains",
+      "see_also": ["branch-primitive", "vendor", "relations", "domain-pack"],
+      "en": { "term": "recipe", "def": "An applied pattern of the `.roots`/Forest model for one domain, under `recipes/` (Odoo suite, design forest, narrative/game, token economy). Shows the same 3 primitives (vendor · relations[] · branch) reused across domains." },
+      "es": { "term": "receta", "def": "Un patrón aplicado del modelo `.roots`/Forest para un dominio, bajo `recipes/` (suite Odoo, bosque de diseños, narrativa/juego, economía de tokens). Muestra los mismos 3 primitivos (vendor · relations[] · branch) reusados en N dominios." },
+      "fr": { "term": "recette", "def": "Un motif appliqué du modèle `.roots`/Forest pour un domaine, sous `recipes/` (suite Odoo, forêt de designs, narration/jeu, économie de tokens). Montre les mêmes 3 primitifs (vendor · relations[] · branch) réutilisés sur N domaines." }
+    },
+    "ai-context-md": {
+      "category": "domains",
+      "see_also": ["context-doc", "recipe", "vendor"],
+      "en": { "term": "ai_context_md (design bridge)", "def": "In the design-forest recipe (Folio/Lab), a prototype field that holds an embedded `.roots/context.md` — the bridge between the `.roots` pattern and runtime product data." },
+      "es": { "term": "ai_context_md (puente de diseño)", "def": "En la receta del bosque de diseños (Folio/Lab), un campo del prototipo que lleva un `.roots/context.md` embebido — el puente entre el patrón `.roots` y los datos del producto en runtime." },
+      "fr": { "term": "ai_context_md (pont design)", "def": "Dans la recette de la forêt de designs (Folio/Lab), un champ du prototype contenant un `.roots/context.md` embarqué — le pont entre le motif `.roots` et les données produit à l'exécution." }
+    },
+    "worldbible": {
+      "category": "domains",
+      "see_also": ["recipe", "domain-pack", "entity-card"],
+      "en": { "term": "worldbible/", "def": "In the narrative/game recipe (`working_mode: narrative`), the world bible: lore, factions, places and the canonical setting of the story/game." },
+      "es": { "term": "worldbible/", "def": "En la receta de narrativa/juego (`working_mode: narrative`), la biblia del mundo: lore, facciones, lugares y el setting canónico de la historia/juego." },
+      "fr": { "term": "worldbible/", "def": "Dans la recette narration/jeu (`working_mode: narrative`), la bible du monde : lore, factions, lieux et l'univers canonique de l'histoire/du jeu." }
+    },
+    "story-arc": {
+      "category": "domains",
+      "see_also": ["branch-primitive", "worldbible", "recipe"],
+      "en": { "term": "story arc (branch)", "def": "In the narrative recipe, a script arc/route modeled as a branch: `branch_type: canon | what-if | playtest`, with `merged_into` and `created_by: human|AI` — a fork of the story and of the logic." },
+      "es": { "term": "arco narrativo (branch)", "def": "En la receta narrativa, un arco/ruta de guion modelado como branch: `branch_type: canon | what-if | playtest`, con `merged_into` y `created_by: human|AI` — un fork de la historia y de la lógica." },
+      "fr": { "term": "arc narratif (branch)", "def": "Dans la recette narrative, un arc/une route de scénario modélisé comme branche : `branch_type: canon | what-if | playtest`, avec `merged_into` et `created_by: human|AI` — un fork de l'histoire et de la logique." }
+    },
+    "character-skill": {
+      "category": "domains",
+      "see_also": ["story-arc", "entity-card", "recipe"],
+      "en": { "term": "character skill ≡ AI skill", "def": "Key intuition of the narrative recipe: a character ability and an AI skill are both *capability definitions* living in `skills/` — a PC ability sheet with mechanics, or an NPC as person+prompt." },
+      "es": { "term": "skill de personaje ≡ skill de IA", "def": "Intuición clave de la receta narrativa: una habilidad de personaje y un skill de IA son ambos *definiciones de capacidad* que viven en `skills/` — una ficha de habilidad de PJ con mecánicas, o un NPC como persona+prompt." },
+      "fr": { "term": "skill de personnage ≡ skill d'IA", "def": "Intuition clé de la recette narrative : une capacité de personnage et un skill d'IA sont tous deux des *définitions de capacité* dans `skills/` — une fiche d'aptitude de PJ avec mécaniques, ou un PNJ comme personne+prompt." }
+    },
+    "entity-card": {
+      "category": "domains",
+      "see_also": ["worldbible", "character-skill", "relations"],
+      "en": { "term": "entity card", "def": "In the narrative recipe, one file per entity (`kind: PC | NPC | scene | item | faction | concept`) — the 'card' sheet, linked into the `relations.json` narrative graph." },
+      "es": { "term": "ficha de entidad", "def": "En la receta narrativa, un archivo por entidad (`kind: PC | NPC | scene | item | faction | concept`) — la ficha 'card', vinculada en el grafo narrativo `relations.json`." },
+      "fr": { "term": "fiche d'entité", "def": "Dans la recette narrative, un fichier par entité (`kind: PC | NPC | scene | item | faction | concept`) — la fiche « card », reliée dans le graphe narratif `relations.json`." }
     }
   }
 }

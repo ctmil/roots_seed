@@ -103,5 +103,16 @@
 | **language lock** | The no-noise rule: the canonical seed is English, but each deployment keeps its own `lang`. On seed-process the agent auto-detects the language of existing `.roots/` content and persists it; updating/redistributing the seed NEVER translates or rewrites existing memory. | lang · on-seed-process · on-seed-update |
 | **glossary system** | The seed's multilingual vocabulary at `glossary/`: `glossary.json` (canonical, EN key + es/fr) generates `GLOSSARY.<lang>.md` tables via `gen.py`. Gives consistent Forest terminology in any `lang`. | lang · glossary.md (per-module) · language lock |
 
+## Recipe domains
+
+| Term | Definition | See also |
+|---|---|---|
+| **recipe** | An applied pattern of the `.roots`/Forest model for one domain, under `recipes/` (Odoo suite, design forest, narrative/game, token economy). Shows the same 3 primitives (vendor · relations[] · branch) reused across domains. | branch (primitive) · vendor · relations[] · domain pack |
+| **ai_context_md (design bridge)** | In the design-forest recipe (Folio/Lab), a prototype field that holds an embedded `.roots/context.md` — the bridge between the `.roots` pattern and runtime product data. | context.md · recipe · vendor |
+| **worldbible/** | In the narrative/game recipe (`working_mode: narrative`), the world bible: lore, factions, places and the canonical setting of the story/game. | recipe · domain pack · entity card |
+| **story arc (branch)** | In the narrative recipe, a script arc/route modeled as a branch: `branch_type: canon \| what-if \| playtest`, with `merged_into` and `created_by: human\|AI` — a fork of the story and of the logic. | branch (primitive) · worldbible/ · recipe |
+| **character skill ≡ AI skill** | Key intuition of the narrative recipe: a character ability and an AI skill are both *capability definitions* living in `skills/` — a PC ability sheet with mechanics, or an NPC as person+prompt. | story arc (branch) · entity card · recipe |
+| **entity card** | In the narrative recipe, one file per entity (`kind: PC \| NPC \| scene \| item \| faction \| concept`) — the 'card' sheet, linked into the `relations.json` narrative graph. | worldbible/ · character skill ≡ AI skill · relations[] |
+
 ---
-<!-- 48 terms · primary_lang=en · languages=en,es,fr -->
+<!-- 54 terms · primary_lang=en · languages=en,es,fr -->

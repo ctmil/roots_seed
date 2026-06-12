@@ -1,50 +1,50 @@
-# Receta — Narrativa, guión y juego (RPG / historias interactivas)
+# Recipe — Narrative, script and game (RPG / interactive stories)
 
-> Caso: usar `.roots` para **diseñar un juego basado en guión + escenarios** (o un libro/serie/historia ramificada). Documentos, lore, fichas de personajes, NPCs, escenarios, asociación de conceptos, y **bifurcación de guión y de lógica**. Se modela como **domain pack** sobre el seed estándar (`working_mode: narrative`) — reusa el esqueleto, agrega dominio.
+> Case: using `.roots` to **design a game based on script + scenarios** (or a branching book/series/story). Documents, lore, character sheets, NPCs, scenarios, concept association, and **forking of script and of logic**. It is modeled as a **domain pack** over the standard seed (`working_mode: narrative`) — reuses the skeleton, adds domain.
 
-## Por qué encaja sin inventar nada
+## Why it fits without inventing anything
 
-Los mismos tres primitivos del Forest cubren la narrativa:
-- **`relations[]`** = el **grafo narrativo y de conceptos** (personaje→aliado→NPC, escena→lleva-a→escena, ítem→desbloquea→puerta, concepto↔concepto estilo RPG).
-- **branch** = **arco de guión / ruta**: una bifurcación de la historia *y de la lógica de código* es un branch con `branch_type: canon | what-if | playtest`, `merged_into`, `created_by: human|AI` (igual que `folio.prototype.branch`).
-- **vendor** = autor/guionista (perfil con voz, tono, restricciones de canon).
+The same three Forest primitives cover narrative:
+- **`relations[]`** = the **narrative and concept graph** (character→ally→NPC, scene→leads-to→scene, item→unlocks→door, concept↔concept RPG-style).
+- **branch** = **script arc / route**: a fork of the story *and of the code logic* is a branch with `branch_type: canon | what-if | playtest`, `merged_into`, `created_by: human|AI` (just like `folio.prototype.branch`).
+- **vendor** = author/scriptwriter (profile with voice, tone, canon constraints).
 
-Y tu intuición clave: **skill de IA ≡ skill de personaje**. Ambas son *definiciones de capacidad*. Una ficha de habilidades de un PJ es una entrada en `skills/` con mecánicas; un NPC es una persona+prompt en `skills/` (tools internas que definen su comportamiento).
+And your key intuition: **AI skill ≡ character skill**. Both are *capability definitions*. A PC's ability sheet is an entry in `skills/` with mechanics; an NPC is a person+prompt in `skills/` (internal tools that define its behavior).
 
-## Estructura `.roots` (domain pack narrative)
+## `.roots` structure (narrative domain pack)
 
 ```
 .roots/                    (_meta.json → working_mode: "narrative")
-├── context.md             ← premisa / logline + overview del mundo
-├── worldbible/            ← la biblia del mundo
-│   ├── lore/              · cosmología, facciones, historia, reglas del mundo
-│   ├── characters/        · fichas PJ y NPC (una por archivo = "carta de entidad")
-│   ├── scenarios/         · escenas / locaciones / encuentros
-│   └── items/             · objetos, artefactos, mecánicas
-├── arcs/                  ← ramas de guión = branches (canon | what-if | playtest)
-├── design/decisions.md    ← ADRs de canon ("qué es canónico y por qué")
-├── skills/                ← ⚡ skills de personaje (stats/traits/abilities) + personas-NPC + skills de IA
-├── journal/               ← bitácora de escritura / playtests
-└── relations.json         ← grafo narrativo {from, to, type}
+├── context.md             ← premise / logline + world overview
+├── worldbible/            ← the world bible
+│   ├── lore/              · cosmology, factions, history, world rules
+│   ├── characters/        · PC and NPC sheets (one per file = "entity card")
+│   ├── scenarios/         · scenes / locations / encounters
+│   └── items/             · objects, artifacts, mechanics
+├── arcs/                  ← script branches = branches (canon | what-if | playtest)
+├── design/decisions.md    ← canon ADRs ("what is canonical and why")
+├── skills/                ← ⚡ character skills (stats/traits/abilities) + NPC-personas + AI skills
+├── journal/               ← writing / playtest log
+└── relations.json         ← narrative graph {from, to, type}
 ```
 
-## Ficha de entidad (template de "carta")
+## Entity sheet ("card" template)
 
 ```markdown
 ---
 id: npc-mara
-kind: NPC            # PJ | NPC | escena | ítem | facción | concepto
+kind: NPC            # PC | NPC | scene | item | faction | concept
 arc: canon
 ---
-# Mara, la cartógrafa
-- **Rol:** guía del Acto I · **Facción:** Gremio de Mapas
+# Mara, the cartographer
+- **Role:** Act I guide · **Faction:** Map Guild
 - **Skills:** [[skill-leer-mapas]], [[skill-regateo]]   (→ skills/)
-- **Relaciones:** aliada-de [[pj-protagonista]] · teme-a [[npc-el-vigia]]
-- **Persona (IA):** ver [[skills/persona-mara]] (voz, motivaciones, qué nunca diría)
+- **Relations:** ally-of [[pj-protagonista]] · fears [[npc-el-vigia]]
+- **Persona (AI):** see [[skills/persona-mara]] (voice, motivations, what it would never say)
 - **Lore:** [[lore/gremio-de-mapas]]
 ```
 
-## El grafo (`relations.json`) — conceptos y trama
+## The graph (`relations.json`) — concepts and plot
 
 ```jsonc
 [
@@ -54,36 +54,36 @@ arc: canon
   { "from": "concepto-deuda",  "to": "npc-el-vigia",   "type": "embodies" }
 ]
 ```
-Tipos sugeridos: `allies` · `enemy` · `knows` · `leads-to` · `unlocks` · `requires` · `embodies` · `foreshadows`. Es el **mismo `relations[]`** que en código modela `depends-on`.
+Suggested types: `allies` · `enemy` · `knows` · `leads-to` · `unlocks` · `requires` · `embodies` · `foreshadows`. It is the **same `relations[]`** that in code models `depends-on`.
 
-## Bifurcación de guión (= branch model)
+## Script forking (= branch model)
 
 ```
 arcs/
-├── canon/            ← la línea oficial (branch_type: canon)
-├── what-if/sin-mara/ ← ¿y si Mara muere en el Acto I? (variante, no mergeada)
-└── playtest/ruta-b/  ← rama de prueba con jugadores (stage: testing)
+├── canon/            ← the official line (branch_type: canon)
+├── what-if/sin-mara/ ← what if Mara dies in Act I? (variant, not merged)
+└── playtest/ruta-b/  ← test branch with players (stage: testing)
 ```
-Cada arco registra `merged_into` (qué se volvió canon) y `created_by`. **La bifurcación de lógica de código del juego viaja en el mismo branch** que la del guión: el arco contiene tanto el texto como los cambios de reglas/lógica que implica.
+Each arc records `merged_into` (what became canon) and `created_by`. **The fork of the game's code logic travels in the same branch** as the script's: the arc contains both the text and the rule/logic changes it implies.
 
-## Skills: personaje ↔ IA (el puente)
+## Skills: character ↔ AI (the bridge)
 
 ```
 skills/
-├── skill-leer-mapas.md     # mecánica de PJ: tirada, efecto, costo  (ficha de capacidad)
-├── persona-mara.md         # NPC como prompt: voz, objetivos, límites (tool interna de comportamiento)
-└── ai-techniques.md        # cómo el agente IA genera escenas/diálogos (técnicas de modelo)
+├── skill-leer-mapas.md     # PC mechanic: roll, effect, cost  (capability sheet)
+├── persona-mara.md         # NPC as prompt: voice, goals, limits (internal behavior tool)
+└── ai-techniques.md        # how the AI agent generates scenes/dialogue (model techniques)
 ```
-Una "skill" es una **definición de capacidad** sin importar si la ejecuta un personaje (mecánica de juego) o el agente (cómo razona). El mismo formato `skills/` sirve para ambos.
+A "skill" is a **capability definition** regardless of whether it is executed by a character (game mechanic) or the agent (how it reasons). The same `skills/` format serves both.
 
-## Mapeo Forest para un juego
+## Forest mapping for a game
 
-| Forest | En el juego |
+| Forest | In the game |
 |---|---|
-| **Roots** | el canon / memoria del mundo (`.roots`) |
-| **Forest** | la IP / universo entero |
-| **Grove** | una saga / temporada / facción |
-| **Tree** | una historia, una línea de personaje, un módulo de campaña |
-| **Branch** | un arco / ruta / final alternativo |
+| **Roots** | the canon / world memory (`.roots`) |
+| **Forest** | the IP / entire universe |
+| **Grove** | a saga / season / faction |
+| **Tree** | a story, a character line, a campaign module |
+| **Branch** | an arc / route / alternate ending |
 
-> El mismo motor que coordina repos de software coordina un universo narrativo: entidades como cartas, trama como grafo, rutas como branches, capacidades como skills.
+> The same engine that coordinates software repos coordinates a narrative universe: entities as cards, plot as graph, routes as branches, capabilities as skills.

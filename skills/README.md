@@ -1,40 +1,40 @@
-# skills — biblioteca compartida del toolkit
+# skills — toolkit shared library
 
-> Skills cross-cutting, bien diseñadas y reutilizables, que viven en el seed para mejorar estrategias comunes (merging, reporting, etc.). Tool-agnostic: las ejecuta cualquier agente IA o humano.
+> Cross-cutting, well-designed and reusable skills that live in the seed to improve common strategies (merging, reporting, etc.). Tool-agnostic: runnable by any AI agent or human.
 
 ---
 
-## skills/ del toolkit vs skills/ de cada `.roots`
+## toolkit skills/ vs each `.roots` skills/
 
-| | Toolkit `roots_seed/skills/` (este) | `.roots/skills/` (por módulo) |
+| | Toolkit `roots_seed/skills/` (this one) | `.roots/skills/` (per module) |
 |---|---|---|
-| Alcance | **compartido** — aplica a muchos módulos/proyectos | **local** — específico de ese módulo |
-| Contenido | estrategias canónicas (merging Odoo, reporting…) | `prompts.md`, `workflows.md`, `patterns.md` propios |
-| Uso | se **referencia** o se **copia/adapta** dentro de un `.roots/skills/` | se mantiene junto al módulo |
+| Scope | **shared** — applies to many modules/projects | **local** — specific to that module |
+| Content | canonical strategies (Odoo merging, reporting…) | its own `prompts.md`, `workflows.md`, `patterns.md` |
+| Use | **referenced** or **copied/adapted** inside a `.roots/skills/` | kept alongside the module |
 
-Cuando un módulo necesita una de estas estrategias, la referencia desde su `.roots` (o copia la parte relevante a su `skills/workflows.md` y la adapta). Si un módulo descubre una mejora general, se **promueve** acá (mismo espíritu que la promoción de descubrimientos del seed).
+When a module needs one of these strategies, it references it from its `.roots` (or copies the relevant part into its `skills/workflows.md` and adapts it). If a module discovers a general improvement, it is **promoted** here (same spirit as promoting seed discoveries).
 
-## Formato de una skill
+## Skill format
 
-Cada skill es un `.md` con:
+Each skill is a `.md` with:
 
 ```markdown
-# {Nombre de la skill}
+# {Skill name}
 
-> Una línea: qué resuelve.
+> One line: what it solves.
 
-## Cuándo usar
-## Entradas / contexto requerido
-## Pasos
-## Verificación
-## Notas / decisiones abiertas
+## When to use
+## Inputs / required context
+## Steps
+## Verification
+## Notes / open decisions
 ```
 
-## Índice
+## Index
 
-| Skill | Para qué |
+| Skill | What for |
 |-------|----------|
-| [odoo-module-merging.md](./odoo-module-merging.md) | Estrategia de merge de branches/clientes hacia repos oficiales Odoo (cross-versión, resolución de conflictos típicos, promoción de `.roots`) |
-| [md-to-pdf-reporting.md](./md-to-pdf-reporting.md) | Convertir `docs/manual.md` y `documentation.md` a reportes PDF (pandoc / HTML+CSS / QWeb Odoo) |
+| [odoo-module-merging.md](./odoo-module-merging.md) | Strategy for merging branches/clients into official Odoo repos (cross-version, typical conflict resolution, `.roots` promotion) |
+| [md-to-pdf-reporting.md](./md-to-pdf-reporting.md) | Convert `docs/manual.md` and `documentation.md` to PDF reports (pandoc / HTML+CSS / Odoo QWeb) |
 
-> Próximas candidatas: revisión de seguridad de access rights, generación de `changelog.md` desde commits, smoke-test de instalación de módulo.
+> Next candidates: security review of access rights, generating `changelog.md` from commits, module installation smoke-test.

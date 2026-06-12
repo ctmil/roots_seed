@@ -1,105 +1,105 @@
 # forest-dashboard
 
-> Dashboard web en tiempo real del estado de un **Forest** de repos (Trees) montados con **bare+worktrees** y su memoria `.roots`. Módulo del toolkit `roots_seed`. Vocabulario: **Roots → Forest → Grove → Tree → Branch**.
+> Real-time web dashboard of the state of a **Forest** of repos (Trees) mounted with **bare+worktrees** and their `.roots` memory. Module of the `roots_seed` toolkit. Vocabulary: **Roots → Forest → Grove → Tree → Branch**.
 
-Pensado para **despegarse del IDE / Antigravity**: es un panel de control en el browser, que corre igual en local o en un server remoto vía SSH. La lógica de scraping es portable y el contrato JSON está pensado para reusarse desde un backend Odoo (`odoo_moldeo_sync`).
+Designed to **detach from the IDE / Antigravity**: it is a control panel in the browser, running the same locally or on a remote server over SSH. The scraping logic is portable and the JSON contract is meant to be reused from an Odoo backend (`odoo_moldeo_sync`).
 
 ---
 
-## Arquitectura (3 capas)
+## Architecture (3 layers)
 
 ```
 collect.py   →   state.json   →   index.html
-(colector)       (contrato)       (vista)
+(collector)      (contract)       (view)
 ```
 
-- **`collect.py`** — escanea el workspace (git + `.roots`) y emite el **modelo de estado** (`state.json`). Sin dependencias (stdlib + `git`). Es el contrato reusable: el mismo *shape* que Odoo debería producir desde sus modelos.
-- **`serve.py`** — server liviano (stdlib `http.server`) que regenera el estado en vivo (cacheado con TTL) y sirve la vista. Equivale a un controller de Odoo.
-- **`index.html`** — vista única (HTML+CSS+JS vanilla), auto-refresh. Su estructura mapea a vistas Odoo (ver abajo).
+- **`collect.py`** — scans the workspace (git + `.roots`) and emits the **state model** (`state.json`). No dependencies (stdlib + `git`). It is the reusable contract: the same *shape* that Odoo should produce from its models.
+- **`serve.py`** — lightweight server (stdlib `http.server`) that regenerates the state live (cached with TTL) and serves the view. Equivalent to an Odoo controller.
+- **`index.html`** — single view (HTML+CSS+vanilla JS), auto-refresh. Its structure maps to Odoo views (see below).
 
-## Uso local
+## Local use
 
 ```bash
-# desde la raíz del workspace a monitorear:
+# from the root of the workspace to monitor:
 python3 roots_seed/main/tools/forest-dashboard/serve.py --root .
 # → http://127.0.0.1:8787/
 ```
 
-O snapshot estático del modelo:
+Or a static snapshot of the model:
 
 ```bash
 python3 .../forest-dashboard/collect.py --root . -o state.json
 ```
 
-## Uso remoto
+## Remote use
 
-**Recomendado — túnel SSH (cero exposición, cero auth):**
+**Recommended — SSH tunnel (zero exposure, zero auth):**
 
 ```bash
-# en el server:
+# on the server:
 python3 .../forest-dashboard/serve.py --root /srv/workspace      # bind 127.0.0.1
-# en tu máquina:
+# on your machine:
 ssh -L 8787:127.0.0.1:8787 user@server
-# abrí http://localhost:8787
+# open http://localhost:8787
 ```
 
-**LAN expuesta (con token):**
+**Exposed LAN (with token):**
 
 ```bash
-python3 .../forest-dashboard/serve.py --root . --host 0.0.0.0 --token MISECRETO
-# abrí http://<server>:8787/?token=MISECRETO
+python3 .../forest-dashboard/serve.py --root . --host 0.0.0.0 --token MYSECRET
+# open http://<server>:8787/?token=MYSECRET
 ```
 
-### Opciones de `serve.py`
+### `serve.py` options
 
-| Flag | Default | Qué hace |
+| Flag | Default | What it does |
 |------|---------|----------|
-| `--root` | cwd | workspace a escanear |
-| `--host` | `127.0.0.1` | bind; `0.0.0.0` = expuesto |
-| `--port` | `8787` | puerto |
-| `--ttl` | `15` | seg. de cache del estado (evita re-escaneo en cada poll) |
-| `--token` | — | protege `/state.json` cuando exponés en LAN |
+| `--root` | cwd | workspace to scan |
+| `--host` | `127.0.0.1` | bind; `0.0.0.0` = exposed |
+| `--port` | `8787` | port |
+| `--ttl` | `15` | state cache seconds (avoids re-scanning on each poll) |
+| `--token` | — | protects `/state.json` when you expose on LAN |
 
-## Qué muestra
+## What it shows
 
-El dashboard tiene **dos vistas** (switch en el header): **Feed** (agregado de todo el Forest) y **Forest map** (Groves → Trees → Branches + grafo SVG de `relations`, con badges `vendor`/`kind`).
+The dashboard has **two views** (switch in the header): **Feed** (aggregate of the whole Forest) and **Forest map** (Groves → Trees → Branches + SVG graph of `relations`, with `vendor`/`kind` badges).
 
-La vista **Feed**, en orden de lectura humana:
+The **Feed** view, in human reading order:
 
-1. **① Cambios** — timeline del `journal` de todos los módulos (entrada de diary con fecha, ícono y módulo), más reciente primero.
-2. **② Tareas** — pendientes (`- [ ]`) agrupadas por módulo, ordenadas por modificación reciente.
-3. **③ Docs** — markdown de cada módulo, **renderizado** inline (carga lazy vía `/file`), con link **"ver descripción ↗"** al `static/description/index.html` del módulo Odoo.
-4. **④ Skills · Hooks · Debug** — siempre colapsados, carga lazy al abrir.
+1. **① Changes** — timeline of every module's `journal` (diary entry with date, icon and module), most recent first.
+2. **② Tasks** — pending items (`- [ ]`) grouped by module, ordered by recent modification.
+3. **③ Docs** — each module's markdown, **rendered** inline (lazy-loaded via `/file`), with a **"view description ↗"** link to the Odoo module's `static/description/index.html`.
+4. **④ Skills · Hooks · Debug** — always collapsed, lazy-loaded on open.
 
-Arriba, una tira de **métricas** (Trees · Groves · vendors · relations) + un desplegable **Forest · git** (estado por Branch: branch, ahead/behind, dirty).
+At the top, a strip of **metrics** (Trees · Groves · vendors · relations) + a **Forest · git** dropdown (status per Branch: branch, ahead/behind, dirty).
 
-Comportamiento de lectura:
-- **Descubrimiento recursivo**: encuentra cada `.roots` con `context.md` a cualquier profundidad (worktree raíz y/o subcarpetas anidadas).
-- **Expandir lo reciente**: los módulos modificados más recientemente arrancan expandidos (primera pantalla); el resto, colapsados + lazy.
-- **Íconos Odoo**: si el módulo tiene `static/description/icon.png`, se muestra junto a su nombre.
-- El expand/colapso que hagas se preserva entre refrescos.
+Reading behavior:
+- **Recursive discovery**: finds every `.roots` with a `context.md` at any depth (root worktree and/or nested subfolders).
+- **Expand what's recent**: the most recently modified modules start expanded (first screen); the rest, collapsed + lazy.
+- **Odoo icons**: if the module has `static/description/icon.png`, it is shown next to its name.
+- The expand/collapse you do is preserved across refreshes.
 
-### Endpoint de archivos
+### File endpoint
 
-`serve.py` expone `GET /file?path=<rel>` para servir archivos del workspace (íconos, `.md`, `index.html` de descripción) con **guarda anti-traversal** (el target real debe quedar dentro de `--root`). Los `.md` se sirven como texto plano y el front los renderiza con un parser markdown propio (sin dependencias).
+`serve.py` exposes `GET /file?path=<rel>` to serve workspace files (icons, `.md`, description `index.html`) with an **anti-traversal guard** (the real target must stay inside `--root`). The `.md` files are served as plain text and the front-end renders them with its own markdown parser (no dependencies).
 
-## Mapeo a Odoo (odoo_moldeo_sync / odoo_moldeo_htree)
+## Mapping to Odoo (odoo_moldeo_sync / odoo_moldeo_htree)
 
-El `state.json` es el puente. Cada parte de la vista tiene su equivalente Odoo:
+The `state.json` is the bridge. Each part of the view has its Odoo equivalent:
 
-| Vista (este módulo) | Odoo |
+| View (this module) | Odoo |
 |---------------------|------|
-| `metrics` | tarjetas de dashboard / `ir.actions.client` |
-| `Tree` (repo, nodo del árbol) | kanban card / agrupador **htree** |
-| `Branch` (worktree, fila) | línea de lista (`one2many`) con badges |
-| `Grove` (producto/suite) | grupo kanban / categoría |
-| `relations[]` (grafo) | diagrama de dependencias / `ir.actions` |
-| jerarquía colapsable Forest→Grove→Tree→Branch→.roots | el patrón **htree** |
+| `metrics` | dashboard cards / `ir.actions.client` |
+| `Tree` (repo, tree node) | kanban card / **htree** grouper |
+| `Branch` (worktree, row) | list line (`one2many`) with badges |
+| `Grove` (product/suite) | kanban group / category |
+| `relations[]` (graph) | dependency diagram / `ir.actions` |
+| collapsible Forest→Grove→Tree→Branch→.roots hierarchy | the **htree** pattern |
 
-Para portar: `odoo_moldeo_sync` produce el mismo JSON desde sus modelos (un endpoint/controller), y la vista OWL/QWeb consume idéntico contrato. La parte de scraping (`collect.py`) puede vivir como servicio/cron que alimenta esos modelos.
+To port: `odoo_moldeo_sync` produces the same JSON from its models (an endpoint/controller), and the OWL/QWeb view consumes the identical contract. The scraping part (`collect.py`) can live as a service/cron feeding those models.
 
-## Requisitos
+## Requirements
 
-- Python 3.8+ (solo stdlib)
-- `git` en PATH
-- Los repos montados con bare+worktrees (ej. vía `setup-module.sh` / `setupbranch.sh`)
+- Python 3.8+ (stdlib only)
+- `git` in PATH
+- Repos mounted with bare+worktrees (e.g. via `setup-module.sh` / `setupbranch.sh`)
