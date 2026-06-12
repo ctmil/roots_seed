@@ -1,7 +1,7 @@
 # 🌳 roots_seed
 
 > **Moldeo Roots Seed** — Agentic Persistent Memory.
-> A template + toolkit for giving AI agents and human developers a durable, structured memory that lives *with the code*.
+> A template + toolkit for giving AI agents and human developers a durable, structured memory that lives *with the code* — and turning a set of repos into a **living, observable ecosystem** you can supervise as it evolves.
 
 ```
                     &&&  & &&&&&  &
@@ -77,6 +77,32 @@ A `.roots/` adapts to what it documents. The mode is chosen once on bootstrap an
 | **+ domain pack** | a domain overlay (e.g. `narrative`) on any of the above | extra domain folders |
 
 The namespaced modes (Source / Client branch) share the multi-source machinery — embedded sources, a **precedence cascade** (client > embedded > original), a **conflict namespace**, and semi-automatic **discovery promotion** back to the source. A **migration** can temporarily fork a flat repo into namespaced and collapse back. Detail: **[`roots_seed.md` → Working modes](roots_seed.md)**.
+
+---
+
+## A living ecosystem (Odoo platforms & community)
+
+`roots_seed` is built for **maintaining platforms as suites of Odoo module extensions** — a core module plus extension modules that depend on shared platforms (OCAPI, OCA, Odoo core). These are modeled as **Groves** related by **dependency edges**, never by nesting (`meli_oerp_multiple` *is part of* the `meli` Grove and *depends on* `odoo_connector_api` — two different axes).
+
+What makes it an **ecosystem and not a pile of drifting forks** is that the source ↔ deployment flow is **bidirectional**:
+
+- a deployment (a client branch) **embeds** the `.roots/` of every source it consumes — carrying that source's docs, fixes, patterns and decisions with it;
+- a useful discovery made downstream (a fix, a reusable pattern, an architectural decision) is **promoted back** to the original source — semi-automatically, with the human deciding what graduates;
+- the public **upstream** (`ctmil/roots_seed`) is checked before processing, and generic improvements can be contributed back the same way.
+
+So **community and per-client contributions don't drift away — they flow into the sources and back out**, keeping the whole thing a living, self-healing ecosystem. (And the **language-lock** guarantees this never costs you noise: updating the shared seed never rewrites the memory a deployment already wrote.)
+
+---
+
+## Observable
+
+The Forest is meant to be **watched as it evolves**. The bundled **[`forest-dashboard`](tools/forest-dashboard/)** is an internal control panel — in the browser, run **locally or on a remote server over SSH** — that scans `git` + every `.roots/` and surfaces the live state of the ecosystem: **Groves → Trees → Branches**, the `relations` dependency graph, `vendor`s, and the `collective/` lineage.
+
+```bash
+python3 tools/forest-dashboard/serve.py --root .   # → http://127.0.0.1:8787/
+```
+
+Its collector emits a **portable JSON contract** (`state.json`) — the *same shape* an Odoo backend can produce from its own models — so the panel runs identically off a local workspace or off a deployed instance, and the supervision layer isn't tied to any one IDE or tool. Detail: **[`tools/forest-dashboard/`](tools/forest-dashboard/)**.
 
 ---
 
