@@ -1,65 +1,66 @@
 # Roots Seed - Agentic Memory Structure
 
-> Plantilla maestra para crear estructura de documentación y memoria de desarrollo. Este archivo define los estándares de formato, estilo y protocolos de poblado.
+> Master template for creating a development documentation and memory structure. This file defines the formatting standards, style, and population protocols.
 
-> ⚠️ **Antes de usar o procesar este seed, consultá SIEMPRE los últimos cambios del upstream fuente
-> [`github.com/ctmil/roots_seed`](https://github.com/ctmil/roots_seed).** Este archivo puede ser una
-> **copia distribuida** y estar desactualizada respecto del canonical (compará el campo `Versión` /
-> changelog). El seed evoluciona — no asumas que esta copia es la última. Ver § "Sync con canonical upstream".
+> ⚠️ **Before using or processing this seed, ALWAYS check the latest changes of the upstream source
+> [`github.com/ctmil/roots_seed`](https://github.com/ctmil/roots_seed).** This file may be a
+> **distributed copy** and out of date with respect to the canonical (compare the `Version` field /
+> changelog). The seed evolves — do not assume this copy is the latest. See § "Sync with the canonical upstream".
 
-**Versión:** 1.13
+**Version:** 1.14
 
 **Changelog:**
-- **1.13** (08 Junio 2026) — Nueva carpeta **`collective/`**: memoria **permanente** de influencias/referencias de terceros que nutren al proyecto (personas, ideas, sitios, obras, organizaciones, libros). Es la contraparte permanente del `workbench/` (efímero) — la diferencia es la **permanencia**; lo que en workbench merece quedar se **promueve** a collective. Ramifica hacia adentro en subcarpetas emergentes (no se fuerza `code/inspiration`): para código funciona como **contrib**, para proyectos creativos como **fuentes de inspiración** atribuidas. Subcarpeta **`library/`** de primera clase (bibliografía comentada como corpus + graduación a ficha por libro). Cada ficha lleva **atribución/copyright**, **Contacto** (mail/tel/WhatsApp/IG) y **Medios** (imágenes/videos, local o remoto) con regla de privacidad. El `.roots/` como **nuevo formato de escritura**: la ficha es texto vivo con bitácora de seguimiento. El **`forest-dashboard`** surfacea el collective (nueva pestaña **Collective**: familias → fichas por proyecto, con apertura inline del `.md` + **preview de contacto** —mail/IG— **e imagen** por ficha). Refuerzo de la directiva de consultar siempre el upstream `ctmil/roots_seed`.
-- **1.12** (04 Junio 2026) — Nueva sección **Agentes y skills — biblioteca importable (on-demand)**. Dos capas + base: **store** en `<repo>/.roots/{agents,skills}/` (**trackeado** → versionado, evoluciona, copiable), **activación** en `<repo>/.claude/{agents,skills}/` (local, **no trackeado** → copiás ahí lo que querés usar de forma general), y **base** cross-cliente en `roots_seed/{agents,skills}/`. Regla: **no precargar todo** — el seed informa qué existe; se importa a demanda. Ciclo: diseñar en `.roots/agents/` del workspace → activar en `.claude/` y probar → promover a `roots_seed/` → referenciar acá. Subagentes Forest-aware por *concern* (ej. `odoo-architect`, `bug-hunter`, `odoo-migrator`, `designer`).
-- **1.11** (03 Junio 2026) — **`forest-dashboard`** (re-planteo del visor con la nomenclatura Forest; antes `fleet-dashboard`). El colector lee los ejes nuevos de `forest.json` (`groves[]`/`vendors[]`/`relations[]` + `grove`/`vendor`/`kind`/`org` por Tree) y los emite en `state.json`. La vista suma una pestaña **Forest map** (Groves → Trees → Branches con badges `vendor`/`kind`) y un **grafo SVG de `relations`** (arc-diagram, aristas coloreadas por tipo). Rebrand: *flota→Forest · repo→Tree · worktree→Branch*. `fleet.json` sigue siendo symlink→`forest.json` (compat). El contrato `state.json` mantiene `repos[]` (port Odoo intacto).
-- **1.10** (02 Junio 2026) — **Recetas por dominio** + **manual completo** + **economía de tokens**. Nueva carpeta `recipes/` con 4 recetas aplicadas del modelo `.roots`/Forest: (1) suite de módulos de extensión Odoo (Grove=suite, Tree=módulo, relations=depends), (2) bosque de diseños (1 vendor-artista > N trees > diseños; puente `ai_context_md`↔`.roots`), (3) narrativa/juego como **domain pack** (`working_mode: narrative`: worldbible, fichas, arcos=branches, skills de personaje ≡ skills de IA), (4) economía de tokens. Tesis transversal: **3 primitivos (vendor · `relations[]` · branch) se reusan en N dominios**. Nuevo `manual.md` (puerta de entrada navegable). Nueva sección **Token economy & model benchmarking**: escalera de capas L0–L3, fórmula legible **CER** (útiles/cargados) + **FS** (si_leo_todo/cargados) + tiers de presupuesto, benchmark interno (`journal/benchmarks.md`) y repo de técnicas por modelo de IA (`skills/model-techniques.md`). No cambia el formato de `.roots/`.
-- **1.9** (02 Junio 2026) — Nueva sección **Forest Model** que formaliza y promueve al canónico el working_mode `workspace` (capa de coordinación por encima de N repos, antes extensión local). Define el vocabulario **Roots → Forest → Grove → Tree → Branch** y un schema multi-eje: cada Tree (repo) lleva `grove` (producto/suite primario), `also_groves` (tags de co-pertenencia genuina), `vendor` (autor/fabricante — **propiedad** con perfil opcional en `.roots/vendors/<slug>.md`), `kind` (`producto-suite`/`plataforma`/`agregador`/`external-upstream`/`seed`) y `org` (hosting). Las **dependencias se modelan como aristas** de un grafo dirigido (`relations[]`: `depends-on`/`extends`/`integrates`/`relates`), NUNCA como anidamiento ni tags — regla de oro: *grove = qué es · arista = qué usa · tag = también es de*. `forest.json` es el registro estructurado (rename de `fleet.json`, que queda como symlink por compat con el `forest-dashboard`; conserva el array `repos[]`). No cambia el formato de `.roots/` por-repo.
-- **1.8** (02 Junio 2026) — Nueva sección **Toolkit complementario (`scripts/` + `skills/` + `tools/`)**: sistematiza que la memoria `.roots/` vive sobre un sustrato de repos y que el seed se distribuye junto a herramientas que lo montan, lo mejoran y lo visualizan. `scripts/` (montaje/operación de la flota: `setup-module.sh`, `setupbranch.sh`, `dashboard.sh` — patrón bare+worktrees), `skills/` (biblioteca **compartida** de estrategias bien diseñadas: merging de módulos Odoo, reporting md→PDF — distinta del `skills/` local de cada `.roots`) y `tools/` (apps; primera: `forest-dashboard`, visor navegable que lee los `.roots` y mapea a un backend Odoo). Se **referencia**, no se inlinea código: cada elemento es self-contained con su README. No cambia el formato de `.roots/`.
-- **1.7** (30 Mayo 2026) — Nuevo **Modo Flat** (simplificado): `.roots/` directo en la raíz, sin namespace, para proyectos single-source con pocas/ninguna fuente remota embebida — el caso común. **Desacople de dos ejes** que v1.6 conflacionaba: el *layout del directorio* (`flat` vs `namespaced`) ahora es independiente de la *metadata de contexto* (`context_format`/`context_parsed`) — un repo flat puede declarar su contexto (ej. Odoo 17.0, dev) en `_meta.json` sin codificarlo en el path (registrar sin namespacear). Nueva **regla de decisión** del layout: lo define "¿necesito memoria multi-contexto concurrente?" (embeber N sources / multi-versión-cliente en paralelo / migración), NO "¿es Odoo?". Nuevo **Modo Migración**: un repo flat puede *forkear temporalmente* a namespaced durante una migración (ej. `.roots/17.0/` + `.roots/19.0/` lado a lado) y *colapsar de vuelta a flat* sobre la versión nueva. `_meta.json` extendido con `layout`. **Flat es el default del bootstrap** — la pregunta de modo solo se dispara ante señales de multi-source/multi-cliente. Script de inicialización a v1.7.
-- **1.6** (10 Mayo 2026) — Modos de trabajo replanteados como modelo híbrido multi-source. Nuevo **Context Format Registry** con contexto estructurado por dominio (Odoo como primer formato: `{major}.{minor}.{infra}.{project}`). Nuevo sistema de **Sources embebidos**: el cliente copia `.roots/` de cada source en `sources/`, con `_sources.json` como manifest de vinculación. **Cascada de precedencia** formalizada: cliente raíz > source embebido > source original. **Namespace de conflictos** con patrón `source.skill_name` y overrides del cliente. **Promoción semi-automática** de descubrimientos del cliente al source original. Nueva sección **Tool Compatibility** con filosofía tool-agnostic, 5 herramientas principales como referencia y merging strategies. `_meta.json` extendido con `context_format`, `context_parsed`, `sources`. Script de inicialización actualizado a v1.6.
-- **1.5** (30 Abril 2026) — Nueva sección "Modos de trabajo" con dos modos: **client branch** (`.roots/{version}.{client}/`) y **source** (`.roots/{module}/`). El modo se pregunta al usuario al procesar el seed por primera vez y se persiste en `_meta.json.working_mode`. Actualizada "Estructura Base" con ambos layouts. `on-seed-process` ampliado con paso 0 de detección de modo. Nuevo protocolo de merge entre namespaces de distintos clientes/branches. `_meta.json` extendido con campos `working_mode`, `odoo_version`, `repo`.
-- **1.4** (24 Abril 2026) — Nueva carpeta `workbench/` para materiales de referencia del usuario. Nueva sección "Sync con canonical upstream (ctmil/roots_seed)" con protocolo de comparación de versiones y reglas de contribución. Nueva sección "Integración con CLAUDE.md y Claude Code (.claude/)" con jerarquía de contexto, reglas de no-duplicación, template de CLAUDE.md, y tabla de compatibilidad futura. Nuevo hook `on-seed-process.md` que consolida bootstrap completo: sync upstream, distribución, verificación CLAUDE.md, y creación de workbench. `session-start` ampliado para listar `workbench/` al inicio.
-- **1.3** (18 Abril 2026) — Regla de distribución del seed dentro de cada `.roots/`. Cada módulo/proyecto lleva una **copia local** del seed que lo generó, así es self-contained y reprocesable aunque se extraiga a otro repo. Nuevo hook `on-seed-update` para re-distribuir al canonical bumpear versión. `session-start` ahora compara copia local vs canonical y avisa si están desincronizadas.
-- **1.2** (18 Abril 2026) — Incorporados tres protocolos al seed, tool-agnostic (aplicables a cualquier asistente de IA o desarrollador humano):
-  - Hook `on-topic-shift`: al cambiar de foco mid-sesión a un archivo/sistema no cubierto por el bootstrap, re-escanear `.roots/docs/` antes de pedir aclaraciones o decidir.
-  - Hook `on-task-done`: al completar cada tarea individual y antes de reportarla, actualizar mínimo `tasks/todo.md` + `tasks/tasks.md` + `docs/commits.md`. Condicionalmente `errors-log.md`, `fixes-log.md`, `decisions.md`, `notes.md`, `glossary.md`, `migrations.md`.
-  - `session-start` ampliado: chequeo de versión del seed contra memoria del agente, chequeo de git state (`git branch --show-current`, `git log`, `git status`) vs `_meta.json.active_branch`, aviso al humano si está desincronizado, lectura de `notes.md` y design docs del feature en curso.
-- **1.1** — Versión base.
+- **1.14** (12 June 2026) — **English becomes the canonical language of the seed** + a multilingual **glossary system** + a **language-lock**. The spec (`roots_seed.md`, `manual.md`) is now maintained in English (single evolving source). New section **Language & glossary (i18n)**: each `.roots/` deployment carries its own working language in `_meta.json.lang` (`"en"` default, `"es"`, `"fr"`, …) — **independent** of the seed's language; code/technical identifiers stay English regardless. **No-noise rule:** updating/re-distributing the seed NEVER translates or rewrites existing memory; `on-seed-process` gains step **0b** that **auto-detects** the language of an already-deployed `.roots/` and persists it (a Spanish project stays Spanish), and `on-seed-update` only refreshes the canonical `roots_seed.md` copy. New **`glossary/`** subsystem: `glossary.json` (canonical, English key + `es`/`fr` term+def + `category`/`see_also`) → `gen.py` generates `GLOSSARY.{en,es,fr}.md` tables (English primary; missing translations fall back to English, flagged). The per-module `docs/glossary.md` (domain terms, in the deployment's `lang`) is distinct from this Forest-vocabulary glossary. The `**Language**` style rows are now `lang`-driven. Does not change the `.roots/` format.
+- **1.13** (08 June 2026) — New folder **`collective/`**: **permanent** memory of third-party influences/references that nourish the project (people, ideas, sites, works, organizations, books). It is the permanent counterpart of `workbench/` (ephemeral) — the difference is **permanence**; whatever in the workbench deserves to stay is **promoted** to collective. It branches inward into emergent subfolders (`code/inspiration` is not forced): for code it works as a **contrib**, for creative projects as attributed **inspiration sources**. First-class **`library/`** subfolder (annotated bibliography as a corpus + graduation to a per-book entry). Each entry carries **attribution/copyright**, **Contact** (email/phone/WhatsApp/IG) and **Media** (images/videos, local or remote) with a privacy rule. The `.roots/` as a **new writing format**: the entry is living text with a follow-up log. The **`forest-dashboard`** surfaces the collective (new **Collective** tab: families → per-project entries, with inline opening of the `.md` + **contact preview** —email/IG— **and image** per entry). Reinforcement of the directive to always check the upstream `ctmil/roots_seed`.
+- **1.12** (04 June 2026) — New section **Agents and skills — importable library (on-demand)**. Two layers + base: **store** in `<repo>/.roots/{agents,skills}/` (**tracked** → versioned, evolves, copyable), **activation** in `<repo>/.claude/{agents,skills}/` (local, **not tracked** → you copy there what you want to use generally), and a cross-client **base** in `roots_seed/{agents,skills}/`. Rule: **do not preload everything** — the seed reports what exists; you import on demand. Cycle: design in the workspace's `.roots/agents/` → activate in `.claude/` and test → promote to `roots_seed/` → reference here. Forest-aware subagents by *concern* (e.g. `odoo-architect`, `bug-hunter`, `odoo-migrator`, `designer`).
+- **1.11** (03 June 2026) — **`forest-dashboard`** (re-framing of the viewer with the Forest nomenclature; formerly `fleet-dashboard`). The collector reads the new axes of `forest.json` (`groves[]`/`vendors[]`/`relations[]` + `grove`/`vendor`/`kind`/`org` per Tree) and emits them in `state.json`. The view adds a **Forest map** tab (Groves → Trees → Branches with `vendor`/`kind` badges) and an **SVG graph of `relations`** (arc-diagram, edges colored by type). Rebrand: *fleet→Forest · repo→Tree · worktree→Branch*. `fleet.json` remains a symlink→`forest.json` (compat). The `state.json` contract keeps `repos[]` (Odoo port intact).
+- **1.10** (02 June 2026) — **Per-domain recipes** + **full manual** + **token economy**. New folder `recipes/` with 4 applied recipes of the `.roots`/Forest model: (1) suite of Odoo extension modules (Grove=suite, Tree=module, relations=depends), (2) design forest (1 vendor-artist > N trees > designs; bridge `ai_context_md`↔`.roots`), (3) narrative/game as a **domain pack** (`working_mode: narrative`: worldbible, entries, arcs=branches, character skills ≡ AI skills), (4) token economy. Cross-cutting thesis: **3 primitives (vendor · `relations[]` · branch) are reused across N domains**. New `manual.md` (navigable front door). New section **Token economy & model benchmarking**: layer ladder L0–L3, readable **CER** formula (useful/loaded) + **FS** (if_I_read_everything/loaded) + budget tiers, internal benchmark (`journal/benchmarks.md`) and a repo of per-AI-model techniques (`skills/model-techniques.md`). Does not change the `.roots/` format.
+- **1.9** (02 June 2026) — New section **Forest Model** that formalizes and promotes to canonical the `workspace` working_mode (a coordination layer above N repos, formerly a local extension). Defines the vocabulary **Roots → Forest → Grove → Tree → Branch** and a multi-axis schema: each Tree (repo) carries `grove` (primary product/suite), `also_groves` (tags of genuine co-membership), `vendor` (author/maker — **ownership** with an optional profile in `.roots/vendors/<slug>.md`), `kind` (`producto-suite`/`plataforma`/`agregador`/`external-upstream`/`seed`) and `org` (hosting). **Dependencies are modeled as edges** of a directed graph (`relations[]`: `depends-on`/`extends`/`integrates`/`relates`), NEVER as nesting or tags — golden rule: *grove = what it is · edge = what it uses · tag = also belongs to*. `forest.json` is the structured registry (rename of `fleet.json`, which remains as a symlink for compat with the `forest-dashboard`; keeps the `repos[]` array). Does not change the per-repo `.roots/` format.
+- **1.8** (02 June 2026) — New section **Complementary toolkit (`scripts/` + `skills/` + `tools/`)**: systematizes that the `.roots/` memory lives on a substrate of repos and that the seed is distributed alongside tools that mount, improve and visualize it. `scripts/` (mounting/operating the fleet: `setup-module.sh`, `setupbranch.sh`, `dashboard.sh` — bare+worktrees pattern), `skills/` (a **shared** library of well-designed strategies: Odoo module merging, md→PDF reporting — distinct from the local `skills/` of each `.roots`) and `tools/` (apps; first: `forest-dashboard`, a navigable viewer that reads the `.roots` and maps to an Odoo backend). Code is **referenced**, not inlined: each element is self-contained with its README. Does not change the `.roots/` format.
+- **1.7** (30 May 2026) — New **Flat mode** (simplified): `.roots/` directly at the root, no namespace, for single-source projects with few/no embedded remote sources — the common case. **Decoupling of two axes** that v1.6 conflated: the *directory layout* (`flat` vs `namespaced`) is now independent of the *context metadata* (`context_format`/`context_parsed`) — a flat repo can declare its context (e.g. Odoo 17.0, dev) in `_meta.json` without encoding it in the path (register without namespacing). New layout **decision rule**: it is defined by "do I need concurrent multi-context memory?" (embed N sources / parallel multi-version-client / migration), NOT "is it Odoo?". New **Migration mode**: a flat repo can *temporarily fork* to namespaced during a migration (e.g. `.roots/17.0/` + `.roots/19.0/` side by side) and *collapse back to flat* on the new version. `_meta.json` extended with `layout`. **Flat is the bootstrap default** — the mode question is only triggered by signals of multi-source/multi-client. Initialization script bumped to v1.7.
+- **1.6** (10 May 2026) — Working modes reframed as a hybrid multi-source model. New **Context Format Registry** with per-domain structured context (Odoo as the first format: `{major}.{minor}.{infra}.{project}`). New **embedded sources** system: the client copies the `.roots/` of each source into `sources/`, with `_sources.json` as the linking manifest. **Precedence cascade** formalized: root client > embedded source > original source. **Conflict namespace** with the `source.skill_name` pattern and client overrides. **Semi-automatic promotion** of client discoveries to the original source. New section **Tool Compatibility** with a tool-agnostic philosophy, 5 main tools as a reference and merging strategies. `_meta.json` extended with `context_format`, `context_parsed`, `sources`. Initialization script updated to v1.6.
+- **1.5** (30 April 2026) — New "Working modes" section with two modes: **client branch** (`.roots/{version}.{client}/`) and **source** (`.roots/{module}/`). The mode is asked of the user when processing the seed for the first time and persisted in `_meta.json.working_mode`. Updated "Base structure" with both layouts. `on-seed-process` extended with step 0 of mode detection. New merge protocol between namespaces of different clients/branches. `_meta.json` extended with the `working_mode`, `odoo_version`, `repo` fields.
+- **1.4** (24 April 2026) — New `workbench/` folder for user reference materials. New section "Sync with the canonical upstream (ctmil/roots_seed)" with a version-comparison protocol and contribution rules. New section "Integration with CLAUDE.md and Claude Code (.claude/)" with a context hierarchy, no-duplication rules, a CLAUDE.md template, and a future-compatibility table. New hook `on-seed-process.md` that consolidates full bootstrap: upstream sync, distribution, CLAUDE.md verification, and workbench creation. `session-start` extended to list `workbench/` at startup.
+- **1.3** (18 April 2026) — Seed distribution rule inside each `.roots/`. Each module/project carries a **local copy** of the seed that generated it, so it is self-contained and reprocessable even if extracted to another repo. New hook `on-seed-update` to re-distribute when the canonical bumps version. `session-start` now compares the local copy vs the canonical and warns if they are out of sync.
+- **1.2** (18 April 2026) — Added three protocols to the seed, tool-agnostic (applicable to any AI assistant or human developer):
+  - Hook `on-topic-shift`: when shifting focus mid-session to a file/system not covered by the bootstrap, re-scan `.roots/docs/` before asking for clarification or deciding.
+  - Hook `on-task-done`: when completing each individual task and before reporting it, update at minimum `tasks/todo.md` + `tasks/tasks.md` + `docs/commits.md`. Conditionally `errors-log.md`, `fixes-log.md`, `decisions.md`, `notes.md`, `glossary.md`, `migrations.md`.
+  - `session-start` extended: check the seed version against the agent's memory, check git state (`git branch --show-current`, `git log`, `git status`) vs `_meta.json.active_branch`, warn the human if out of sync, read `notes.md` and design docs of the current feature.
+- **1.1** — Base version.
 
 ---
 
-## Concepto
+## Concept
 
-La carpeta `.roots/` funciona como **memoria persistente** del proyecto, organizada para:
-- Documentar decisiones y progreso
-- Mantener logs de errores y fixes
-- Registrar ideas y reflexiones
-- Trackear tareas pendientes
-- Definir skills y workflows reutilizables por módulo
+The `.roots/` folder works as the project's **persistent memory**, organized to:
+- Document decisions and progress
+- Keep logs of errors and fixes
+- Record ideas and reflections
+- Track pending tasks
+- Define reusable skills and workflows per module
 
-Esta estructura está diseñada para ser usada por **agentes de IA** y **desarrolladores humanos** por igual.
+This structure is designed to be used by **AI agents** and **human developers** alike.
 
 ---
 
-## Modos de trabajo
+## Working modes
 
-**Regla:** al procesar el seed por primera vez en un repo, el agente determina el modo. El **default es Flat** (el más simple — `.roots/` directo). El agente solo **pregunta** si detecta señales de un setup multi-source / multi-cliente (ver "¿Cuándo flat vs namespaced?"). El modo determina si `.roots/` lleva namespace interno y cómo se comportan los merges. Se persiste en `_meta.json` (`layout` + `working_mode`) y no se vuelve a preguntar.
+**Rule:** when processing the seed for the first time in a repo, the agent determines the mode. The **default is Flat** (the simplest — `.roots/` directly). The agent only **asks** if it detects signals of a multi-source / multi-client setup (see "When flat vs namespaced?"). The mode determines whether `.roots/` carries an internal namespace and how merges behave. It is persisted in `_meta.json` (`layout` + `working_mode`) and is not asked again.
 
-### Los modos
+### The modes
 
-| Modo | Layout | Namespace | Cuándo usar | Ejemplo |
+| Mode | Layout | Namespace | When to use | Example |
 |------|--------|-----------|-------------|---------|
-| **Flat** (default) | `flat` | ninguno — `.roots/` directo | Proyecto único, pocas/ninguna fuente remota embebida. El caso común. | `.roots/context.md`, `.roots/tasks/` |
-| **Source** | `namespaced` | `.roots/{module}/` | Repo source multi-módulo (fuente de verdad de varios módulos) | `.roots/meli_oerp/` |
-| **Client branch** | `namespaced` | `.roots/{context}.{project}/` | Branch de cliente que consume/embebe uno o más sources | `.roots/17.0.sh.acme/` |
-| **Workspace** | `flat` raíz + `geoecon/` etc. | coordina N repos | El `.roots/` vive en la carpeta que **contiene** varios repos y los indexa/relaciona (no documenta un proyecto). | `.roots/forest.json`, `.roots/<grove>/` |
+| **Flat** (default) | `flat` | none — `.roots/` directly | Single project, few/no embedded remote sources. The common case. | `.roots/context.md`, `.roots/tasks/` |
+| **Source** | `namespaced` | `.roots/{module}/` | Multi-module source repo (source of truth of several modules) | `.roots/meli_oerp/` |
+| **Client branch** | `namespaced` | `.roots/{context}.{project}/` | Client branch that consumes/embeds one or more sources | `.roots/17.0.sh.acme/` |
+| **Workspace** | `flat` root + `geoecon/` etc. | coordinates N repos | The `.roots/` lives in the folder that **contains** several repos and indexes/relates them (it does not document a project). | `.roots/forest.json`, `.roots/<grove>/` |
 
-> Los modos **Source** y **Client branch** son ambos `namespaced` y comparten la maquinaria multi-source descrita abajo (sources embebidos, `_sources.json`, cascada de precedencia, namespace de conflictos, promoción). El modo **Flat** NO usa nada de eso — saltá a "Modo Flat" si tu repo es un proyecto único. El modo **Workspace** opera *por encima* de los repos (cada uno con su propio modo) — ver "Forest Model".
+> The **Source** and **Client branch** modes are both `namespaced` and share the multi-source machinery described below (embedded sources, `_sources.json`, precedence cascade, conflict namespace, promotion). The **Flat** mode does NOT use any of that — jump to "Flat mode" if your repo is a single project. The **Workspace** mode operates *above* the repos (each with its own mode) — see "Forest Model".
 
-### Modo Flat (simplificado — default)
+### Flat mode (simplified — default)
 
-El caso más común: **un repo, un proyecto, una memoria**. `.roots/` lleva los archivos directamente, sin subdirectorio de namespace:
+The most common case: **one repo, one project, one memory**. `.roots/` carries the files directly, without a namespace subdirectory:
 
 ```
 .roots/
@@ -76,90 +77,90 @@ El caso más común: **un repo, un proyecto, una memoria**. `.roots/` lleva los 
 └── workbench/
 ```
 
-**Cuándo usar Flat:**
-- El repo es un proyecto/producto bespoke, no un módulo source consumido por N clientes.
-- No vas a **embeber `.roots/` de otras fuentes** (`sources/`) — o son muy pocas y las referenciás a mano.
-- No mantenés **múltiples versiones/clientes en paralelo** en el mismo working tree.
+**When to use Flat:**
+- The repo is a bespoke project/product, not a source module consumed by N clients.
+- You won't **embed the `.roots/` of other sources** (`sources/`) — or there are very few and you reference them by hand.
+- You don't maintain **multiple versions/clients in parallel** in the same working tree.
 
-**Qué NO trae Flat** (y no necesita): el subdir `{context}.{project}/`, el sistema `sources/` + `_sources.json`, la cascada de precedencia, el namespace de conflictos. Todo eso es maquinaria para multi-source; en flat es ceremonia sin valor.
+**What Flat does NOT bring** (and doesn't need): the `{context}.{project}/` subdir, the `sources/` + `_sources.json` system, the precedence cascade, the conflict namespace. All that is machinery for multi-source; in flat it is ceremony without value.
 
-**Contexto en Flat:** un repo flat **igual puede declarar** su `context_format` / `context_parsed` en `_meta.json` (ej. "Odoo 17.0, dev") para que el agente razone sobre el entorno — **sin** codificarlo en el path. El contexto es *metadata*, no *layout* (ver "Context Format Registry").
+**Context in Flat:** a flat repo **can still declare** its `context_format` / `context_parsed` in `_meta.json` (e.g. "Odoo 17.0, dev") so the agent can reason about the environment — **without** encoding it in the path. Context is *metadata*, not *layout* (see "Context Format Registry").
 
-`_meta.json` incluye `"layout": "flat"` + `"working_mode": "source"` (un flat es un source colapsado a un solo proyecto).
+`_meta.json` includes `"layout": "flat"` + `"working_mode": "source"` (a flat is a source collapsed to a single project).
 
-### ¿Cuándo flat vs namespaced? — la regla
+### When flat vs namespaced? — the rule
 
-El layout NO lo decide el framework ("es Odoo → namespaced"). Lo decide **una sola pregunta: ¿necesito tener memoria de múltiples contextos viva al mismo tiempo?**
+The layout is NOT decided by the framework ("it's Odoo → namespaced"). It is decided by **a single question: do I need to keep the memory of multiple contexts alive at the same time?**
 
-- **No** → **Flat.** Un proyecto que evoluciona hacia adelante. La versión vieja pasa a ser historia (git + `journal/changelog` + `debug/migrations.md`), no un namespace paralelo que seguís consultando.
-- **Sí** → **Namespaced.** Tres disparadores típicos:
-  1. **Multi-source:** embebés los `.roots/` de N módulos source (cliente híbrido).
-  2. **Multi-versión/cliente en paralelo:** el mismo código mantenido en Odoo 16 para cliente A y 17 para B, simultáneo.
-  3. **Migración** (ver "Modo Migración"): durante la ventana, dos versiones conviven.
+- **No** → **Flat.** A project that evolves forward. The old version becomes history (git + `journal/changelog` + `debug/migrations.md`), not a parallel namespace you keep consulting.
+- **Yes** → **Namespaced.** Three typical triggers:
+  1. **Multi-source:** you embed the `.roots/` of N source modules (hybrid client).
+  2. **Parallel multi-version/client:** the same code maintained on Odoo 16 for client A and 17 for B, simultaneously.
+  3. **Migration** (see "Migration mode"): during the window, two versions coexist.
 
-La mayoría de los repos bespoke (un producto, una versión, hacia adelante) son **Flat**. El namespaced es para sources reutilizables y para casas de software que mantienen muchos clientes/versiones en paralelo.
+Most bespoke repos (one product, one version, going forward) are **Flat**. Namespaced is for reusable sources and for software houses that maintain many clients/versions in parallel.
 
-### Modo Migración (flat → namespaced temporal → colapso)
+### Migration mode (flat → temporary namespaced → collapse)
 
-Una migración (ej. Odoo 17 → 19) es un caso *temporal* de "memoria multi-contexto concurrente". Un repo normalmente **flat** puede **forkear temporalmente** a namespaced para la transición, y **colapsar de vuelta** al terminar:
+A migration (e.g. Odoo 17 → 19) is a *temporary* case of "concurrent multi-context memory". A normally **flat** repo can **temporarily fork** to namespaced for the transition, and **collapse back** when finished:
 
 ```
-# Antes (flat, en producción sobre 17):
-.roots/                          ← memoria viva del proyecto en 17
+# Before (flat, in production on 17):
+.roots/                          ← live project memory on 17
 
-# Durante la migración (namespaced temporal):
-.roots/17.0.{infra}/             ← fork de la memoria de 17 (referencia: "cómo funciona hoy")
-.roots/19.0.{infra}/             ← memoria nueva que se acumula al migrar
+# During the migration (temporary namespaced):
+.roots/17.0.{infra}/             ← fork of the 17 memory (reference: "how it works today")
+.roots/19.0.{infra}/             ← new memory accumulated while migrating
 
-# Después (colapso a flat sobre 19):
-.roots/                          ← 19 promovido a flat; 17 archivado (git history + migrations.md)
+# After (collapse to flat on 19):
+.roots/                          ← 19 promoted to flat; 17 archived (git history + migrations.md)
 ```
 
-**Por qué sirve el namespace acá:** `{major}.{minor}` es exactamente el eje que la migración cambia. Partir la memoria por ese eje permite:
-- Mantener `.roots/17.0/` **intacto como source-of-truth del comportamiento actual** mientras construís el 19.
-- Que el agente lea **ambos** sin confundir (no aplicar un fix de 17 a un caso de 19; los ADRs quedan tagueados por versión).
-- Tratar la migración como un **fork de memoria**: las decisiones que sobreviven se migran, las version-specific se re-evalúan.
+**Why the namespace helps here:** `{major}.{minor}` is exactly the axis the migration changes. Splitting the memory along that axis lets you:
+- Keep `.roots/17.0/` **intact as the source-of-truth of the current behavior** while you build 19.
+- Let the agent read **both** without confusing them (don't apply a 17 fix to a 19 case; the ADRs stay tagged by version).
+- Treat the migration as a **memory fork**: the decisions that survive are migrated, the version-specific ones are re-evaluated.
 
-Al cerrar la migración, **colapsás de vuelta a flat**: promovés `19.0/` a `.roots/` raíz y archivás `17.0/` (su valor histórico vive en git + `debug/migrations.md`). No te quedás namespaced para siempre si no tenés otro disparador (multi-source / multi-cliente).
+When closing the migration, **you collapse back to flat**: you promote `19.0/` to the `.roots/` root and archive `17.0/` (its historical value lives in git + `debug/migrations.md`). You don't stay namespaced forever if you have no other trigger (multi-source / multi-client).
 
-### Modelo híbrido multi-source
+### Hybrid multi-source model
 
-> Aplica a los modos **namespaced** (Source / Client branch). En **Flat** no aplica.
+> Applies to the **namespaced** modes (Source / Client branch). It does NOT apply to **Flat**.
 
-Un proyecto cliente es siempre un **híbrido de uno o más sources**. El `.roots/` del cliente no es una isla — referencia y embebe los `.roots/` de cada source que consume:
+A client project is always a **hybrid of one or more sources**. The client's `.roots/` is not an island — it references and embeds the `.roots/` of each source it consumes:
 
 ```
 .roots/17.0.sh.acme/                    ← client branch
-    _meta.json                           ← manifest del cliente
-    _sources.json                        ← registro de sources vinculados
-    roots_seed.md                        ← seed self-contained
-    journal/                             ← journal propio del cliente
-    tasks/                               ← tasks propias del cliente
-    debug/                               ← errores del contexto del cliente
-    sources/                             ← copias de .roots/ de cada source
-        meli_oerp/                       ← copia del .roots/meli_oerp/
+    _meta.json                           ← client manifest
+    _sources.json                        ← registry of linked sources
+    roots_seed.md                        ← self-contained seed
+    journal/                             ← client's own journal
+    tasks/                               ← client's own tasks
+    debug/                               ← errors of the client context
+    sources/                             ← copies of each source's .roots/
+        meli_oerp/                       ← copy of .roots/meli_oerp/
             context.md
             journal/
             debug/
             skills/
-            docs/                        ← manuales, documentación técnica
-        odoo_moldeo_sync/                ← copia de otro source
+            docs/                        ← manuals, technical documentation
+        odoo_moldeo_sync/                ← copy of another source
             context.md
             journal/
             ...
 ```
 
-**¿Por qué embeber los sources?** Porque el agente del cliente tiene acceso completo al conocimiento del source:
-- Lee `docs/` → sabe cómo funciona el módulo para el usuario final
-- Lee `debug/errors-log.md` → conoce errores ya diagnosticados y sus fixes
-- Lee `skills/patterns.md` → sabe qué patrones seguir y qué anti-patrones evitar
-- Lee `tasks/` → ve si hay trabajo en marcha en el source que podría colisionar
-- Lee `journal/diary.md` → sabe si un tema recurrente ya fue discutido y qué se decidió
-- Lee `design/decisions.md` → entiende POR QUÉ se tomó una decisión de arquitectura
+**Why embed the sources?** Because the client's agent has full access to the source's knowledge:
+- Reads `docs/` → knows how the module works for the end user
+- Reads `debug/errors-log.md` → knows already-diagnosed errors and their fixes
+- Reads `skills/patterns.md` → knows which patterns to follow and which anti-patterns to avoid
+- Reads `tasks/` → sees whether there is work in progress in the source that could collide
+- Reads `journal/diary.md` → knows whether a recurring topic was already discussed and what was decided
+- Reads `design/decisions.md` → understands WHY an architecture decision was made
 
-### `_sources.json` — Manifest de sources vinculados
+### `_sources.json` — Manifest of linked sources
 
-Cada client branch mantiene un archivo `_sources.json` que registra sus sources:
+Each client branch maintains a `_sources.json` file that registers its sources:
 
 ```json
 {
@@ -190,84 +191,84 @@ Cada client branch mantiene un archivo `_sources.json` que registra sus sources:
 }
 ```
 
-| Campo | Descripción |
+| Field | Description |
 |-------|-------------|
-| `source_id` | Nombre/path del módulo source |
-| `source_version` | Versión del seed del source al momento de vinculación |
-| `linked_at` | Fecha de vinculación |
-| `linked_by` | Quién vinculó (agente o usuario) |
-| `upstream_url` | Repositorio público del source (si existe) |
-| `roots_path` | Path relativo dentro del client `.roots/` donde vive la copia |
-| `sync_include` | Carpetas a sincronizar (vacío = todas) |
-| `sync_exclude` | Carpetas a excluir del sync |
-| `last_sync` | Última fecha de sincronización |
+| `source_id` | Name/path of the source module |
+| `source_version` | Seed version of the source at the time of linking |
+| `linked_at` | Linking date |
+| `linked_by` | Who linked it (agent or user) |
+| `upstream_url` | Public repository of the source (if any) |
+| `roots_path` | Relative path inside the client `.roots/` where the copy lives |
+| `sync_include` | Folders to sync (empty = all) |
+| `sync_exclude` | Folders to exclude from the sync |
+| `last_sync` | Last synchronization date |
 
-### Cascada de precedencia
+### Precedence cascade
 
-Cuando hay conflictos entre el cliente y sus sources, la precedencia es de arriba hacia abajo:
-
-```
-Nivel 1 (máxima prioridad):  .roots/17.0.sh.acme/            ← cliente raíz
-Nivel 2:                      .roots/17.0.sh.acme/sources/X/  ← source embebido
-Nivel 3 (base):               X/.roots/                       ← source original
-```
-
-El cliente **siempre gana**. Si el cliente define un pattern o skill que contradice al source, el del cliente aplica.
-
-### Namespace de conflictos
-
-Cuando dos sources definen hooks, skills o patterns con el mismo nombre, se usa **namespace con prefijo del source**:
+When there are conflicts between the client and its sources, precedence is top to bottom:
 
 ```
-meli_oerp.discount_pattern        → PAT-001 del meli_oerp
-meli_oerp_accounting.tax_rule     → patrón del módulo de facturación
-odoo_moldeo_sync.git_workflow     → workflow del módulo de sync
+Level 1 (highest priority):  .roots/17.0.sh.acme/            ← root client
+Level 2:                      .roots/17.0.sh.acme/sources/X/  ← embedded source
+Level 3 (base):               X/.roots/                       ← original source
 ```
 
-El agente que procesa el `.roots/` raíz del repo (nivel meta) puede:
-1. **Comparar** — ¿el `meli_oerp.patterns` de un cliente y otro divergieron?
-2. **Promover** — si un cliente descubrió un patrón útil, subirlo al source original
-3. **Detectar** — si un skill del cliente sobreescribe uno del source, el agente avisa
+The client **always wins**. If the client defines a pattern or skill that contradicts the source, the client's applies.
 
-### Promoción de descubrimientos
+### Conflict namespace
 
-Cuando el cliente descubre algo valioso (pattern, fix, decisión) que aplica a todos los usuarios del source:
+When two sources define hooks, skills or patterns with the same name, a **namespace prefixed with the source** is used:
 
 ```
-source .roots/  ──→  client .roots/sources/  ──→  client usa y adapta
+meli_oerp.discount_pattern        → PAT-001 of meli_oerp
+meli_oerp_accounting.tax_rule     → pattern of the invoicing module
+odoo_moldeo_sync.git_workflow     → workflow of the sync module
+```
+
+The agent that processes the repo's root `.roots/` (meta level) can:
+1. **Compare** — did the `meli_oerp.patterns` of one client and another diverge?
+2. **Promote** — if a client discovered a useful pattern, push it up to the original source
+3. **Detect** — if a client skill overrides one from the source, the agent warns
+
+### Discovery promotion
+
+When the client discovers something valuable (pattern, fix, decision) that applies to all users of the source:
+
+```
+source .roots/  ──→  client .roots/sources/  ──→  client uses and adapts
                                                         │
                                                         ▼
-repo raíz .roots/ ← agrega todos los clients ← revisa con namespace
+root repo .roots/ ← aggregates all clients ← reviews with namespace
         │
         ▼
-    ¿vale la pena?  ──sí──→  promueve a source .roots/ original
-                    ──no──→  queda como override del cliente
+    worth it?  ──yes──→  promotes to the original source .roots/
+               ──no──→   stays as a client override
 ```
 
-**Regla:** la promoción es **semi-automática**. El agente sugiere ("este pattern de acme aplica a todos los clientes, ¿lo promuevo al source?"), el usuario decide.
+**Rule:** promotion is **semi-automatic**. The agent suggests ("this pattern from acme applies to all clients, should I promote it to the source?"), the user decides.
 
-Cuando el cliente override un skill o pattern del source, el agente registra el override en el journal del cliente con la razón.
+When the client overrides a skill or pattern from the source, the agent records the override in the client's journal with the reason.
 
-### Modo Client Branch
+### Client Branch mode
 
-El desarrollador trabaja en un branch derivado del source, adaptando y configurando para un cliente específico. El namespace aísla la historia de ese cliente.
+The developer works on a branch derived from the source, adapting and configuring it for a specific client. The namespace isolates that client's history.
 
-**Características:**
-- El namespace `{context}.{project}` sigue el formato del Context Format Registry (ver § siguiente)
-- Múltiples clientes pueden coexistir: `.roots/17.0.sh.acme/`, `.roots/17.0.premise.farmacia/`
-- Al mergear al source, cada cliente trae su `.roots/` sin pisar el de otros
-- `_meta.json` incluye `"working_mode": "client"`, `"context_format"`, `"context_parsed"`
+**Characteristics:**
+- The namespace `{context}.{project}` follows the Context Format Registry format (see § below)
+- Multiple clients can coexist: `.roots/17.0.sh.acme/`, `.roots/17.0.premise.farmacia/`
+- When merging to the source, each client brings its `.roots/` without overwriting others'
+- `_meta.json` includes `"working_mode": "client"`, `"context_format"`, `"context_parsed"`
 
-**Cuándo se usa:**
-- Branches de implementación para clientes específicos
-- Forks con customizaciones
-- Branches de testing/staging que capturan contexto del entorno
+**When it is used:**
+- Implementation branches for specific clients
+- Forks with customizations
+- Testing/staging branches that capture environment context
 
-### Modo Source
+### Source mode
 
-El desarrollador trabaja directamente en el source del módulo. Es la fuente de verdad.
+The developer works directly on the module's source. It is the source of truth.
 
-**Estructura:**
+**Structure:**
 ```
 .roots/
 ├── _meta.json
@@ -281,125 +282,125 @@ El desarrollador trabaja directamente en el source del módulo. Es la fuente de 
     └── ...
 ```
 
-**Características:**
-- Sin namespace extra — los módulos van directamente bajo `.roots/`
-- Es el `.roots/` canónico del proyecto
-- `_meta.json` incluye `"working_mode": "source"`
-- Puede recibir contribuciones promovidas desde client branches
+**Characteristics:**
+- No extra namespace — modules go directly under `.roots/`
+- It is the project's canonical `.roots/`
+- `_meta.json` includes `"working_mode": "source"`
+- Can receive contributions promoted from client branches
 
-**Cuándo se usa:**
-- Branch principal de desarrollo (ej: `19.0`, `main`)
-- Repositorio canónico del módulo
-- Mantenimiento del source sin contexto de cliente
+**When it is used:**
+- Main development branch (e.g.: `19.0`, `main`)
+- Canonical repository of the module
+- Source maintenance without client context
 
-### Detección de modo al procesar el seed
+### Mode detection on seed-process
 
-Al ejecutar `on-seed-process` por primera vez (bootstrap), el agente determina el layout. **El default es Flat** — NO se pregunta si el repo es un proyecto único. El agente solo pregunta cuando detecta **señales de namespaced**:
-- El repo es un **módulo source reutilizable** (lo consumen otros proyectos/clientes), o
-- Va a **embeber `.roots/` de otras fuentes** (`sources/`), o
-- Mantiene **múltiples versiones/clientes en paralelo**, o
-- Está entrando en una **migración** (ver Modo Migración).
+When running `on-seed-process` for the first time (bootstrap), the agent determines the layout. **The default is Flat** — it does NOT ask if the repo is a single project. The agent only asks when it detects **namespaced signals**:
+- The repo is a **reusable source module** (consumed by other projects/clients), or
+- It will **embed the `.roots/` of other sources** (`sources/`), or
+- It maintains **multiple versions/clients in parallel**, or
+- It is entering a **migration** (see Migration mode).
 
-Sin esas señales → Flat directo, sin preguntar. Con señales, el agente pregunta:
+Without those signals → Flat directly, without asking. With signals, the agent asks:
 
 ```
-Detecté señales de un setup multi-source/multi-cliente. ¿Qué layout uso?
+I detected signals of a multi-source/multi-client setup. Which layout do I use?
 
-0. Flat (default) — Un proyecto, una memoria. .roots/ directo, sin namespace.
-   → No se crea subdir. (Opcional: declarar context_format en _meta.json.)
+0. Flat (default) — One project, one memory. .roots/ directly, no namespace.
+   → No subdir is created. (Optional: declare context_format in _meta.json.)
 
-1. Source — Repo source multi-módulo (fuente de verdad de varios módulos).
-   → Se crea .roots/{module}/ por módulo.
+1. Source — Multi-module source repo (source of truth of several modules).
+   → .roots/{module}/ is created per module.
 
-2. Client branch — Branch de cliente que consume/embebe sources.
-   → Se crea .roots/{context}.{project}/ con namespace aislado.
-   → Se preguntará: context_format (Odoo/genérico/custom) + sources a vincular.
+2. Client branch — Client branch that consumes/embeds sources.
+   → .roots/{context}.{project}/ is created with an isolated namespace.
+   → It will ask: context_format (Odoo/generic/custom) + sources to link.
 ```
 
-La respuesta se persiste en `_meta.json` (`layout` + `working_mode`) y **no se vuelve a preguntar** en sesiones posteriores. Un repo Flat puede pasar a namespaced después (ej. al arrancar una migración) — ver Modo Migración.
+The answer is persisted in `_meta.json` (`layout` + `working_mode`) and **is not asked again** in later sessions. A Flat repo can become namespaced later (e.g. when starting a migration) — see Migration mode.
 
-### Merge entre modos
+### Merge between modes
 
-| Escenario | Comportamiento |
+| Scenario | Behavior |
 |-----------|----------------|
-| Client A → Source | `.roots/{context}.{client_a}/` coexiste con `.roots/{module}/` — no se pisan |
-| Client A + Client B | Cada client tiene su namespace, coexisten sin conflicto |
-| Client → Client (mismo namespace) | Git merge estándar — los archivos append-only (diary, errors-log) se resuelven naturalmente |
-| Source → Client | El client embebe el `.roots/` del source en `sources/` — es una copia de referencia |
-| Source actualiza → Client | El agente detecta diff entre source embebido y source original, propone sync |
+| Client A → Source | `.roots/{context}.{client_a}/` coexists with `.roots/{module}/` — they don't overwrite each other |
+| Client A + Client B | Each client has its namespace, they coexist without conflict |
+| Client → Client (same namespace) | Standard git merge — the append-only files (diary, errors-log) resolve naturally |
+| Source → Client | The client embeds the source's `.roots/` in `sources/` — it is a reference copy |
+| Source updates → Client | The agent detects a diff between the embedded source and the original source, proposes a sync |
 
-**Regla de merge:** al detectar múltiples namespaces en `.roots/`, **no consolidar automáticamente**. Cada namespace es una historia independiente. Si el usuario quiere consolidar (ej: cerrar un client branch y llevar lo aprendido al source), debe ser explícito:
+**Merge rule:** when detecting multiple namespaces in `.roots/`, **do not consolidate automatically**. Each namespace is an independent history. If the user wants to consolidate (e.g.: close a client branch and bring the learnings to the source), it must be explicit:
 
 ```
-"Consolidar .roots/17.0.sh.acme/ → .roots/meli_oerp/"
+"Consolidate .roots/17.0.sh.acme/ → .roots/meli_oerp/"
 ```
 
-El agente entonces:
-1. Lee ambos `.roots/`
-2. Propone qué migrar (decisions, patterns, glossary son buenos candidatos; diary y errors-log son contextuales)
-3. El usuario aprueba item por item
-4. Se mergea el contenido seleccionado
-5. El namespace del client puede archivarse o eliminarse
+The agent then:
+1. Reads both `.roots/`
+2. Proposes what to migrate (decisions, patterns, glossary are good candidates; diary and errors-log are contextual)
+3. The user approves item by item
+4. The selected content is merged
+5. The client's namespace can be archived or deleted
 
 ---
 
 ## Context Format Registry
 
-El `{context}` en `.roots/{context}.{project}/` (layout **namespaced**) no es un string libre — tiene **estructura semántica según el dominio**, que los agentes parsean para razonar sobre el entorno.
+The `{context}` in `.roots/{context}.{project}/` (**namespaced** layout) is not a free string — it has **semantic structure per domain**, which agents parse to reason about the environment.
 
-> **Layout vs metadata (v1.7):** el Context Format describe DOS cosas independientes — (1) cómo se *nombra* el subdir cuando el layout es `namespaced`, y (2) la *metadata* `context_format`/`context_parsed` del `_meta.json`. Un repo **Flat NO usa el subdir**, pero **puede declarar igual** `context_format`/`context_parsed` en su `_meta.json` para que el agente sepa "esto es Odoo 17.0, dev" sin codificarlo en el path. O sea: el contexto se puede **registrar sin namespacear**. El Registry de abajo define los formatos; aplican a la metadata en cualquier layout y al nombre del subdir solo en namespaced.
+> **Layout vs metadata (v1.7):** the Context Format describes TWO independent things — (1) how the subdir is *named* when the layout is `namespaced`, and (2) the `context_format`/`context_parsed` *metadata* of `_meta.json`. A **Flat repo does NOT use the subdir**, but **can still declare** `context_format`/`context_parsed` in its `_meta.json` so the agent knows "this is Odoo 17.0, dev" without encoding it in the path. In other words: context can be **registered without namespacing**. The Registry below defines the formats; they apply to the metadata in any layout and to the subdir name only in namespaced.
 
-### Formatos registrados
+### Registered formats
 
 #### Odoo Context
 
 **Pattern:** `{major}.{minor}.{infra}`
 
-| Segmento | Valores | Descripción |
+| Segment | Values | Description |
 |----------|---------|-------------|
-| `major` | `16`, `17`, `18`, `19` | Versión major de Odoo |
-| `minor` | `0`, `1`, ... | Versión minor de Odoo |
-| `infra` | `sh`, `premise`, `cp`, `vps`, `docker`, `dev` | Infraestructura de despliegue |
+| `major` | `16`, `17`, `18`, `19` | Odoo major version |
+| `minor` | `0`, `1`, ... | Odoo minor version |
+| `infra` | `sh`, `premise`, `cp`, `vps`, `docker`, `dev` | Deployment infrastructure |
 
-**Códigos de infraestructura recomendados:**
+**Recommended infrastructure codes:**
 
-| Código | Significado |
+| Code | Meaning |
 |--------|-------------|
-| `sh` | Odoo.sh (PaaS oficial) |
-| `premise` | On-premise (servidor propio del cliente) |
-| `cp` | CloudPepper (PaaS third-party) |
-| `vps` | VPS genérico |
-| `docker` | Docker / contenedores |
-| `dev` | Desarrollo / local |
+| `sh` | Odoo.sh (official PaaS) |
+| `premise` | On-premise (client's own server) |
+| `cp` | CloudPepper (third-party PaaS) |
+| `vps` | Generic VPS |
+| `docker` | Docker / containers |
+| `dev` | Development / local |
 
-**Ejemplos:**
+**Examples:**
 ```
-.roots/17.0.sh.acme/              → Odoo 17.0, SH, cliente Acme
-.roots/16.0.premise.farmacia/     → Odoo 16.0, on-premise, cliente Farmacia
-.roots/17.0.cp.tienda/            → Odoo 17.0, CloudPepper, cliente Tienda
-.roots/18.0.vps.coop/             → Odoo 18.0, VPS, cliente Coop
-.roots/19.0.dev.testing/          → Odoo 19.0, desarrollo, entorno testing
+.roots/17.0.sh.acme/              → Odoo 17.0, SH, client Acme
+.roots/16.0.premise.farmacia/     → Odoo 16.0, on-premise, client Farmacia
+.roots/17.0.cp.tienda/            → Odoo 17.0, CloudPepper, client Tienda
+.roots/18.0.vps.coop/             → Odoo 18.0, VPS, client Coop
+.roots/19.0.dev.testing/          → Odoo 19.0, development, testing environment
 ```
 
-Los códigos de infraestructura son **semi-abiertos**: se definen los comunes arriba, pero el usuario puede usar custom (ej: `aws`, `gcp`, `hetzner`).
+The infrastructure codes are **semi-open**: the common ones are defined above, but the user can use custom ones (e.g.: `aws`, `gcp`, `hetzner`).
 
 #### Generic Context (default)
 
 **Pattern:** `{version}`
 
-Para proyectos no-Odoo o sin estructura de dominio específica:
+For non-Odoo projects or projects without a domain-specific structure:
 ```
-.roots/v2.acme/                   → Versión 2, proyecto Acme
-.roots/main.internal/             → Branch main, proyecto interno
+.roots/v2.acme/                   → Version 2, project Acme
+.roots/main.internal/             → main branch, internal project
 ```
 
 #### Custom Contexts
 
-Los dominios pueden registrar su propio formato de contexto en `_meta.json`. El seed no pretende cubrir todos los frameworks — la comunidad puede contribuir formatos para Django, Rails, Next.js, etc.
+Domains can register their own context format in `_meta.json`. The seed does not pretend to cover all frameworks — the community can contribute formats for Django, Rails, Next.js, etc.
 
-### `context_parsed` en `_meta.json`
+### `context_parsed` in `_meta.json`
 
-El `_meta.json` de cada `.roots/` declara explícitamente su context format para que el agente pueda parsearlo:
+The `_meta.json` of each `.roots/` explicitly declares its context format so the agent can parse it:
 
 ```json
 {
@@ -413,13 +414,13 @@ El `_meta.json` de cada `.roots/` declara explícitamente su context format para
 }
 ```
 
-Así el agente puede razonar sobre el entorno (sabe que es Odoo 17 en SH) sin adivinar.
+This way the agent can reason about the environment (it knows it is Odoo 17 on SH) without guessing.
 
 ---
 
-## _meta.json extendido
+## Extended _meta.json
 
-**Flat (default)** — el caso simple; `context_format`/`context_parsed` son opcionales (metadata para razonar sobre el entorno, sin namespacear):
+**Flat (default)** — the simple case; `context_format`/`context_parsed` are optional (metadata to reason about the environment, without namespacing):
 
 ```json
 {
@@ -427,6 +428,7 @@ Así el agente puede razonar sobre el entorno (sabe que es Odoo 17 en SH) sin ad
   "created_at": "2026-05-30T00:00:00",
   "layout": "flat",
   "working_mode": "source",
+  "lang": "en",
   "context_format": "odoo",
   "context_parsed": { "major": 17, "minor": 0, "infra": "dev" },
   "project": "mi_proyecto",
@@ -434,7 +436,7 @@ Así el agente puede razonar sobre el entorno (sabe que es Odoo 17 en SH) sin ad
 }
 ```
 
-**Namespaced (Client branch / Source multi-módulo)** — usa el subdir + maquinaria multi-source:
+**Namespaced (Client branch / multi-module Source)** — uses the subdir + multi-source machinery:
 
 ```json
 {
@@ -442,6 +444,7 @@ Así el agente puede razonar sobre el entorno (sabe que es Odoo 17 en SH) sin ad
   "created_at": "2026-05-10T00:00:00",
   "layout": "namespaced",
   "working_mode": "client",
+  "lang": "es",
   "context_format": "odoo",
   "context_parsed": {
     "major": 17,
@@ -455,154 +458,201 @@ Así el agente puede razonar sobre el entorno (sabe que es Odoo 17 en SH) sin ad
 }
 ```
 
-| Campo | Flat (default) | Source | Client branch |
+| Field | Flat (default) | Source | Client branch |
 |-------|----------------|--------|---------------|
 | `layout` | `"flat"` | `"namespaced"` | `"namespaced"` |
 | `working_mode` | `"source"` | `"source"` | `"client"` |
-| `context_format` | opcional (metadata) | opcional | `"odoo"`/`"generic"`/custom |
-| `context_parsed` | opcional (metadata) | opcional | objeto parseado |
-| `project` | nombre del proyecto | nombre del proyecto | `"{context}.{project}"` |
-| `modules` | módulos del proyecto | módulos del source | módulos del cliente |
-| `sources` | normalmente ausente / `[]` | no aplica (es el source) | source_ids vinculados (ref. `_sources.json`) |
+| `lang` | working language (default `"en"`; **auto-detected** on existing deployments) | same | same |
+| `context_format` | optional (metadata) | optional | `"odoo"`/`"generic"`/custom |
+| `context_parsed` | optional (metadata) | optional | parsed object |
+| `project` | project name | project name | `"{context}.{project}"` |
+| `modules` | project modules | source modules | client modules |
+| `sources` | usually absent / `[]` | not applicable (it is the source) | linked source_ids (ref. `_sources.json`) |
 
-> `layout` ausente ⇒ asumir `"flat"` (back-compat: los `.roots/` pre-v1.7 sin `layout` que tienen archivos directos bajo `.roots/` ya son flat de hecho).
+> `layout` absent ⇒ assume `"flat"` (back-compat: pre-v1.7 `.roots/` without `layout` that have files directly under `.roots/` are already flat in fact).
+
+---
+
+## Language & glossary (i18n)
+
+> **The canonical seed is written in English.** But the language of the *memory you write into a `.roots/`* is a **per-deployment** choice that the seed must never override. This section defines that contract. The goal is **zero noise**: updating the seed must not change the language a project already writes in.
+
+### Two separate things
+
+1. **The seed's language** — `roots_seed.md`, `manual.md` and the rest of the toolkit are **canonical in English** (single source that evolves; one language to maintain).
+2. **A deployment's working language** — each `.roots/` writes its memory (context, journal, decisions, glossary…) in **one** working language, recorded in `_meta.json.lang` (BCP-47 short code: `"en"` default, `"es"`, `"fr"`, …). **Code and technical identifiers are always English regardless of `lang`** (field names, module names, commands).
+
+These are independent: an English canonical seed can drive a `.roots/` that is written entirely in Spanish.
+
+### The language-lock rule (no noise)
+
+- **New deployments** are born in **`en`** by default (the seed is English). The agent only asks if the user signals another language up front.
+- **Existing deployments** keep their language. On seed-process the agent **auto-detects** the language of the existing `.roots/` content and **persists** it to `_meta.json.lang` if absent. A `.roots/` already written in Spanish stays `"es"` — the agent keeps writing Spanish in that project.
+- **Updating / re-distributing the seed NEVER translates or rewrites existing memory.** `on-seed-update` only refreshes the canonical `roots_seed.md` copy (English) and the `glossary/` tables. Prose already written in a project is left untouched. The English-ification of the canonical seed is **not** a migration of your projects.
+- **Switching language** of a deployment is **explicit and rare** (`"set this .roots/ to en"`); it is never implied by a seed bump.
+
+### Auto-detection (on seed-process, step 0b)
+
+```
+if _meta.json.lang exists        → use it, do not ask, do not re-detect
+elif .roots/ already has content → detect dominant language of existing
+                                    *.md prose (context.md, journal/, decisions…)
+                                    → persist to _meta.json.lang  (NO rewrite of content)
+else (brand-new .roots/)         → default "en"  (ask only if the user signals otherwise)
+```
+
+The detection is a one-time stamp: once `lang` is set it is authoritative and the content is never machine-translated as a side effect.
+
+### The glossary system (`glossary/`)
+
+The cross-language **Forest vocabulary** lives in the seed's `glossary/`:
+
+| File | Role |
+|---|---|
+| `glossary.json` | **Canonical** source of truth. Key = English slug; each term has `en`/`es`/`fr` (`term` + `def`), a `category`, and `see_also`. |
+| `gen.py` | Generator (stdlib only) → emits one `GLOSSARY.<lang>.md` table per language. `--check` guards staleness. |
+| `GLOSSARY.{en,es,fr}.md` | **Generated** tables — do not edit by hand. |
+
+English is primary (the key); `es`/`fr` are translations and may lag (a missing one falls back to the English term, flagged). This gives an agent or human writing a project's `.roots/` in any `lang` a **consistent rendering of the model's terms** (Roots, Grove, Tree, modes, axes…). It is distinct from a project's own `docs/glossary.md`, which holds **domain** terms in that deployment's `lang`.
+
+> **To add/curate vocabulary:** edit `glossary/glossary.json`, run `python3 gen.py`, commit the regenerated tables. To add a language: extend `meta.languages` + `gen.py` headings.
 
 ---
 
 ## Tool Compatibility
 
-### Filosofía
+### Philosophy
 
-`.roots/` es **tool-agnostic by design**. La estructura es plain files y directories — cualquier herramienta de IA que pueda leer archivos puede usarla. La portabilidad viene de la **simplicidad y claridad de la descripción**, no de traducciones automáticas.
+`.roots/` is **tool-agnostic by design**. The structure is plain files and directories — any AI tool that can read files can use it. Portability comes from the **simplicity and clarity of the description**, not from automatic translations.
 
-### Herramientas principales con compatibilidad conocida
+### Main tools with known compatibility
 
-| Herramienta | Punto de integración | Estrategia de merge |
+| Tool | Integration point | Merge strategy |
 |-------------|---------------------|---------------------|
-| **Claude Code** | `.claude/` + `CLAUDE.md` | File-based — lee `.roots/` directamente. Bridge via `CLAUDE.md` (ver § Integración) |
-| **Codex** | `codex.md` / `.codex/` | Hybrid — mapear `context.md` → `codex.md`, tiene soporte nativo + config |
-| **Antigravity** | nativo | File-based — soporte directo de `.roots/` |
-| **VS Code + Copilot** | `.github/copilot-instructions.md` | Instruction-based — referenciar `.roots/` desde instructions |
-| **Cursor** | `.cursorrules` | Instruction-based — referenciar `.roots/` desde rules |
+| **Claude Code** | `.claude/` + `CLAUDE.md` | File-based — reads `.roots/` directly. Bridge via `CLAUDE.md` (see § Integration) |
+| **Codex** | `codex.md` / `.codex/` | Hybrid — map `context.md` → `codex.md`, has native support + config |
+| **Antigravity** | native | File-based — direct support of `.roots/` |
+| **VS Code + Copilot** | `.github/copilot-instructions.md` | Instruction-based — reference `.roots/` from instructions |
+| **Cursor** | `.cursorrules` | Instruction-based — reference `.roots/` from rules |
 
 ### Merging Strategies
 
-Cada herramienta integra contexto de forma diferente:
+Each tool integrates context differently:
 
-- **File-based**: La herramienta lee archivos de `.roots/` directamente al iniciar sesión (Claude Code, Antigravity)
-- **Instruction-based**: La herramienta necesita un archivo puntero que referencia `.roots/` (Copilot, Cursor)
-- **Hybrid**: La herramienta tiene soporte nativo + archivo de configuración (Codex)
+- **File-based**: The tool reads files from `.roots/` directly at session start (Claude Code, Antigravity)
+- **Instruction-based**: The tool needs a pointer file that references `.roots/` (Copilot, Cursor)
+- **Hybrid**: The tool has native support + a configuration file (Codex)
 
-### Extensibilidad
+### Extensibility
 
-- **Máximo 5 herramientas principales**, 10 tope en el seed — el resto es comunidad
-- Integraciones adicionales pueden contribuirse como skills en el upstream (`ctmil/roots_seed`)
-- La idea es que la descripción sea tan clara y simple que cualquier IA nueva la entienda sin traducción
-- Pensar siempre en base a una **progresión infinita de IAs** — las referencias a las 5 principales sirven para ubicar a futuras herramientas
+- **Maximum 5 main tools**, 10 cap in the seed — the rest is community
+- Additional integrations can be contributed as skills in the upstream (`ctmil/roots_seed`)
+- The idea is that the description be so clear and simple that any new AI understands it without translation
+- Always think in terms of an **infinite progression of AIs** — the references to the 5 main ones serve to situate future tools
 
 ---
 
-## Toolkit complementario (`scripts/` + `skills/` + `tools/`)
+## Complementary toolkit (`scripts/` + `skills/` + `tools/`)
 
-La estructura `.roots/` es **tool-agnostic** y se sostiene sola, pero la memoria persistente no vive en el aire: vive en **repos**. El seed se publica junto a un toolkit que monta ese sustrato, lo mejora y lo visualiza. Estas herramientas son **complementarias y opcionales** — no cambian el formato de `.roots/`; lo operan, lo enriquecen y lo exponen.
+The `.roots/` structure is **tool-agnostic** and stands on its own, but persistent memory does not live in thin air: it lives in **repos**. The seed is published alongside a toolkit that mounts that substrate, improves it and visualizes it. These tools are **complementary and optional** — they don't change the `.roots/` format; they operate it, enrich it and expose it.
 
-> **Principio:** el toolkit se **referencia, no se inlinea**. Cada herramienta es self-contained, con su propio README, y evoluciona aparte del spec. Esta sección sistematiza el concepto y apunta a los directorios; el código vive en ellos.
+> **Principle:** the toolkit is **referenced, not inlined**. Each tool is self-contained, with its own README, and evolves apart from the spec. This section systematizes the concept and points to the directories; the code lives in them.
 
-### `scripts/` — montar y operar la flota
+### `scripts/` — mount and operate the fleet
 
-Plantillas `.sh` que se copian a la raíz de un **workspace** (la carpeta que contiene los repos) y arman el sustrato físico de la memoria con el patrón **bare + worktrees** (un `.bare` por repo, un worktree por versión/branch — objetos git compartidos, espacio local optimizado):
+`.sh` templates copied to the root of a **workspace** (the folder that contains the repos) that build the physical substrate of the memory with the **bare + worktrees** pattern (one `.bare` per repo, one worktree per version/branch — shared git objects, optimized local space):
 
-| Script | Rol |
+| Script | Role |
 |--------|-----|
-| `setup-module.sh` | Clona un repo como bare + worktrees por branch |
-| `setupbranch.sh` | Agrega un worktree para un branch (auto-detecta existente/nuevo) |
-| `dashboard.sh` | Levanta el visor (`tools/forest-dashboard`) apuntando al workspace |
+| `setup-module.sh` | Clones a repo as bare + worktrees per branch |
+| `setupbranch.sh` | Adds a worktree for a branch (auto-detects existing/new) |
+| `dashboard.sh` | Launches the viewer (`tools/forest-dashboard`) pointing at the workspace |
 
-Ver `scripts/README.md`.
+See `scripts/README.md`.
 
-### `skills/` — estrategias reutilizables (biblioteca compartida)
+### `skills/` — reusable strategies (shared library)
 
-Skills **cross-cutting** y bien diseñadas que viven en el seed para mejorar estrategias comunes. Son la biblioteca **compartida**, distinta del `skills/` que cada `.roots` tiene localmente (`prompts.md`/`workflows.md`/`patterns.md` propios del módulo): un módulo referencia o copia/adapta desde acá, y promueve de vuelta lo que resulte general.
+**Cross-cutting** and well-designed skills that live in the seed to improve common strategies. They are the **shared** library, distinct from the `skills/` that each `.roots` has locally (`prompts.md`/`workflows.md`/`patterns.md` specific to the module): a module references or copies/adapts from here, and promotes back whatever turns out to be general.
 
-Primeras skills:
+First skills:
 
-| Skill | Para qué |
+| Skill | For what |
 |-------|----------|
-| `odoo-module-merging.md` | Merge de branches/clientes hacia repos oficiales Odoo: revisión por capas, patrones de conflicto cross-versión, promoción del `.roots` |
-| `md-to-pdf-reporting.md` | `manual.md` / `documentation.md` → PDF (pandoc / HTML+CSS / QWeb Odoo) — base del reporting |
+| `odoo-module-merging.md` | Merge of branches/clients toward official Odoo repos: layered review, cross-version conflict patterns, `.roots` promotion |
+| `md-to-pdf-reporting.md` | `manual.md` / `documentation.md` → PDF (pandoc / HTML+CSS / Odoo QWeb) — reporting base |
 
-Ver `skills/README.md`.
+See `skills/README.md`.
 
-### `tools/` — apps sobre la memoria
+### `tools/` — apps on top of the memory
 
-Aplicaciones que **leen los `.roots`** y los exponen. Primera del toolkit:
+Applications that **read the `.roots`** and expose them. First of the toolkit:
 
-- **`forest-dashboard/`** — visor web navegable (viñetas → drill-down recursivo, HERO de cambios + tabs de tareas/docs). Arquitectura en 3 capas: colector → `state.json` (contrato reusable) → vista. Pensado como **base para portar a un backend Odoo** (ej. `odoo_moldeo_sync`), donde el mismo `state.json` se emite desde modelos y la jerarquía mapea a un patrón de árbol (`odoo_moldeo_htree`).
+- **`forest-dashboard/`** — navigable web viewer (cards → recursive drill-down, changes HERO + tabs for tasks/docs). Architecture in 3 layers: collector → `state.json` (reusable contract) → view. Designed as a **base to port to an Odoo backend** (e.g. `odoo_moldeo_sync`), where the same `state.json` is emitted from models and the hierarchy maps to a tree pattern (`odoo_moldeo_htree`).
 
-Ver `tools/<nombre>/README.md`.
+See `tools/<name>/README.md`.
 
-### Relación con el spec
+### Relationship with the spec
 
-El toolkit asume el patrón bare+worktrees, pero el **formato `.roots/` no depende de él**: cualquier proyecto (un solo repo, un solo dir) usa la misma estructura de memoria sin necesidad del toolkit. Adoptá las herramientas si te sirven; ignoralas si tu setup es más simple.
+The toolkit assumes the bare+worktrees pattern, but the **`.roots/` format does not depend on it**: any project (a single repo, a single dir) uses the same memory structure without needing the toolkit. Adopt the tools if they help you; ignore them if your setup is simpler.
 
 ---
 
-## Forest Model — coordinación de workspace (multi-repo)
+## Forest Model — workspace coordination (multi-repo)
 
-> Esta sección formaliza el working_mode **`workspace`**: un `.roots/` que no documenta *un* proyecto sino que **coordina N repos** desde la carpeta que los contiene. Es la capa que usan los `scripts/` y el `forest-dashboard` del toolkit. **No reemplaza** los modos por-repo (Flat/Source/Client-branch) — vive *por encima* de ellos.
+> This section formalizes the **`workspace`** working_mode: a `.roots/` that does not document *a* project but **coordinates N repos** from the folder that contains them. It is the layer used by the toolkit's `scripts/` and the `forest-dashboard`. It **does not replace** the per-repo modes (Flat/Source/Client-branch) — it lives *above* them.
 
-### Cuándo aplica
+### When it applies
 
-Cuando montás varios repos juntos (patrón bare+worktrees) y necesitás un lugar que **indexe y relacione** la flota sin duplicar las memorias que ya viven en cada repo. La regla de oro del nivel workspace: **indexar y apuntar, no duplicar** — el `.roots/` raíz coordina; las memorias reales siguen en `<repo>/<worktree>/.roots`.
+When you mount several repos together (bare+worktrees pattern) and need a place that **indexes and relates** the fleet without duplicating the memories that already live in each repo. The golden rule of the workspace level: **index and point, don't duplicate** — the root `.roots/` coordinates; the real memories stay in `<repo>/<worktree>/.roots`.
 
-### Vocabulario (crece de las raíces)
+### Vocabulary (grows from the roots)
 
-La metáfora arranca en `.roots` y sube:
+The metaphor starts at `.roots` and goes up:
 
-| Término | Es | Ejemplo |
+| Term | Is | Example |
 |---|---|---|
-| **Roots** (`.roots`) | la capa de memoria/conocimiento | `context.md`, `decisions.md`, `journal/` |
-| **Forest** | el workspace entero — todos los repos coordinados | la carpeta que contiene los repos |
-| **Grove** | un **producto/suite**: cluster de Trees con función común | Meli · OCAPI · GeoEcon |
-| **Tree** | un **repo** (montado bare+worktrees) | `meli_oerp`, `geoecon_map` |
-| **Branch** | un git branch / worktree del Tree | `17.0`, `mapdev` |
+| **Roots** (`.roots`) | the memory/knowledge layer | `context.md`, `decisions.md`, `journal/` |
+| **Forest** | the whole workspace — all coordinated repos | the folder that contains the repos |
+| **Grove** | a **product/suite**: a cluster of Trees with a common function | Meli · OCAPI · GeoEcon |
+| **Tree** | a **repo** (mounted bare+worktrees) | `meli_oerp`, `geoecon_map` |
+| **Branch** | a git branch / worktree of the Tree | `17.0`, `mapdev` |
 
-> Calza con git: un worktree contiene un *working **tree*** y los branches son *ramas*.
+> Fits git: a worktree contains a *working **tree*** and the branches are *branches*.
 
-### Ejes de cada Tree (ortogonales)
+### Axes of each Tree (orthogonal)
 
-Un Tree se describe con etiquetas **independientes**; no confundir "qué es" con "quién lo hace", "dónde vive" o "qué usa":
+A Tree is described with **independent** labels; don't confuse "what it is" with "who makes it", "where it lives" or "what it uses":
 
-| Eje | Pregunta | Cardinalidad | Valores |
+| Axis | Question | Cardinality | Values |
 |---|---|---|---|
-| `grove` | ¿de qué **producto** es parte? | **1 primario** | Meli, OCAPI, Fulfillment, GeoEcon… |
-| `also_groves` | ¿co-pertenece a otro producto? (raro) | 0..N tags | solo co-pertenencia genuina, **NO** dependencia |
-| `vendor` | ¿quién lo **crea/mantiene**? | 1 (propiedad) | `moldeo-interactive`, `oca`, `odoo-sa`, `3rd-party` |
-| `kind` | ¿qué **naturaleza** tiene? | 1 | enum abajo |
-| `org` | ¿dónde **vive** el repo? (hosting) | 1 | la org/namespace de hosting |
+| `grove` | which **product** is it part of? | **1 primary** | Meli, OCAPI, Fulfillment, GeoEcon… |
+| `also_groves` | does it co-belong to another product? (rare) | 0..N tags | only genuine co-membership, **NOT** dependency |
+| `vendor` | who **creates/maintains** it? | 1 (ownership) | `moldeo-interactive`, `oca`, `odoo-sa`, `3rd-party` |
+| `kind` | what **nature** does it have? | 1 | enum below |
+| `org` | where does the repo **live**? (hosting) | 1 | the hosting org/namespace |
 
-**`kind` enum:** `producto-suite` (producto de usuario) · `plataforma` (base abstracta de la que dependen otros) · `agregador` (deployment que anida módulos de muchos Groves) · `external-upstream` (vendorizado, no lo autoramos: Odoo core, OCA) · `seed` (tooling/semilla de roots).
+**`kind` enum:** `producto-suite` (end-user product) · `plataforma` (abstract base that others depend on) · `agregador` (deployment that nests modules from many Groves) · `external-upstream` (vendored, not authored by us: Odoo core, OCA) · `seed` (roots tooling/seed).
 
-**`vendor` = propiedad + perfil opcional:** `vendor` es un campo del Tree, NO un nodo estructural. Opcionalmente cada vendor/autor/persona tiene un perfil en `.roots/vendors/<slug>.md` (su "raíz propia" descriptiva) que la propiedad referencia. Un mismo actor puede ser vendor (autor) y Grove (producto) sin chocar.
+**`vendor` = ownership + optional profile:** `vendor` is a field of the Tree, NOT a structural node. Optionally each vendor/author/person has a profile in `.roots/vendors/<slug>.md` (its descriptive "own root") that ownership references. The same actor can be a vendor (author) and a Grove (product) without clashing.
 
-### Relaciones = grafo (la regla de oro)
+### Relations = graph (the golden rule)
 
-> **`grove` = "qué es" · arista = "qué usa" · `also_groves` = "también es de" (raro).**
+> **`grove` = "what it is" · edge = "what it uses" · `also_groves` = "also belongs to" (rare).**
 
-Las **dependencias NO se modelan como pertenencia ni como anidamiento** — son **aristas** de un grafo dirigido (DAG). Una base compartida (ej. una plataforma `connector_api`) es **dependida por Trees de productos distintos**; si la dependencia fuera membership/jerarquía romperíamos los productos (un nodo no puede tener dos padres; un tag de plataforma significaría a la vez "es parte de" y "depende de").
+**Dependencies are NOT modeled as membership or as nesting** — they are **edges** of a directed graph (DAG). A shared base (e.g. a `connector_api` platform) is **depended on by Trees of different products**; if the dependency were membership/hierarchy we would break the products (a node can't have two parents; a platform tag would mean both "is part of" and "depends on" at once).
 
-`relations[]`: `{ "from": <tree/módulo>, "to": <tree/módulo/servicio>, "type": <tipo> }` — tipos: `depends-on`, `extends`, `integrates`, `relates`.
+`relations[]`: `{ "from": <tree/module>, "to": <tree/module/service>, "type": <type> }` — types: `depends-on`, `extends`, `integrates`, `relates`.
 
-### `forest.json` — registro estructurado
+### `forest.json` — structured registry
 
-Es el rename de `fleet.json`. El `forest-dashboard` lee `forest.json` (con fallback a `fleet.json`); **se mantiene `fleet.json` como symlink** para compat con tools viejos o forks upstream. El array sigue siendo `repos[]` con `name`/`role`/`notes`; los ejes nuevos (`grove`/`vendor`/`kind`/`org`) se agregan como campos adicionales (un tool viejo ignora lo que no conoce).
+It is the rename of `fleet.json`. The `forest-dashboard` reads `forest.json` (with fallback to `fleet.json`); **`fleet.json` is kept as a symlink** for compat with old tools or upstream forks. The array is still `repos[]` with `name`/`role`/`notes`; the new axes (`grove`/`vendor`/`kind`/`org`) are added as additional fields (an old tool ignores what it doesn't know).
 
 ```jsonc
 {
   "vocabulary": "Roots > Forest > Grove > Tree > Branch",
   "groves":  [ { "id": "ocapi", "label": "OCAPI", "kind": "plataforma", "vendor": "moldeo-interactive" } ],
   "vendors": [ { "id": "moldeo-interactive", "label": "Moldeo Interactive", "profile": "vendors/moldeo-interactive.md" } ],
-  "repos": [               // = Trees (clave 'repos' por compat con el dashboard)
+  "repos": [               // = Trees ('repos' key for compat with the dashboard)
     { "name": "meli_oerp_multiple", "org": "...", "grove": "meli", "vendor": "moldeo-interactive",
       "kind": "producto-suite", "role": "source", "worktrees": ["17.0"], "bare_size": "4.3M" }
   ],
@@ -613,160 +663,160 @@ Es el rename de `fleet.json`. El `forest-dashboard` lee `forest.json` (con fallb
 }
 ```
 
-> El nivel workspace se registra en `_meta.json` con `working_mode: "workspace"`. El `forest-dashboard` **dibuja `relations[]` como grafo** en su pestaña *Forest map*.
+> The workspace level is registered in `_meta.json` with `working_mode: "workspace"`. The `forest-dashboard` **draws `relations[]` as a graph** in its *Forest map* tab.
 
-### Semáforo de sync (multi-sesión sobre el mismo source)
+### Sync semaphore (multi-session over the same source)
 
-Cuando varias sesiones (agénticas o humanas) trabajan sobre los **mismos worktrees** de un Tree
-(módulo bare + N branches/versiones), una puede pisar cambios **sin commitear** de otra. Para
-coordinar sin commits ni locks de git, el seed define un **semáforo liviano por módulo**:
+When several sessions (agentic or human) work over the **same worktrees** of a Tree
+(a bare module + N branches/versions), one can overwrite **uncommitted** changes of another. To
+coordinate without git commits or locks, the seed defines a **lightweight per-module semaphore**:
 
-- **Un flag por Tree, en el CONTENEDOR de sus branches** (NO recursivo por branch — sería lento y
-  dejaría flags *stale* si una sesión muere): `<wt_container>/<module>/.SYNCING`.
-- **Contenido** (lectura/escritura instantánea): `FREE` (liberado) | `LOCKED|by=…|since=ISO8601|scope=…|task=…`.
-- **Flujo**: antes de portar/sincronizar un módulo cross-versión → `check`; si `LOCKED` por otro y
-  reciente, **esperar**; si `FREE` → `acquire`, hacer el sync, `release` (deja `FREE`).
-- **Vista forest**: `list` escanea todos los `.SYNCING` (no hay archivo agregado que mantener
-  en sync — los flags por-módulo SON la fuente de verdad).
-- **Stale**: un `LOCKED` más viejo que un umbral (def. 2h) se considera abandonado y se puede tomar
-  (`SYNC_FORCE=1`). Identidad de sesión por `SYNC_WHO`.
-- Los `.SYNCING` son **runtime** (fuera de git, no se commitean). Helper de referencia:
+- **One flag per Tree, in the CONTAINER of its branches** (NOT recursive per branch — it would be slow and
+  would leave *stale* flags if a session dies): `<wt_container>/<module>/.SYNCING`.
+- **Content** (instant read/write): `FREE` (released) | `LOCKED|by=…|since=ISO8601|scope=…|task=…`.
+- **Flow**: before porting/syncing a module cross-version → `check`; if `LOCKED` by another and
+  recent, **wait**; if `FREE` → `acquire`, do the sync, `release` (leaves `FREE`).
+- **Forest view**: `list` scans all the `.SYNCING` (there is no aggregate file to keep
+  in sync — the per-module flags ARE the source of truth).
+- **Stale**: a `LOCKED` older than a threshold (def. 2h) is considered abandoned and can be taken
+  (`SYNC_FORCE=1`). Session identity via `SYNC_WHO`.
+- The `.SYNCING` are **runtime** (out of git, not committed). Reference helper:
   `scripts/sync-lock.sh {check|acquire|release|list}`.
 
-> Por qué contenedor y no por-branch: un sync cross-versión toca **todas** las branches del módulo,
-> así que el flag natural es a nivel módulo (un archivo, rápido), no 1-por-branch (N archivos, stale).
+> Why container and not per-branch: a cross-version sync touches **all** the branches of the module,
+> so the natural flag is at the module level (one file, fast), not 1-per-branch (N files, stale).
 
 ---
 
-## Recetas por dominio (`recipes/` + `manual.md`)
+## Per-domain recipes (`recipes/` + `manual.md`)
 
-El modelo `.roots`/Forest no es solo para Odoo: los mismos primitivos aplican a software, diseño y narrativa. El detalle aplicado vive en `recipes/` (referenciado, no inlineado); la puerta de entrada navegable es `manual.md`.
+The `.roots`/Forest model is not only for Odoo: the same primitives apply to software, design and narrative. The applied detail lives in `recipes/` (referenced, not inlined); the navigable front door is `manual.md`.
 
-**Tesis:** tres primitivos se reusan en N dominios →
+**Thesis:** three primitives are reused across N domains →
 
-| Primitivo | Código (Odoo) | Diseño (Folio) | Narrativa/juego |
+| Primitive | Code (Odoo) | Design (Folio) | Narrative/game |
 |---|---|---|---|
-| **vendor** | quién mantiene el módulo | el artista/usuario | el autor/guionista |
-| **`relations[]`** | `depends-on` entre módulos | prototype→layout, work→author | personaje→NPC, escena→escena, concepto↔concepto |
-| **branch** | branch git | variante de diseño (`prototype.branch`) | arco de guión (canon/what-if/playtest) |
+| **vendor** | who maintains the module | the artist/user | the author/screenwriter |
+| **`relations[]`** | `depends-on` between modules | prototype→layout, work→author | character→NPC, scene→scene, concept↔concept |
+| **branch** | git branch | design variant (`prototype.branch`) | script arc (canon/what-if/playtest) |
 
-Recetas (`recipes/`):
-1. **odoo-suite** — `Grove = suite · Tree = módulo · relations = depends`.
-2. **design-forest** — `1 vendor (artista) > N trees > diseños`; puente `ai_context_md` ↔ `.roots/context.md`.
-3. **narrative-game** — domain pack `working_mode: narrative` (worldbible, fichas, arcos=branches, **skills de personaje ≡ skills de IA**).
-4. **token-economy** — ver sección siguiente.
+Recipes (`recipes/`):
+1. **odoo-suite** — `Grove = suite · Tree = module · relations = depends`.
+2. **design-forest** — `1 vendor (artist) > N trees > designs`; bridge `ai_context_md` ↔ `.roots/context.md`.
+3. **narrative-game** — domain pack `working_mode: narrative` (worldbible, entries, arcs=branches, **character skills ≡ AI skills**).
+4. **token-economy** — see the next section.
 
-> **Domain pack:** un overlay de dominio (carpetas extra como `worldbible/`, `arcs/`) sobre cualquier modo base, marcado en `_meta.json` (ej. `working_mode: "narrative"`). Reusa el esqueleto del seed; no lo reemplaza.
+> **Domain pack:** a domain overlay (extra folders like `worldbible/`, `arcs/`) on top of any base mode, marked in `_meta.json` (e.g. `working_mode: "narrative"`). Reuses the seed skeleton; does not replace it.
 
 ---
 
 ## Token economy & model benchmarking
 
-El `.roots` ahorra tokens por diseño: **leer por capas, no recargar el corpus cada turno**. Aplica a cualquier `.roots`.
+The `.roots` saves tokens by design: **read by layers, don't reload the corpus every turn**. Applies to any `.roots`.
 
-### Escalera de capas
+### Layer ladder
 
 ```
-L0  índice barato     context.md · _meta.json · forest.json · MEMORY    (casi siempre)
-L1  slice activo      tasks/todo.md + _meta.current_feature + 1–2 docs   (la tarea)
-L2  doc de dominio    drill on-demand: UN archivo de docs/                (cuando hace falta)
-L3  corpus completo   leer todo                                          (raro, explícito)
+L0  cheap index       context.md · _meta.json · forest.json · MEMORY    (almost always)
+L1  active slice      tasks/todo.md + _meta.current_feature + 1–2 docs   (the task)
+L2  domain doc        drill on-demand: ONE file from docs/               (when needed)
+L3  full corpus       read everything                                    (rare, explicit)
 ```
-Regla: quedate en la capa más baja que resuelva la tarea. `hooks/` y `_meta.current_feature` existen para cargar el slice correcto sin barrer todo.
+Rule: stay at the lowest layer that solves the task. `hooks/` and `_meta.current_feature` exist to load the right slice without sweeping everything.
 
-### Fórmula (dos números legibles)
+### Formula (two readable numbers)
 
-- **CER** (Context Efficiency Ratio) = `tokens_útiles / tokens_cargados` — densidad de lo leído.
-- **FS** (Frugality Score) = `tokens_si_leo_todo / tokens_cargados` — "leí 1/N del corpus".
-- **Tiers** (tokens cargados): trivial ≤5k (L0) · normal ≤20k (L0+L1) · deep ≤80k (L0+L1+L2) · full sin tope (L3, justificar).
+- **CER** (Context Efficiency Ratio) = `useful_tokens / loaded_tokens` — density of what was read.
+- **FS** (Frugality Score) = `tokens_if_I_read_everything / loaded_tokens` — "I read 1/N of the corpus".
+- **Tiers** (loaded tokens): trivial ≤5k (L0) · normal ≤20k (L0+L1) · deep ≤80k (L0+L1+L2) · full no cap (L3, justify).
 
-### Benchmark + técnicas
+### Benchmark + techniques
 
-- `journal/benchmarks.md` — fila por sesión: `fecha · modelo · tarea · tokens_in/out · capas · FS · calidad(1–5) · nota`.
-- `skills/model-techniques.md` — destilado por modelo (cuándo usar Opus/Sonnet/Haiku, patrones de prompt, caché ~5min, cuándo delegar a subagentes, cuándo subir a L3).
-- Loop: **medir → destilar técnica → aplicar → medir**. El conocimiento de cómo gastar tokens bien se persiste, no se reaprende.
+- `journal/benchmarks.md` — one row per session: `date · model · task · tokens_in/out · layers · FS · quality(1–5) · note`.
+- `skills/model-techniques.md` — per-model distillate (when to use Opus/Sonnet/Haiku, prompt patterns, cache ~5min, when to delegate to subagents, when to move up to L3).
+- Loop: **measure → distill technique → apply → measure**. The knowledge of how to spend tokens well is persisted, not relearned.
 
-Detalle: `recipes/token-economy.md`.
+Detail: `recipes/token-economy.md`.
 
 ---
 
-## Agentes y skills — biblioteca importable (on-demand)
+## Agents and skills — importable library (on-demand)
 
-> Los **skills** y los **subagentes** (formato Claude Code) forman una **biblioteca canónica que crece** en `roots_seed/{skills,agents}/` y se **referencia** desde este `roots_seed.md`. Cada repo guarda su copia en **`.roots/{skills,agents}/`** — porque **`.roots` siempre va trackeado/commiteado** (versionado, evoluciona, viaja con la distribución del seed). `.claude/{skills,agents}/` es **solo activación**: copiás ahí lo que querés que Claude Code use **de forma general**; es local y **no necesita trackearse**.
+> The **skills** and the **subagents** (Claude Code format) form a **canonical library that grows** in `roots_seed/{skills,agents}/` and is **referenced** from this `roots_seed.md`. Each repo keeps its copy in **`.roots/{skills,agents}/`** — because **`.roots` always goes tracked/committed** (versioned, evolves, travels with the seed's distribution). `.claude/{skills,agents}/` is **activation only**: you copy there what you want Claude Code to use **generally**; it is local and **does not need to be tracked**.
 
-**Dos capas + base (no confundir):**
+**Two layers + base (don't confuse them):**
 
-| Capa | Dónde | ¿Trackeado? | Rol |
+| Layer | Where | Tracked? | Role |
 |---|---|---|---|
-| **Store** | `<repo>/.roots/{agents,skills}/` | **sí** (con el repo) | donde **viven** y evolucionan; fuente de verdad local; copiables |
-| **Activación** | `<repo>/.claude/{agents,skills}/` | no (local) | copiás aquí lo que querés usar; Claude Code lee de acá |
-| **Base** | `roots_seed/{agents,skills}/` | sí (seed) | biblioteca cross-cliente de la que todos se nutren |
+| **Store** | `<repo>/.roots/{agents,skills}/` | **yes** (with the repo) | where they **live** and evolve; local source of truth; copyable |
+| **Activation** | `<repo>/.claude/{agents,skills}/` | no (local) | you copy here what you want to use; Claude Code reads from here |
+| **Base** | `roots_seed/{agents,skills}/` | yes (seed) | cross-client library everyone draws from |
 
-**Por qué importar on-demand:** la base puede volverse enorme. No se precarga todo en cada cliente: el seed informa *qué existe y dónde*; copiás a `.roots/` lo que ese repo necesita y **activás en `.claude/`** lo que vas a usar (encaja con la *escala de capas* de Token economy: la biblioteca es L2/L3, no L0).
+**Why import on-demand:** the base can become huge. Not everything is preloaded in each client: the seed reports *what exists and where*; you copy to `.roots/` what that repo needs and **activate in `.claude/`** what you are going to use (fits the *layer ladder* of Token economy: the library is L2/L3, not L0).
 
-**Ciclo de vida:**
-1. **Diseñar** en `.roots/agents/` (o `.roots/skills/`) del workspace; **activar** copiando a `.claude/` y probar en uso real.
-2. **Promover** la versión probada a la base del seed (`roots_seed/{agents,skills}/`).
-3. **Referenciar** acá para que todo cliente lo descubra.
-4. En cada cliente: la copia vive en su `.roots/` (tracked) y se **activa on-demand** en `.claude/` cuando hace falta.
+**Lifecycle:**
+1. **Design** in the workspace's `.roots/agents/` (or `.roots/skills/`); **activate** by copying to `.claude/` and test in real use.
+2. **Promote** the tested version to the seed base (`roots_seed/{agents,skills}/`).
+3. **Reference** here so every client discovers it.
+4. In each client: the copy lives in its `.roots/` (tracked) and is **activated on-demand** in `.claude/` when needed.
 
-**Subagente** (`<name>.md`): persona experta con **su propio contexto**, `tools` restringidas y `model`. Catálogo inicial (Forest-aware: leen `forest.json`/`.roots`, respetan `grove`/`vendor` y los sources read-only):
+**Subagent** (`<name>.md`): an expert persona with **its own context**, restricted `tools` and `model`. Initial catalog (Forest-aware: they read `forest.json`/`.roots`, respect `grove`/`vendor` and the read-only sources):
 
-| Agente | Para | Modelo |
+| Agent | For | Model |
 |---|---|---|
-| `odoo-architect` | arquitectura: modelos, herencia, ADRs | opus |
-| `bug-hunter` | diagnóstico + fix mínimo de bugs | sonnet |
+| `odoo-architect` | architecture: models, inheritance, ADRs | opus |
+| `bug-hunter` | diagnosis + minimal bug fix | sonnet |
 | `odoo-migrator` | backport/forward-port 16↔17↔18↔19 | opus |
-| `designer` | UI/UX: layouts Folio, geoecon_map, dark theme (Figma MCP) | sonnet |
+| `designer` | UI/UX: Folio layouts, geoecon_map, dark theme (Figma MCP) | sonnet |
 
-**Skill** (`<name>/SKILL.md`): procedimiento/conocimiento reutilizable; un agente puede usar skills (ej. `odoo-migrator` usa `odoo-module-merging`).
+**Skill** (`<name>/SKILL.md`): a reusable procedure/knowledge; an agent can use skills (e.g. `odoo-migrator` uses `odoo-module-merging`).
 
-> El `forest-dashboard` y el toolkit ya siguen este patrón (referenciados, no inlineados). Los agentes se **diseñan en `.roots/agents/`** y, ya probados, se promueven al seed.
+> The `forest-dashboard` and the toolkit already follow this pattern (referenced, not inlined). Agents are **designed in `.roots/agents/`** and, once tested, promoted to the seed.
 
 ---
 
-## Distribución del seed (obligatorio)
+## Seed distribution (mandatory)
 
-**Regla:** cada `.roots/` lleva una copia del seed que lo generó, como `.roots/roots_seed.md`. No es opcional — es el mecanismo que hace al módulo self-contained y reprocesable.
+**Rule:** each `.roots/` carries a copy of the seed that generated it, as `.roots/roots_seed.md`. It is not optional — it is the mechanism that makes the module self-contained and reprocessable.
 
-### Por qué
+### Why
 
-1. **Self-contained:** si el módulo se extrae a otro repo, el seed viaja con él. Cualquier AI/humano que abra el módulo aislado tiene la spec para interpretar y mantener el `.roots/`.
-2. **Reprocesable:** ante duda sobre convenciones, el agente puede releer el seed local y reaplicar sin depender del canonical (que puede haberse movido o no estar accesible).
-3. **Versionable:** la copia local refleja con qué versión del seed se generó este `.roots/`. Permite detectar desync y migrar convenciones cuando el canonical evoluciona.
-4. **Auditable:** diff entre copia local y canonical = delta pendiente de aplicar al módulo.
+1. **Self-contained:** if the module is extracted to another repo, the seed travels with it. Any AI/human who opens the isolated module has the spec to interpret and maintain the `.roots/`.
+2. **Reprocessable:** when in doubt about conventions, the agent can re-read the local seed and reapply without depending on the canonical (which may have moved or not be accessible).
+3. **Versionable:** the local copy reflects which seed version this `.roots/` was generated with. It allows detecting desync and migrating conventions when the canonical evolves.
+4. **Auditable:** diff between the local copy and canonical = delta pending to apply to the module.
 
-### Dónde vive el canonical
+### Where the canonical lives
 
-El canonical del seed vive en el módulo que lo mantiene. En este repo:
+The seed's canonical lives in the module that maintains it. In this repo:
 
 ```
 odoo_moldeo_roots/roots_seed.md   ← canonical (editable)
 ```
 
-Toda copia distribuida lleva el header:
+Every distributed copy carries the header:
 
 ```html
 <!-- CANONICAL: odoo_moldeo_roots/roots_seed.md -->
-<!-- Esto es una COPIA distribuida del seed para que el módulo sea self-contained. -->
-<!-- Para cambios permanentes: editar el canonical y re-distribuir a todos los .roots/. -->
-<!-- Para cambios locales experimentales: agregar nota al pie de este archivo. -->
+<!-- This is a distributed COPY of the seed so the module is self-contained. -->
+<!-- For permanent changes: edit the canonical and re-distribute to all .roots/. -->
+<!-- For local experimental changes: add a footnote to this file. -->
 ```
 
-### Cuándo re-distribuir
+### When to re-distribute
 
-- **Al crear un `.roots/` nuevo** → copiar el canonical con header (parte del bootstrap del módulo).
-- **Al bumpear la versión del canonical** → ejecutar `hooks/on-seed-update.md` → re-distribuir a todas las copias del repo.
-- **Al traer un módulo externo que ya tiene `.roots/`** → comparar seed embebido vs canonical, resolver delta.
+- **When creating a new `.roots/`** → copy the canonical with header (part of the module bootstrap).
+- **When bumping the canonical version** → run `hooks/on-seed-update.md` → re-distribute to all the repo's copies.
+- **When bringing in an external module that already has `.roots/`** → compare embedded seed vs canonical, resolve the delta.
 
-### Comando de distribución (one-shot, tool-agnostic)
+### Distribution command (one-shot, tool-agnostic)
 
 ```bash
-SEED="odoo_moldeo_roots/roots_seed.md"  # ajustar según repo
+SEED="odoo_moldeo_roots/roots_seed.md"  # adjust per repo
 HEADER='<!-- CANONICAL: '"$SEED"' -->
-<!-- Esto es una COPIA distribuida del seed para que el módulo sea self-contained. -->
-<!-- Para cambios permanentes: editar el canonical y re-distribuir a todos los .roots/. -->
-<!-- Para cambios locales experimentales: agregar nota al pie de este archivo. -->
+<!-- This is a distributed COPY of the seed so the module is self-contained. -->
+<!-- For permanent changes: edit the canonical and re-distribute to all .roots/. -->
+<!-- For local experimental changes: add a footnote to this file. -->
 
 '
 find . -type d -name ".roots" -not -path "*/node_modules/*" | while read -r dir; do
@@ -776,231 +826,231 @@ done
 
 ---
 
-## Workbench — Materiales de referencia
+## Workbench — Reference materials
 
-**Regla:** cada `.roots/{module}/` incluye una carpeta `workbench/` como espacio libre para materiales de referencia que el usuario comparte durante el trabajo.
+**Rule:** each `.roots/{module}/` includes a `workbench/` folder as free space for reference materials the user shares during work.
 
-### Qué va en workbench/
+### What goes in workbench/
 
-- Imágenes, screenshots, mockups
-- PDFs, documentos de análisis
-- Videos o links a videos
-- Datasets de ejemplo, CSVs
-- Archivos de terceros para estudio
-- Cualquier material que el usuario pase como referencia
+- Images, screenshots, mockups
+- PDFs, analysis documents
+- Videos or links to videos
+- Sample datasets, CSVs
+- Third-party files for study
+- Any material the user passes as reference
 
-### Reglas
+### Rules
 
-1. **El usuario es quien llena el workbench** — el agente no inventa contenido aquí; sólo lo consulta.
-2. **El agente DEBE revisar `workbench/`** al inicio de sesión (ver `session-start`) y al cambiar de tema (ver `on-topic-shift`). Si hay archivos nuevos, leerlos o mencionar su existencia.
-3. **No hay formato obligatorio** — es un espacio libre, no requiere estructura interna.
-4. **Los archivos pueden ser temporales** — el usuario puede borrar materiales obsoletos sin consecuencias.
-5. **No se redistribuye** — a diferencia del seed, el contenido del workbench es local al módulo y no se copia entre `.roots/`.
-6. **Si un material inspira una decisión** → referenciar en `design/decisions.md` (ej: "ver `workbench/mockup-v3.png`").
-7. **Gitignore selectivo** — archivos pesados (videos, datasets grandes) pueden agregarse a `.gitignore` del módulo; los livianos (screenshots, notas) se commitean.
+1. **The user is the one who fills the workbench** — the agent does not invent content here; it only consults it.
+2. **The agent MUST review `workbench/`** at session start (see `session-start`) and on topic shift (see `on-topic-shift`). If there are new files, read them or mention their existence.
+3. **There is no mandatory format** — it is free space, it does not require internal structure.
+4. **Files can be temporary** — the user can delete obsolete materials without consequences.
+5. **It is not redistributed** — unlike the seed, the workbench content is local to the module and is not copied between `.roots/`.
+6. **If a material inspires a decision** → reference it in `design/decisions.md` (e.g.: "see `workbench/mockup-v3.png`").
+7. **Selective gitignore** — heavy files (videos, large datasets) can be added to the module's `.gitignore`; the light ones (screenshots, notes) are committed.
 
 ---
 
-## Collective — influencias y referencias del proyecto (permanente)
+## Collective — project influences and references (permanent)
 
-**Regla:** cada `.roots/{module}` (y/o el nivel grove/proyecto) puede incluir una carpeta `collective/`:
-la **memoria permanente** de las **referencias de terceros** que nutren al proyecto — personas, ideas,
-sitios, obras, organizaciones, libros. Es el registro de *de quién/qué nos nutrimos*, con atribución.
+**Rule:** each `.roots/{module}` (and/or the grove/project level) can include a `collective/` folder:
+the **permanent memory** of the **third-party references** that nourish the project — people, ideas,
+sites, works, organizations, books. It is the record of *who/what we draw from*, with attribution.
 
-**`collective` ≠ `workbench` — la diferencia es la PERMANENCIA:**
+**`collective` ≠ `workbench` — the difference is PERMANENCE:**
 
 | | `workbench/` | `collective/` |
 |---|---|---|
-| Naturaleza | mesa de trabajo | memoria / linaje / contrib |
-| Permanencia | **efímero** (se borra sistemáticamente) | **se conserva** |
-| Contenido | material que el usuario tira para una tarea | referencias curadas y atribuidas |
-| Redistribución | local al módulo, no se copia | parte de la memoria versionada del repo |
+| Nature | work surface | memory / lineage / contrib |
+| Permanence | **ephemeral** (deleted systematically) | **kept** |
+| Content | material the user drops for a task | curated and attributed references |
+| Redistribution | local to the module, not copied | part of the repo's versioned memory |
 
-Lo que en `workbench/` inspira algo y **merece quedar** → se **promueve** a una ficha en `collective/`.
+What in `workbench/` inspires something and **deserves to stay** → is **promoted** to an entry in `collective/`.
 
-### Ramificación (categorías emergentes)
-`collective/` **ramifica hacia adentro** en subcarpetas según lo que el autor necesite seguir de cerca.
-**No** hay categorías fijas (no se fuerza `code/`/`inspiration/`): emergen del proyecto. Cada subcarpeta
-es una *familia* de referencias con su `README.md` (qué agrupa + formato de nombre) + fichas `.md`.
-Para **código**, `collective/` funciona como un **contrib** (aportes/implementaciones de referencia de
-terceros); para proyectos **creativos**, como **fuentes de inspiración** atribuidas. Mismo formato.
+### Branching (emergent categories)
+`collective/` **branches inward** into subfolders according to what the author needs to track closely.
+There are **no** fixed categories (`code/`/`inspiration/` are not forced): they emerge from the project. Each subfolder
+is a *family* of references with its `README.md` (what it groups + naming format) + `.md` entries.
+For **code**, `collective/` works as a **contrib** (third-party reference contributions/implementations);
+for **creative** projects, as attributed **inspiration sources**. Same format.
 
-### `library/` — biblioteca (primera clase)
-Las referencias a **libros/publicaciones** son cimiento, no decoración. Recomendación:
-- **Espina única `library/bibliografia.md`**: bibliografía *comentada* (corpus numerado; por entrada:
-  tabla `Autor · Editorial · Año · Disciplina · Enlace · Portada` + **Resumen** + **Conexión con el
-  proyecto**). Se mantiene como **un texto único** porque los libros **dialogan entre sí**; se renderiza
-  a PDF (pipeline md→PDF).
-- **Graduación**: un libro pasa a `library/<slug>.md` (ficha propia) sólo cuando acumula bitácora de
-  lectura / citas / ensayo, y la bibliografía lo **enlaza**.
+### `library/` — library (first-class)
+References to **books/publications** are foundation, not decoration. Recommendation:
+- **Single spine `library/bibliografia.md`**: *annotated* bibliography (numbered corpus; per entry:
+  a table `Author · Publisher · Year · Discipline · Link · Cover` + **Summary** + **Connection with the
+  project**). It is kept as **a single text** because the books **dialogue with each other**; it renders
+  to PDF (md→PDF pipeline).
+- **Graduation**: a book moves to `library/<slug>.md` (its own entry) only when it accumulates a reading
+  log / quotes / essay, and the bibliography **links** it.
 
-### Atribución, contacto y medios (obligatorio)
-Como `.roots/` se **versiona y se sube**, todo lo de `collective/` es público en el repo:
-1. **Cada entrada acredita autoría y derechos** (autor, fuente, uso/licencia). El autor **elige el
-   formato de cita/nombre** y lo mantiene consistente por subcarpeta.
-2. **Contacto + medios** son parte de la ficha (para volver a la fuente y sostener el vínculo):
-   bloque `Contacto` (mail · teléfono/WhatsApp · Instagram/redes · web) y bloque `Medios y referencias`
-   (imágenes · videos · trabajos/enlaces). **Local o remoto**: `![alt](assets/…)` o `![alt](https://…)`.
-3. **Privacidad** — handles/mails de proyecto son públicos (van sin problema). Datos personales
-   sensibles (teléfono/WhatsApp privado) → el autor decide: **omitir**, **`gitignorear`**, o anotar
-   "consultar". No exponer contacto privado de terceros sin acuerdo.
-4. **Binarios pesados** (video, alta resolución) → `gitignore` selectivo o sólo el link; las fichas
-   `.md` y miniaturas livianas se commitean. Medios locales: `collective/<familia>/assets/`.
+### Attribution, contact and media (mandatory)
+Since `.roots/` is **versioned and pushed**, everything in `collective/` is public in the repo:
+1. **Each entry credits authorship and rights** (author, source, use/license). The author **chooses the
+   citation/name format** and keeps it consistent per subfolder.
+2. **Contact + media** are part of the entry (to return to the source and sustain the link):
+   a `Contact` block (email · phone/WhatsApp · Instagram/social · web) and a `Media and references` block
+   (images · videos · works/links). **Local or remote**: `![alt](assets/…)` or `![alt](https://…)`.
+3. **Privacy** — project handles/emails are public (they go without issue). Sensitive personal
+   data (private phone/WhatsApp) → the author decides: **omit**, **`gitignore`**, or note
+   "ask". Do not expose third parties' private contact without agreement.
+4. **Heavy binaries** (video, high resolution) → selective `gitignore` or only the link; the `.md`
+   entries and light thumbnails are committed. Local media: `collective/<family>/assets/`.
 
-### Fichas (formatos de referencia)
-No es un formulario rígido — el `.roots/` es un **nuevo formato de escritura**: la ficha es texto vivo
-que crece con el seguimiento del autor (sección "Seguimiento (vivo)" tipo bitácora, lo último arriba).
-Modelos base:
-- **Persona / idea / sitio / obra** — identidad · contacto · medios · qué aporta al proyecto · vínculos · seguimiento.
-- **Organización / taller / proyecto amigo** — qué es y hace · contacto · medios · qué aporta · seguimiento.
-- **Libro** — datos bibliográficos · derechos · resumen · conexión con el proyecto · citas · bitácora.
+### Entries (reference formats)
+It is not a rigid form — the `.roots/` is a **new writing format**: the entry is living text
+that grows with the author's follow-up (a "Follow-up (live)" log-style section, latest on top).
+Base models:
+- **Person / idea / site / work** — identity · contact · media · what it contributes to the project · links · follow-up.
+- **Organization / studio / friendly project** — what it is and does · contact · media · what it contributes · follow-up.
+- **Book** — bibliographic data · rights · summary · connection with the project · quotes · log.
 
-> Cuando una referencia del collective inspira una decisión → enlazarla desde `design/decisions.md`.
+> When a collective reference inspires a decision → link it from `design/decisions.md`.
 
 ---
 
-## Sync con canonical upstream (ctmil/roots_seed)
+## Sync with the canonical upstream (ctmil/roots_seed)
 
-**Regla:** el canonical del seed se publica como copia open-source en:
+**Rule:** the seed's canonical is published as an open-source copy at:
 
 ```
 https://github.com/ctmil/roots_seed/blob/main/roots_seed.md
 ```
 
-Este upstream público es la **referencia de paridad**. El canonical del repo privado (`odoo_moldeo_roots/roots_seed.md`) puede tener extensiones propias, pero las convenciones core deben mantenerse alineadas con el upstream.
+This public upstream is the **parity reference**. The private repo's canonical (`odoo_moldeo_roots/roots_seed.md`) may have its own extensions, but the core conventions must stay aligned with the upstream.
 
-### Jerarquía de canonicals
+### Canonical hierarchy
 
-| Nivel | Ubicación | Rol |
+| Level | Location | Role |
 |-------|-----------|-----|
-| **Upstream público** | `github.com/ctmil/roots_seed/main/roots_seed.md` | Referencia open-source, convenciones core |
-| **Canonical del repo** | `odoo_moldeo_roots/roots_seed.md` | Fuente de verdad local, puede extender el upstream |
-| **Copias distribuidas** | `.roots/roots_seed.md` (cada módulo) | Self-contained, refleja el canonical del repo |
+| **Public upstream** | `github.com/ctmil/roots_seed/main/roots_seed.md` | Open-source reference, core conventions |
+| **Repo canonical** | `odoo_moldeo_roots/roots_seed.md` | Local source of truth, can extend the upstream |
+| **Distributed copies** | `.roots/roots_seed.md` (each module) | Self-contained, reflects the repo's canonical |
 
-### Protocolo de sync al procesar el seed
+### Sync protocol on seed-process
 
-Cada vez que un agente o humano **procesa el seed** (bootstrap, session-start, bump de versión), debe:
+Every time an agent or human **processes the seed** (bootstrap, session-start, version bump), it must:
 
-1. **Obtener la versión upstream** — fetch de `https://raw.githubusercontent.com/ctmil/roots_seed/main/roots_seed.md`, leer campo `**Versión:**`.
-2. **Comparar con la versión del canonical local** — leer `odoo_moldeo_roots/roots_seed.md`, mismo campo.
-3. **Resolver según el caso:**
+1. **Get the upstream version** — fetch `https://raw.githubusercontent.com/ctmil/roots_seed/main/roots_seed.md`, read the `**Version:**` field.
+2. **Compare with the local canonical version** — read `odoo_moldeo_roots/roots_seed.md`, same field.
+3. **Resolve per case:**
 
-| Caso | Acción |
+| Case | Action |
 |------|--------|
-| Local < Upstream | Revisar changelog del upstream, aplicar cambios nuevos al canonical local, bumpear versión, re-distribuir |
-| Local = Upstream | No action — en paridad |
-| Local > Upstream | El canonical local tiene extensiones propias. Evaluar si las extensiones deben subir al upstream (PR a `ctmil/roots_seed`) |
-| Diff sin cambio de versión | Cambio cosmético o local. Documentar en `journal/notes.md` |
+| Local < Upstream | Review the upstream changelog, apply new changes to the local canonical, bump the version, re-distribute |
+| Local = Upstream | No action — at parity |
+| Local > Upstream | The local canonical has its own extensions. Evaluate whether the extensions should go up to the upstream (PR to `ctmil/roots_seed`) |
+| Diff without version change | Cosmetic or local change. Document in `journal/notes.md` |
 
-4. **Si hay delta sustancial** → avisar al humano antes de aplicar. No mergear a ciegas.
-5. **Si el upstream no es accesible** (offline, rate limit) → continuar con el canonical local, anotar en `journal/notes.md` que no se pudo verificar.
+4. **If there is a substantial delta** → warn the human before applying. Don't merge blindly.
+5. **If the upstream is not accessible** (offline, rate limit) → continue with the local canonical, note in `journal/notes.md` that it could not be verified.
 
-### Cuándo sincronizar con el upstream
+### When to sync with the upstream
 
-- **Al hacer bootstrap de un `.roots/` nuevo** → verificar que el canonical local está al día con el upstream.
-- **Al bumpear la versión del canonical local** → evaluar si el bump incluye cosas que deben subir al upstream público.
-- **Al inicio de sesión** (opcional, no bloqueante) → si el agente tiene acceso a internet, hacer un check rápido. No bloquear la sesión si falla.
+- **When bootstrapping a new `.roots/`** → verify that the local canonical is up to date with the upstream.
+- **When bumping the local canonical version** → evaluate whether the bump includes things that should go up to the public upstream.
+- **At session start** (optional, non-blocking) → if the agent has internet access, do a quick check. Don't block the session if it fails.
 
-### Contribuir al upstream
+### Contributing to the upstream
 
-Si el canonical local evoluciona con convenciones útiles para la comunidad:
+If the local canonical evolves with conventions useful to the community:
 
-1. Preparar el diff entre canonical local y upstream.
-2. Separar extensiones privadas (específicas del repo) de mejoras genéricas.
-3. Las mejoras genéricas → PR a `github.com/ctmil/roots_seed`.
-4. Las extensiones privadas → quedan sólo en el canonical local.
+1. Prepare the diff between the local canonical and upstream.
+2. Separate private extensions (repo-specific) from generic improvements.
+3. Generic improvements → PR to `github.com/ctmil/roots_seed`.
+4. Private extensions → stay only in the local canonical.
 
 ---
 
-## Integración con CLAUDE.md y Claude Code (.claude/)
+## Integration with CLAUDE.md and Claude Code (.claude/)
 
-**Principio:** `.roots/` es tool-agnostic — lo debe poder leer cualquier agente o humano. `CLAUDE.md` y `.claude/` son específicos de Claude Code. Cuando ambos conviven, `.roots/` es la **fuente de verdad** y `CLAUDE.md`/`.claude/` son **bridges**.
+**Principle:** `.roots/` is tool-agnostic — any agent or human must be able to read it. `CLAUDE.md` and `.claude/` are specific to Claude Code. When both coexist, `.roots/` is the **source of truth** and `CLAUDE.md`/`.claude/` are **bridges**.
 
-### Jerarquía de contexto
+### Context hierarchy
 
-| Archivo | Alcance | Quién lo lee | Rol |
+| File | Scope | Who reads it | Role |
 |---------|---------|--------------|-----|
-| `CLAUDE.md` (raíz) | Proyecto global | Claude Code (auto-carga) | Índice y directivas top-level |
-| `.roots/{module}/context.md` | Módulo específico | Cualquier agente/humano | Detalle del módulo |
-| `.claude/` (raíz) | Config Claude Code | Solo Claude Code | Bridge opcional — settings, hooks json |
+| `CLAUDE.md` (root) | Global project | Claude Code (auto-loads) | Index and top-level directives |
+| `.roots/{module}/context.md` | Specific module | Any agent/human | Module detail |
+| `.claude/` (root) | Claude Code config | Only Claude Code | Optional bridge — settings, json hooks |
 
-### Reglas de no-duplicación
+### No-duplication rules
 
-1. **`CLAUDE.md` indexa, no repite.** Si existe `.roots/`, `CLAUDE.md` lista los módulos activos y apunta a cada `.roots/{module}/context.md`. No copia el contenido de context.md ni de otros archivos de `.roots/`.
-2. **`.claude/hooks/*.json` puede hacer bridge.** Los hooks de Claude Code pueden disparar lectura/ejecución de los protocolos tool-agnostic en `.roots/*/hooks/*.md`. La lógica vive en `.roots/`, el trigger en `.claude/`.
-3. **Sin `.roots/`, `CLAUDE.md` es autónomo.** Si un proyecto no tiene `.roots/` (es legacy o simple), `CLAUDE.md` documenta stack y directivas directamente. No se fuerza la creación de `.roots/` en proyectos que no lo necesitan.
-4. **Con `.roots/`, `CLAUDE.md` es ligero.** Sólo contiene: (a) directivas globales que aplican a todo el proyecto (ej: reglas de routing Odoo), (b) índice de módulos con `.roots/`, (c) referencia al seed.
+1. **`CLAUDE.md` indexes, it does not repeat.** If `.roots/` exists, `CLAUDE.md` lists the active modules and points to each `.roots/{module}/context.md`. It does not copy the content of context.md or other `.roots/` files.
+2. **`.claude/hooks/*.json` can bridge.** Claude Code hooks can trigger reading/execution of the tool-agnostic protocols in `.roots/*/hooks/*.md`. The logic lives in `.roots/`, the trigger in `.claude/`.
+3. **Without `.roots/`, `CLAUDE.md` is autonomous.** If a project has no `.roots/` (it is legacy or simple), `CLAUDE.md` documents stack and directives directly. The creation of `.roots/` is not forced on projects that don't need it.
+4. **With `.roots/`, `CLAUDE.md` is light.** It only contains: (a) global directives that apply to the whole project (e.g.: Odoo routing rules), (b) index of modules with `.roots/`, (c) reference to the seed.
 
-### Allowlist de permisos (`.claude/settings.json`)
+### Permissions allowlist (`.claude/settings.json`)
 
-Para que el agente pueda correr sin atender prompts de permisos, el `.claude/settings.json`
-del proyecto mantiene un `permissions.allow` de **patrones amplios por familia** (`Bash(git *)`,
-`Bash(python3 *)`, scripts de la flota, `Read` de sources read-only), **no** comandos exactos
-(las entradas hiper-específicas hacen que cada variante vuelva a preguntar).
+So the agent can run without attending permission prompts, the project's `.claude/settings.json`
+keeps a `permissions.allow` of **broad patterns per family** (`Bash(git *)`,
+`Bash(python3 *)`, fleet scripts, `Read` of read-only sources), **not** exact commands
+(hyper-specific entries make each variant ask again).
 
-- **Evoluciona con la estructura `.roots`/workspace:** al sumar scripts (ej. en `.roots/*/scripts/`),
-  rutas de sources read-only o nuevos flujos, se actualiza el allowlist en consecuencia.
-- **Skill `allowlist-sync`** (`.claude/skills/allowlist-sync/`): escanea el uso real + la estructura
-  y mergea patrones generalizados en `settings.json`. Invocarlo cuando reaparezcan prompts o cambie
-  la estructura.
-- **Trade-off explícito:** patrones como `Bash(python3 *)`/`Bash(curl *)`/`Bash(rm *)` habilitan
-  ejecución/borrado amplios — decisión consciente del dueño del workspace; documentarlo, no esconderlo.
+- **It evolves with the `.roots`/workspace structure:** when adding scripts (e.g. in `.roots/*/scripts/`),
+  read-only source paths or new flows, the allowlist is updated accordingly.
+- **Skill `allowlist-sync`** (`.claude/skills/allowlist-sync/`): scans real usage + the structure
+  and merges generalized patterns into `settings.json`. Invoke it when prompts reappear or the
+  structure changes.
+- **Explicit trade-off:** patterns like `Bash(python3 *)`/`Bash(curl *)`/`Bash(rm *)` enable
+  broad execution/deletion — a conscious decision of the workspace owner; document it, don't hide it.
 
-### Regla al procesar el seed (obligatoria)
+### Rule on seed-process (mandatory)
 
-Al hacer bootstrap o bump del seed, verificar `CLAUDE.md`:
+When bootstrapping or bumping the seed, verify `CLAUDE.md`:
 
-| Situación | Acción |
+| Situation | Action |
 |-----------|--------|
-| No existe `CLAUDE.md` | Crear con template mínimo (ver abajo) |
-| Existe pero no lista módulos con `.roots/` | Agregar sección de índice de módulos |
-| Existe y lista módulos | Verificar que los módulos listados coinciden con los `.roots/` actuales — agregar nuevos, marcar removidos |
-| Existe `.claude/` | Verificar que sus hooks referencian `.roots/` sin duplicar lógica |
+| `CLAUDE.md` does not exist | Create with a minimal template (see below) |
+| Exists but does not list modules with `.roots/` | Add a module index section |
+| Exists and lists modules | Verify the listed modules match the current `.roots/` — add new ones, mark removed ones |
+| `.claude/` exists | Verify its hooks reference `.roots/` without duplicating logic |
 
-### Template mínimo de CLAUDE.md
+### Minimal CLAUDE.md template
 
-Cuando se crea `CLAUDE.md` desde el seed, usar este template como base:
+When `CLAUDE.md` is created from the seed, use this template as a base:
 
 ```markdown
-# {Proyecto} - Development Directives
+# {Project} - Development Directives
 
-## Módulos con memoria persistente (.roots/)
+## Modules with persistent memory (.roots/)
 
-| Módulo | Context | Estado |
+| Module | Context | Status |
 |--------|---------|--------|
-| `{module_a}` | [context.md](.roots/{module_a}/context.md) | Activo |
-| `{module_b}` | [context.md](.roots/{module_b}/context.md) | Activo |
+| `{module_a}` | [context.md](.roots/{module_a}/context.md) | Active |
+| `{module_b}` | [context.md](.roots/{module_b}/context.md) | Active |
 
 ## Seed
 
-**Versión:** {X.Y}
+**Version:** {X.Y}
 **Canonical:** `odoo_moldeo_roots/roots_seed.md`
 **Upstream:** `github.com/ctmil/roots_seed`
 
-## Directivas globales del proyecto
+## Global project directives
 
-(Reglas que aplican a todo el proyecto, no a un módulo específico.
-Ejemplo: convenciones de routing Odoo multi-website, estándares de JS, etc.)
+(Rules that apply to the whole project, not to a specific module.
+Example: Odoo multi-website routing conventions, JS standards, etc.)
 ```
 
-### Compatibilidad futura
+### Future compatibility
 
-Problemas anticipados y cómo resolverlos:
+Anticipated problems and how to resolve them:
 
-| Problema | Resolución |
+| Problem | Resolution |
 |----------|------------|
-| Otro agente (Cursor, Copilot) ignora `CLAUDE.md` | No importa — `.roots/` es self-contained y tool-agnostic, el otro agente lo lee directamente |
-| Claude Code ignora `.roots/` | `CLAUDE.md` apunta a `.roots/` — Claude Code sigue los links. Alternativamente, un hook `session-start` en `.claude/hooks/` puede forzar la lectura |
-| Módulo extraído a otro repo pierde `CLAUDE.md` | El módulo lleva su `.roots/` con seed embebido — es reprocesable sin `CLAUDE.md`. El nuevo repo puede generar su propio `CLAUDE.md` desde el seed |
-| `CLAUDE.md` crece demasiado | Señal de que contenido debería migrar a `.roots/`. `CLAUDE.md` debe mantenerse como índice ligero |
+| Another agent (Cursor, Copilot) ignores `CLAUDE.md` | Doesn't matter — `.roots/` is self-contained and tool-agnostic, the other agent reads it directly |
+| Claude Code ignores `.roots/` | `CLAUDE.md` points to `.roots/` — Claude Code follows the links. Alternatively, a `session-start` hook in `.claude/hooks/` can force the read |
+| A module extracted to another repo loses `CLAUDE.md` | The module carries its `.roots/` with the embedded seed — it is reprocessable without `CLAUDE.md`. The new repo can generate its own `CLAUDE.md` from the seed |
+| `CLAUDE.md` grows too much | A sign that content should migrate to `.roots/`. `CLAUDE.md` must stay a light index |
 
 ---
 
-## Estructura Base
+## Base structure
 
-La estructura varía según el layout (ver § "Modos de trabajo"):
+The structure varies according to the layout (see § "Working modes"):
 
-**Modo Flat (default):** archivos directos bajo `.roots/`, sin subdir de namespace.
+**Flat mode (default):** files directly under `.roots/`, no namespace subdir.
 ```
 .roots/
 ├── _meta.json          ← "layout": "flat"
@@ -1013,11 +1063,11 @@ La estructura varía según el layout (ver § "Modos de trabajo"):
 ├── docs/     (architecture, glossary, commits, manual, ...)
 ├── hooks/
 ├── skills/
-├── workbench/   ← materiales de trabajo efímeros
-└── collective/  ← influencias/referencias permanentes (≠ workbench)
+├── workbench/   ← ephemeral work materials
+└── collective/  ← permanent influences/references (≠ workbench)
 ```
 
-**Modo Source (namespaced multi-módulo):**
+**Source mode (namespaced multi-module):**
 ```
 .roots/
 ├── _meta.json
@@ -1025,14 +1075,14 @@ La estructura varía según el layout (ver § "Modos de trabajo"):
 └── {module_name}/
 ```
 
-**Modo Client Branch:**
+**Client Branch mode:**
 ```
 .roots/
 └── {context}.{project}/
     ├── _meta.json
     ├── _sources.json
     ├── roots_seed.md
-    ├── sources/                    ← copias de .roots/ de cada source
+    ├── sources/                    ← copies of each source's .roots/
     │   ├── {source_module_a}/
     │   │   ├── context.md
     │   │   ├── journal/
@@ -1042,203 +1092,203 @@ La estructura varía según el layout (ver § "Modos de trabajo"):
     │   │   └── ...
     │   └── {source_module_b}/
     │       └── ...
-    └── {module_name}/              ← módulos propios del cliente
+    └── {module_name}/              ← client's own modules
 ```
 
-Dentro de cada módulo, la estructura interna es idéntica en ambos modos:
+Inside each module, the internal structure is identical in both modes:
 
 ```
 {module_name}/
-    ├── context.md             # Briefing rápido del módulo (30 seg)
+    ├── context.md             # Quick module briefing (30 sec)
     │
-    ├── workbench/             # Materiales de referencia del usuario (efímero, se borra)
-    │   └── (archivos libres)  # Imágenes, PDFs, videos, análisis, etc.
+    ├── workbench/             # User reference materials (ephemeral, deleted)
+    │   └── (free files)       # Images, PDFs, videos, analysis, etc.
     │
-    ├── collective/           # Influencias/referencias permanentes (≠ workbench)
-    │   ├── README.md          # concepto + ramificación + contacto/medios + atribución
-    │   ├── {familia}/         # subcarpetas emergentes (personas, orgs, ...) c/README + fichas
-    │   │   └── assets/        # medios locales (gitignore selectivo para pesados)
-    │   └── library/           # biblioteca: bibliografia.md (corpus comentado) + fichas graduadas
+    ├── collective/           # Permanent influences/references (≠ workbench)
+    │   ├── README.md          # concept + branching + contact/media + attribution
+    │   ├── {family}/          # emergent subfolders (people, orgs, ...) w/README + entries
+    │   │   └── assets/        # local media (selective gitignore for heavy ones)
+    │   └── library/           # library: bibliografia.md (annotated corpus) + graduated entries
     │
-    ├── journal/               # Bitácora - registros temporales
-    │   ├── changelog.md       # Historial de versiones (para clientes)
-    │   ├── diary.md           # Reflexiones diarias, qué pasó, pensamientos
-    │   └── notes.md           # Ideas precisas, pre-features, observaciones
+    ├── journal/               # Log - temporal records
+    │   ├── changelog.md       # Version history (for clients)
+    │   ├── diary.md           # Daily reflections, what happened, thoughts
+    │   └── notes.md           # Precise ideas, pre-features, observations
     │
-    ├── debug/                 # Debugging y troubleshooting
-    │   ├── errors-log.md      # Errores encontrados, análisis, estado
-    │   ├── fixes-log.md       # Qué se arregló, cómo, cuándo
-    │   └── migrations.md      # Migraciones de datos, campos, esquemas
+    ├── debug/                 # Debugging and troubleshooting
+    │   ├── errors-log.md      # Errors found, analysis, status
+    │   ├── fixes-log.md       # What was fixed, how, when
+    │   └── migrations.md      # Data, field, schema migrations
     │
-    ├── design/                # Diseño y arquitectura
+    ├── design/                # Design and architecture
     │   ├── decisions.md       # ADRs (Architecture Decision Records)
-    │   └── sketchbook.md      # Bocetos, diagramas, ideas visuales
+    │   └── sketchbook.md      # Sketches, diagrams, visual ideas
     │
-    ├── docs/                  # Documentación
-    │   ├── README.md          # Índice de documentación
-    │   ├── manual.md          # Manual de usuario (cómo USAR)
-    │   ├── documentation.md   # Documentación técnica (cómo FUNCIONA)
-    │   ├── architecture.md    # Arquitectura del sistema
-    │   ├── glossary.md        # Términos del dominio y convenciones
-    │   └── commits.md         # Historial detallado de commits
+    ├── docs/                  # Documentation
+    │   ├── README.md          # Documentation index
+    │   ├── manual.md          # User manual (how to USE)
+    │   ├── documentation.md   # Technical documentation (how it WORKS)
+    │   ├── architecture.md    # System architecture
+    │   ├── glossary.md        # Domain terms and conventions
+    │   └── commits.md         # Detailed commit history
     │
-    ├── tasks/                 # Gestión de tareas
-    │   ├── tasks.md           # Tareas en progreso
-    │   └── todo.md            # Backlog y pendientes
+    ├── tasks/                 # Task management
+    │   ├── tasks.md           # Tasks in progress
+    │   └── todo.md            # Backlog and pending
     │
-    ├── hooks/                 # Hooks de sesión y automatización
-    │   ├── session-start.md   # Qué ejecutar al iniciar sesión
-    │   ├── session-end.md     # Qué ejecutar al cerrar sesión
-    │   ├── on-error.md        # Protocolo al detectar error
-    │   ├── on-fix.md          # Protocolo al commitear fix
-    │   └── on-seed-process.md # Bootstrap/reprocesamiento del seed
+    ├── hooks/                 # Session hooks and automation
+    │   ├── session-start.md   # What to run at session start
+    │   ├── session-end.md     # What to run at session end
+    │   ├── on-error.md        # Protocol when detecting an error
+    │   ├── on-fix.md          # Protocol when committing a fix
+    │   └── on-seed-process.md # Seed bootstrap/reprocessing
     │
-    └── skills/                # Skills y workflows del módulo
-        ├── prompts.md         # Prompts reutilizables específicos del módulo
-        ├── workflows.md       # Flujos de trabajo comunes del módulo
-        └── patterns.md        # Patrones y convenciones del módulo
+    └── skills/                # Module skills and workflows
+        ├── prompts.md         # Reusable module-specific prompts
+        ├── workflows.md       # Common module workflows
+        └── patterns.md        # Module patterns and conventions
 ```
 
 ---
 
-## Estándares de Estilo
+## Style standards
 
-### Reglas Generales
+### General rules
 
-| Aspecto | Estándar |
+| Aspect | Standard |
 |---------|----------|
-| **Idioma** | Español para contenido, inglés para código/nombres técnicos |
-| **Encabezados** | Usar `#` jerárquico: `#` título, `##` sección, `###` subsección |
-| **Fechas** | Formato: `DD Mes YYYY` (ej: `23 Marzo 2026`) |
-| **IDs** | Prefijo + número secuencial: `ADR-001`, `ERROR-001`, `WF-001` |
-| **Separadores** | Usar `---` entre secciones principales |
-| **Listas** | Usar `-` para bullets, `1.` para numeradas, `- [ ]` para checkboxes |
-| **Énfasis** | `**negrita**` para términos clave, `código` para técnico |
-| **Links** | Relativos dentro de .roots: `[texto](./archivo.md)` |
+| **Language** | per `_meta.json.lang` (see "Language & glossary (i18n)"); English for code/technical names |
+| **Headings** | Use hierarchical `#`: `#` title, `##` section, `###` subsection |
+| **Dates** | Format: `DD Month YYYY` (e.g.: `23 March 2026`) |
+| **IDs** | Prefix + sequential number: `ADR-001`, `ERROR-001`, `WF-001` |
+| **Separators** | Use `---` between main sections |
+| **Lists** | Use `-` for bullets, `1.` for numbered, `- [ ]` for checkboxes |
+| **Emphasis** | `**bold**` for key terms, `code` for technical |
+| **Links** | Relative within .roots: `[text](./file.md)` |
 
-### Estructura de Documento
+### Document structure
 
-Todo archivo `.md` en `.roots/` DEBE seguir esta estructura:
+Every `.md` file in `.roots/` MUST follow this structure:
 
 ```markdown
-# {Module} - {Título del Documento}
+# {Module} - {Document Title}
 
-> Descripción breve de una línea sobre el propósito del documento.
+> One-line brief description of the document's purpose.
 
 ---
 
-## Sección Principal
+## Main Section
 
-Contenido...
+Content...
 
 ---
 ```
 
-### Voz y Tono
+### Voice and tone
 
-| Documento | Voz | Tono |
+| Document | Voice | Tone |
 |-----------|-----|------|
-| `context.md` | Impersonal | Conciso, esencial |
-| `changelog.md` | Tercera persona | Profesional, orientado al cliente |
-| `diary.md` | Primera persona | Reflexivo, informal |
-| `notes.md` | Impersonal | Conciso, técnico |
-| `errors-log.md` | Impersonal | Preciso, analítico |
-| `fixes-log.md` | Impersonal | Descriptivo, técnico |
-| `migrations.md` | Impersonal | Preciso, con versiones |
-| `decisions.md` | Primera persona plural (nosotros) | Formal, justificativo |
-| `manual.md` | Segunda persona (usted/vos) | Instructivo, amigable |
-| `documentation.md` | Impersonal | Técnico, detallado |
-| `glossary.md` | Impersonal | Definitorio, con ejemplos |
-| `prompts.md` | Imperativo | Directo, claro |
-| `workflows.md` | Imperativo | Paso a paso, preciso |
-| `patterns.md` | Impersonal | Técnico, con ejemplos |
-| `hooks/*.md` | Imperativo | Procedimental, ejecutable |
+| `context.md` | Impersonal | Concise, essential |
+| `changelog.md` | Third person | Professional, client-oriented |
+| `diary.md` | First person | Reflective, informal |
+| `notes.md` | Impersonal | Concise, technical |
+| `errors-log.md` | Impersonal | Precise, analytical |
+| `fixes-log.md` | Impersonal | Descriptive, technical |
+| `migrations.md` | Impersonal | Precise, with versions |
+| `decisions.md` | First person plural (we) | Formal, justificatory |
+| `manual.md` | Second person (you) | Instructive, friendly |
+| `documentation.md` | Impersonal | Technical, detailed |
+| `glossary.md` | Impersonal | Definitional, with examples |
+| `prompts.md` | Imperative | Direct, clear |
+| `workflows.md` | Imperative | Step by step, precise |
+| `patterns.md` | Impersonal | Technical, with examples |
+| `hooks/*.md` | Imperative | Procedural, executable |
 
 ---
 
-## Protocolos de Poblado
+## Population protocols
 
-### Protocolo General
+### General protocol
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  ANTES de cualquier sesión de trabajo:                      │
-│  → Ejecutar hooks/session-start.md                   │
-│  1. Leer context.md (briefing del módulo)                   │
-│  2. Leer diary.md (últimas 5 entradas)                      │
-│  3. Leer notes.md (ideas pendientes)                        │
-│  4. Revisar tasks/todo.md (backlog)                         │
-│  5. Revisar errors-log.md (errores activos)                 │
+│  BEFORE any work session:                                   │
+│  → Run hooks/session-start.md                        │
+│  1. Read context.md (module briefing)                       │
+│  2. Read diary.md (last 5 entries)                          │
+│  3. Read notes.md (pending ideas)                           │
+│  4. Review tasks/todo.md (backlog)                          │
+│  5. Review errors-log.md (active errors)                    │
 └─────────────────────────────────────────────────────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
-│  DURANTE el trabajo:                                        │
-│  - Encontré error → hooks/on-error.md → errors-log.md      │
-│  - Arreglé algo → hooks/on-fix.md → fixes-log.md           │
-│  - Tomé decisión importante → decisions.md                  │
-│  - Tuve idea → notes.md                                     │
-│  - Completé tarea → tasks/tasks.md (marcar done)            │
-│  - Término nuevo → glossary.md                              │
-│  - Cambié esquema/datos → migrations.md                     │
+│  DURING the work:                                           │
+│  - Found an error → hooks/on-error.md → errors-log.md      │
+│  - Fixed something → hooks/on-fix.md → fixes-log.md        │
+│  - Made an important decision → decisions.md                │
+│  - Had an idea → notes.md                                   │
+│  - Completed a task → tasks/tasks.md (mark done)            │
+│  - New term → glossary.md                                   │
+│  - Changed schema/data → migrations.md                      │
 └─────────────────────────────────────────────────────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
-│  AL FINAL de la sesión:                                     │
-│  → Ejecutar hooks/session-end.md                     │
-│  1. Actualizar diary.md con resumen del día                 │
-│  2. Si hubo release → changelog.md                          │
-│  3. Si hubo commits significativos → commits.md             │
-│  4. Si creé patrón reutilizable → patterns.md               │
-│  5. Si cambió el stack/estado → actualizar context.md       │
+│  AT THE END of the session:                                 │
+│  → Run hooks/session-end.md                          │
+│  1. Update diary.md with the day's summary                  │
+│  2. If there was a release → changelog.md                   │
+│  3. If there were significant commits → commits.md          │
+│  4. If I created a reusable pattern → patterns.md           │
+│  5. If the stack/state changed → update context.md          │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-### Protocolo por Documento
+### Protocol per document
 
 #### context.md
 
-| Aspecto | Protocolo |
+| Aspect | Protocol |
 |---------|-----------|
-| **Quién escribe** | Humano o IA (al inicializar o cambiar dirección) |
-| **Cuándo** | Al crear el módulo, al cambiar stack o arquitectura significativa |
-| **Propósito** | Briefing de 30 segundos para cualquier agente o dev nuevo |
-| **Qué incluir** | Qué es, stack, estado actual, convenciones clave, dependencias |
-| **Qué NO incluir** | Historial, detalles de implementación (eso va en docs/) |
-| **Tamaño** | Máximo 50 líneas — si es más largo, no cumple su propósito |
+| **Who writes** | Human or AI (when initializing or changing direction) |
+| **When** | When creating the module, when changing the stack or significant architecture |
+| **Purpose** | 30-second briefing for any new agent or dev |
+| **What to include** | What it is, stack, current state, key conventions, dependencies |
+| **What NOT to include** | History, implementation details (that goes in docs/) |
+| **Size** | Maximum 50 lines — if longer, it doesn't fulfill its purpose |
 
-**Formato de entrada:**
+**Entry format:**
 ```markdown
 # {Module} - Context
 
-> Una línea que describe qué hace el módulo.
+> One line describing what the module does.
 
 ---
 
 ## Stack
 
 - **Framework:** Odoo 17 / Django / etc.
-- **Lenguaje:** Python 3.10+
-- **Base de datos:** PostgreSQL
-- **APIs externas:** MercadoLibre API v2
+- **Language:** Python 3.10+
+- **Database:** PostgreSQL
+- **External APIs:** MercadoLibre API v2
 
-## Estado Actual
+## Current State
 
-Breve descripción del estado: en desarrollo, producción, mantenimiento.
-Features principales funcionando, qué falta.
+Brief description of the state: in development, production, maintenance.
+Main features working, what's missing.
 
-## Convenciones Clave
+## Key Conventions
 
-- Convención 1: explicación breve
-- Convención 2: explicación breve
+- Convention 1: brief explanation
+- Convention 2: brief explanation
 
-## Dependencias Críticas
+## Critical Dependencies
 
-- `modulo_a`: para qué se usa
-- `modulo_b`: para qué se usa
+- `module_a`: what it is used for
+- `module_b`: what it is used for
 
 ---
 ```
@@ -1247,826 +1297,843 @@ Features principales funcionando, qué falta.
 
 #### changelog.md
 
-| Aspecto | Protocolo |
+| Aspect | Protocol |
 |---------|-----------|
-| **Quién escribe** | Humano (final review) o IA (draft) |
-| **Cuándo** | Al hacer release de versión |
-| **Trigger humano** | "Preparar changelog para versión X.Y" |
-| **Trigger IA** | Detectar commits con tag de versión |
-| **Qué incluir** | Cambios agrupados por área funcional |
-| **Qué NO incluir** | Detalles técnicos, commits individuales |
-| **Idioma** | Español, sin jerga técnica |
+| **Who writes** | Human (final review) or AI (draft) |
+| **When** | When releasing a version |
+| **Human trigger** | "Prepare changelog for version X.Y" |
+| **AI trigger** | Detect commits with a version tag |
+| **What to include** | Changes grouped by functional area |
+| **What NOT to include** | Technical details, individual commits |
+| **Language** | per `_meta.json.lang`; no technical jargon |
 
-**Formato de entrada:**
+**Entry format:**
 ```markdown
-## Versión X.Y
-DD Mes YYYY
+## Version X.Y
+DD Month YYYY
 
-**Cambios:**
+**Changes:**
 
-1. **Área funcional:** Descripción del cambio en 1-3 oraciones orientadas al usuario.
-   Explicar el beneficio, no el cómo técnico.
+1. **Functional area:** Description of the change in 1-3 user-oriented sentences.
+   Explain the benefit, not the technical how.
 
-2. **Otra área:** Descripción...
+2. **Another area:** Description...
 ```
 
 ---
 
 #### diary.md
 
-| Aspecto | Protocolo |
+| Aspect | Protocol |
 |---------|-----------|
-| **Quién escribe** | Humano o IA (basado en sesión) |
-| **Cuándo** | Al final de cada sesión de trabajo |
-| **Trigger humano** | "Actualizar diary" o implícito al cerrar |
-| **Trigger IA** | Final de sesión con cambios significativos |
-| **Qué incluir** | Qué se hizo, problemas, decisiones, reflexiones |
-| **Qué NO incluir** | Código, detalles excesivos |
-| **Idioma** | Español, tono personal |
+| **Who writes** | Human or AI (based on the session) |
+| **When** | At the end of each work session |
+| **Human trigger** | "Update diary" or implicit when closing |
+| **AI trigger** | End of session with significant changes |
+| **What to include** | What was done, problems, decisions, reflections |
+| **What NOT to include** | Code, excessive details |
+| **Language** | per `_meta.json.lang`; personal tone |
 
-**Formato de entrada:**
+**Entry format:**
 ```markdown
-**DD Mes** - Resumen en una línea.
+**DD Month** - One-line summary.
 
-Desarrollo del día: qué se trabajó, qué problemas surgieron,
-qué decisiones se tomaron y por qué. Reflexiones personales
-sobre el código o arquitectura. Máximo 5-7 líneas.
+Development of the day: what was worked on, what problems arose,
+what decisions were made and why. Personal reflections
+on the code or architecture. Maximum 5-7 lines.
 ```
 
 ---
 
 #### notes.md
 
-| Aspecto | Protocolo |
+| Aspect | Protocol |
 |---------|-----------|
-| **Quién escribe** | Humano o IA (captura de ideas) |
-| **Cuándo** | En cualquier momento que surja una idea |
-| **Trigger humano** | "Anotar idea: ..." |
-| **Trigger IA** | Detectar sugerencia de mejora durante trabajo |
-| **Qué incluir** | Ideas, observaciones, cosas a investigar |
-| **Qué NO incluir** | Tareas concretas (van a tasks/) |
-| **Procesamiento** | Revisar semanalmente, mover a tasks/ o descartar |
+| **Who writes** | Human or AI (idea capture) |
+| **When** | Any time an idea arises |
+| **Human trigger** | "Note idea: ..." |
+| **AI trigger** | Detect an improvement suggestion during work |
+| **What to include** | Ideas, observations, things to investigate |
+| **What NOT to include** | Concrete tasks (those go to tasks/) |
+| **Processing** | Review weekly, move to tasks/ or discard |
 
-**Formato de entrada:**
+**Entry format:**
 ```markdown
-### Título de la idea (DD Mes)
+### Idea title (DD Month)
 
-Descripción breve. Por qué podría ser útil.
-Referencias o contexto si aplica.
+Brief description. Why it could be useful.
+References or context if applicable.
 
-**Estado:** Nueva | En evaluación | Descartada | → tasks/todo.md
+**Status:** New | Under evaluation | Discarded | → tasks/todo.md
 ```
 
 ---
 
 #### errors-log.md
 
-| Aspecto | Protocolo |
+| Aspect | Protocol |
 |---------|-----------|
-| **Quién escribe** | Humano o IA (al encontrar error) |
-| **Cuándo** | Inmediatamente al detectar error |
-| **Trigger humano** | "Registrar error: ..." |
-| **Trigger IA** | Exception, test fallido, comportamiento inesperado |
-| **Qué incluir** | Síntomas, contexto, análisis, severidad |
-| **Lifecycle** | Activo → En progreso → Resuelto (mover a fixes-log) |
+| **Who writes** | Human or AI (when finding an error) |
+| **When** | Immediately when detecting an error |
+| **Human trigger** | "Log error: ..." |
+| **AI trigger** | Exception, failed test, unexpected behavior |
+| **What to include** | Symptoms, context, analysis, severity |
+| **Lifecycle** | Active → In progress → Resolved (move to fixes-log) |
 
-**Formato de entrada:**
+**Entry format:**
 ```markdown
-### ERROR-XXX: Título descriptivo
+### ERROR-XXX: Descriptive title
 
-**Reportado:** DD Mes YYYY
-**Severidad:** Alta | Media | Baja
-**Estado:** Activo | Investigando | En progreso | Resuelto
+**Reported:** DD Month YYYY
+**Severity:** High | Medium | Low
+**Status:** Active | Investigating | In progress | Resolved
 
-**Síntomas:**
-Qué se observa, cómo se manifiesta el error.
+**Symptoms:**
+What is observed, how the error manifests.
 
-**Contexto:**
-Cuándo ocurre, qué lo dispara, frecuencia.
+**Context:**
+When it occurs, what triggers it, frequency.
 
-**Análisis:**
-Posibles causas, hipótesis, hallazgos de investigación.
+**Analysis:**
+Possible causes, hypotheses, investigation findings.
 
-**Resolución:** (cuando se resuelve)
-Ver fixes-log.md → FIX-XXX
+**Resolution:** (when resolved)
+See fixes-log.md → FIX-XXX
 ```
 
 ---
 
 #### fixes-log.md
 
-| Aspecto | Protocolo |
+| Aspect | Protocol |
 |---------|-----------|
-| **Quién escribe** | Humano o IA (al resolver error) |
-| **Cuándo** | Después de commitear el fix |
-| **Trigger humano** | "Documentar fix de ERROR-XXX" |
-| **Trigger IA** | Commit que referencia error |
-| **Qué incluir** | Qué se arregló, cómo, commit, archivos |
-| **Qué NO incluir** | Código completo (solo snippets relevantes) |
+| **Who writes** | Human or AI (when resolving an error) |
+| **When** | After committing the fix |
+| **Human trigger** | "Document fix for ERROR-XXX" |
+| **AI trigger** | Commit that references an error |
+| **What to include** | What was fixed, how, commit, files |
+| **What NOT to include** | Full code (only relevant snippets) |
 
-**Formato de entrada:**
+**Entry format:**
 ```markdown
-### DD Mes - Título del fix
+### DD Month - Fix title
 
 **Commit:** `abc1234`
-**Resuelve:** ERROR-XXX (si aplica)
-**Archivos:** archivo1.py, archivo2.py
+**Resolves:** ERROR-XXX (if applicable)
+**Files:** file1.py, file2.py
 
-Descripción de qué se arregló y cómo. Explicar la causa raíz
-y la solución implementada. Si hay impacto en performance o
-comportamiento, mencionarlo.
+Description of what was fixed and how. Explain the root cause
+and the implemented solution. If there is an impact on performance or
+behavior, mention it.
 ```
 
 ---
 
 #### migrations.md
 
-| Aspecto | Protocolo |
+| Aspect | Protocol |
 |---------|-----------|
-| **Quién escribe** | Humano o IA (al modificar esquema/datos) |
-| **Cuándo** | Al renombrar campos, cambiar tipos, migrar datos |
-| **Trigger humano** | "Documentar migración de campo X" |
-| **Trigger IA** | Detectar cambio de schema en modelos |
-| **Qué incluir** | Campo viejo → nuevo, script de migración, versión afectada |
-| **Qué NO incluir** | Cambios que no afectan datos existentes |
-| **Lifecycle** | Pendiente → Aplicada → Verificada |
+| **Who writes** | Human or AI (when modifying schema/data) |
+| **When** | When renaming fields, changing types, migrating data |
+| **Human trigger** | "Document migration of field X" |
+| **AI trigger** | Detect a schema change in models |
+| **What to include** | Old field → new, migration script, affected version |
+| **What NOT to include** | Changes that don't affect existing data |
+| **Lifecycle** | Pending → Applied → Verified |
 
-**Formato de entrada:**
+**Entry format:**
 ```markdown
-### MIG-XXX: Título de la migración
+### MIG-XXX: Migration title
 
-**Fecha:** DD Mes YYYY
-**Versión:** X.Y → X.Z
-**Estado:** Pendiente | Aplicada | Verificada
+**Date:** DD Month YYYY
+**Version:** X.Y → X.Z
+**Status:** Pending | Applied | Verified
 
-**Cambio:**
-Descripción de qué cambió en el esquema o datos.
+**Change:**
+Description of what changed in the schema or data.
 
-**Migración:**
+**Migration:**
 ```python
-# Script o pasos para migrar datos existentes
+# Script or steps to migrate existing data
 ```
 
 **Rollback:**
-Cómo revertir si algo falla (si aplica).
+How to revert if something fails (if applicable).
 
-**Verificación:**
-Cómo confirmar que la migración fue exitosa.
+**Verification:**
+How to confirm the migration was successful.
 ```
 
 ---
 
 #### decisions.md
 
-| Aspecto | Protocolo |
+| Aspect | Protocol |
 |---------|-----------|
-| **Quién escribe** | Humano (decisiones importantes) |
-| **Cuándo** | Al tomar decisión de arquitectura/diseño significativa |
-| **Trigger humano** | "Documentar decisión: ..." |
-| **Trigger IA** | Sugerir documentar cuando detecta decisión importante |
-| **Qué incluir** | Contexto, opciones consideradas, decisión, consecuencias |
-| **Inmutabilidad** | NO borrar, marcar como Deprecado/Reemplazado |
+| **Who writes** | Human (important decisions) |
+| **When** | When making a significant architecture/design decision |
+| **Human trigger** | "Document decision: ..." |
+| **AI trigger** | Suggest documenting when it detects an important decision |
+| **What to include** | Context, options considered, decision, consequences |
+| **Immutability** | Do NOT delete, mark as Deprecated/Replaced |
 
-**Formato de entrada:**
+**Entry format:**
 ```markdown
-## ADR-XXX: Título de la decisión
+## ADR-XXX: Decision title
 
-**Fecha:** DD Mes YYYY
-**Estado:** Propuesto | Aceptado | Deprecado | Reemplazado por ADR-YYY
+**Date:** DD Month YYYY
+**Status:** Proposed | Accepted | Deprecated | Replaced by ADR-YYY
 
-**Contexto:**
-Situación que motivó la decisión. Problema a resolver.
+**Context:**
+Situation that motivated the decision. Problem to solve.
 
-**Opciones consideradas:**
-1. Opción A - pros y contras
-2. Opción B - pros y contras
+**Options considered:**
+1. Option A - pros and cons
+2. Option B - pros and cons
 
-**Decisión:**
-Qué decidimos hacer y por qué elegimos esta opción.
+**Decision:**
+What we decided to do and why we chose this option.
 
-**Consecuencias:**
-Qué implica esta decisión. Trade-offs aceptados.
+**Consequences:**
+What this decision implies. Accepted trade-offs.
 ```
 
 ---
 
 #### sketchbook.md
 
-| Aspecto | Protocolo |
+| Aspect | Protocol |
 |---------|-----------|
-| **Quién escribe** | Humano o IA (visualización de ideas) |
-| **Cuándo** | Al diseñar UI, flujos, arquitectura visual |
-| **Trigger humano** | "Bocetar: ..." |
-| **Trigger IA** | Crear diagrama para explicar concepto |
-| **Formato visual** | ASCII art, mermaid (si soportado), descripciones |
+| **Who writes** | Human or AI (visualization of ideas) |
+| **When** | When designing UI, flows, visual architecture |
+| **Human trigger** | "Sketch: ..." |
+| **AI trigger** | Create a diagram to explain a concept |
+| **Visual format** | ASCII art, mermaid (if supported), descriptions |
 
-**Formato de entrada:**
+**Entry format:**
 ```markdown
-## Nombre del diseño (DD Mes)
+## Design name (DD Month)
 
-**Propósito:** Para qué es este boceto.
+**Purpose:** What this sketch is for.
 
 ```
 ┌─────────────────┐
 │  ASCII diagram  │
-│  del concepto   │
+│  of the concept │
 └─────────────────┘
 ```
 
-**Notas:** Explicación adicional, alternativas, decisiones visuales.
+**Notes:** Additional explanation, alternatives, visual decisions.
 ```
 
 ---
 
 #### manual.md
 
-| Aspecto | Protocolo |
+| Aspect | Protocol |
 |---------|-----------|
-| **Quién escribe** | Humano (estructura) + IA (contenido) |
-| **Cuándo** | Al agregar features, al hacer release |
-| **Audiencia** | Usuarios finales, no técnicos |
-| **Estructura** | Instalación → Configuración → Uso diario → Troubleshooting |
-| **Estilo** | Paso a paso, con screenshots si posible |
+| **Who writes** | Human (structure) + AI (content) |
+| **When** | When adding features, when releasing |
+| **Audience** | End users, non-technical |
+| **Structure** | Installation → Configuration → Daily use → Troubleshooting |
+| **Style** | Step by step, with screenshots if possible |
 
-**Secciones obligatorias:**
-1. Instalación/Requisitos
-2. Configuración inicial
-3. Operaciones comunes (con pasos numerados)
-4. Solución de problemas
+**Mandatory sections:**
+1. Installation/Requirements
+2. Initial configuration
+3. Common operations (with numbered steps)
+4. Troubleshooting
 
 ---
 
 #### documentation.md
 
-| Aspecto | Protocolo |
+| Aspect | Protocol |
 |---------|-----------|
-| **Quién escribe** | Humano o IA (documentación técnica) |
-| **Cuándo** | Al crear/modificar modelos, APIs, funciones importantes |
-| **Audiencia** | Desarrolladores |
-| **Estructura** | Modelos → Métodos → Ciclos → Extensión |
-| **Estilo** | Técnico, con código de ejemplo |
+| **Who writes** | Human or AI (technical documentation) |
+| **When** | When creating/modifying models, APIs, important functions |
+| **Audience** | Developers |
+| **Structure** | Models → Methods → Cycles → Extension |
+| **Style** | Technical, with example code |
 
-**Secciones sugeridas:**
-1. Arquitectura de módulos
-2. Modelos principales (campos, métodos)
-3. Ciclos y flujos (diagramas de secuencia)
+**Suggested sections:**
+1. Module architecture
+2. Main models (fields, methods)
+3. Cycles and flows (sequence diagrams)
 4. API/Endpoints
-5. Hooks y extensión
-6. Diagnóstico/Debugging
+5. Hooks and extension
+6. Diagnosis/Debugging
 
 ---
 
 #### glossary.md
 
-| Aspecto | Protocolo |
+| Aspect | Protocol |
 |---------|-----------|
-| **Quién escribe** | Humano o IA (al usar término ambiguo) |
-| **Cuándo** | Al introducir concepto nuevo, al detectar confusión de términos |
-| **Trigger humano** | "Agregar al glosario: ..." |
-| **Trigger IA** | Término técnico o de dominio usado sin definición previa |
-| **Qué incluir** | Término, definición, ejemplo de uso, sinónimos si los hay |
-| **Ordenamiento** | Alfabético |
+| **Who writes** | Human or AI (when using an ambiguous term) |
+| **When** | When introducing a new concept, when detecting term confusion |
+| **Human trigger** | "Add to the glossary: ..." |
+| **AI trigger** | Technical or domain term used without prior definition |
+| **What to include** | Term, definition, usage example, synonyms if any |
+| **Ordering** | Alphabetical |
+| **Language** | per `_meta.json.lang` (this is a **domain** glossary) |
 
-**Formato de entrada:**
+> This is the module's **domain** glossary, written in the deployment's `lang`. For the **Forest vocabulary** (Roots, Grove, Tree, modes, axes…) across languages, see the seed's `glossary/` — § "Language & glossary (i18n)".
+
+**Entry format:**
 ```markdown
-### término
+### term
 
-**Definición:** Qué es, en el contexto de este módulo.
-**Ejemplo:** `campo.binding_id` — referencia al binding de MercadoLibre.
-**Sinónimos:** otros nombres usados para lo mismo (si aplica).
-**Ver también:** términos relacionados.
+**Definition:** What it is, in the context of this module.
+**Example:** `field.binding_id` — reference to the MercadoLibre binding.
+**Synonyms:** other names used for the same thing (if applicable).
+**See also:** related terms.
 ```
 
 ---
 
 #### prompts.md
 
-| Aspecto | Protocolo |
+| Aspect | Protocol |
 |---------|-----------|
-| **Quién escribe** | Humano o IA (después de usar prompt exitoso) |
-| **Cuándo** | Al identificar tarea repetitiva que se beneficia de prompt |
-| **Trigger** | "Guardar este prompt como reutilizable" |
-| **Qué incluir** | Uso, contexto necesario, prompt exacto |
-| **Prueba** | El prompt debe haber sido probado y funcionar |
+| **Who writes** | Human or AI (after using a successful prompt) |
+| **When** | When identifying a repetitive task that benefits from a prompt |
+| **Trigger** | "Save this prompt as reusable" |
+| **What to include** | Use, required context, exact prompt |
+| **Test** | The prompt must have been tested and work |
 
-**Formato de entrada:**
+**Entry format:**
 ```markdown
-## PROMPT-XXX: Nombre descriptivo
+## PROMPT-XXX: Descriptive name
 
-**Uso:** En qué situación usar este prompt.
-**Contexto requerido:** Qué información necesita el agente.
-**Variables:** {variable1}, {variable2} (si las hay)
+**Use:** In what situation to use this prompt.
+**Required context:** What information the agent needs.
+**Variables:** {variable1}, {variable2} (if any)
 
 ```
-Texto del prompt aquí.
-Usar {variables} para partes que cambian.
+Prompt text here.
+Use {variables} for parts that change.
 ```
 
-**Ejemplo de uso:**
-Mostrar un ejemplo concreto con variables reemplazadas.
+**Usage example:**
+Show a concrete example with variables replaced.
 ```
 
 ---
 
 #### workflows.md
 
-| Aspecto | Protocolo |
+| Aspect | Protocol |
 |---------|-----------|
-| **Quién escribe** | Humano (define) + IA (puede ejecutar) |
-| **Cuándo** | Al identificar proceso repetitivo multi-paso |
-| **Requisito** | Cada paso debe ser ejecutable y verificable |
-| **Qué incluir** | Trigger, pasos, resultado esperado, notas |
+| **Who writes** | Human (defines) + AI (can execute) |
+| **When** | When identifying a repetitive multi-step process |
+| **Requirement** | Each step must be executable and verifiable |
+| **What to include** | Trigger, steps, expected result, notes |
 
-**Formato de entrada:**
+**Entry format:**
 ```markdown
-## WF-XXX: Nombre del workflow
+## WF-XXX: Workflow name
 
-**Trigger:** Cuándo/por qué ejecutar este workflow.
-**Resultado esperado:** Qué se obtiene al completar.
-**Tiempo estimado:** X minutos/horas.
+**Trigger:** When/why to run this workflow.
+**Expected result:** What is obtained on completion.
+**Estimated time:** X minutes/hours.
 
-### Pasos
+### Steps
 
-1. **Nombre del paso** — Descripción. Comando o acción específica.
-2. **Siguiente paso** — Descripción. Verificación de éxito.
+1. **Step name** — Description. Specific command or action.
+2. **Next step** — Description. Success verification.
 3. ...
 
-### Verificación
+### Verification
 
-Cómo confirmar que el workflow se completó correctamente.
+How to confirm the workflow completed correctly.
 
 ### Rollback
 
-Qué hacer si algo falla (si aplica).
+What to do if something fails (if applicable).
 ```
 
 ---
 
 #### patterns.md
 
-| Aspecto | Protocolo |
+| Aspect | Protocol |
 |---------|-----------|
-| **Quién escribe** | Humano o IA (al identificar patrón) |
-| **Cuándo** | Al establecer convención o detectar patrón repetido |
-| **Qué incluir** | Ejemplo correcto + anti-patrón |
-| **Obligatorio** | Incluir razón del patrón |
+| **Who writes** | Human or AI (when identifying a pattern) |
+| **When** | When establishing a convention or detecting a repeated pattern |
+| **What to include** | Correct example + anti-pattern |
+| **Mandatory** | Include the reason for the pattern |
 
-**Formato de entrada:**
+**Entry format:**
 ```markdown
-## PAT-XXX: Nombre del patrón
+## PAT-XXX: Pattern name
 
-**Aplica a:** Modelos | Vistas | Controllers | JS | CSS | Tests
-**Razón:** Por qué usamos este patrón.
+**Applies to:** Models | Views | Controllers | JS | CSS | Tests
+**Reason:** Why we use this pattern.
 
-### Ejemplo correcto
-
-```python
-# Código que SÍ seguir
-```
-
-### Anti-patrón
+### Correct example
 
 ```python
-# Código que NO hacer y por qué
+# Code to DO follow
 ```
 
-### Excepciones
+### Anti-pattern
 
-Cuándo está permitido no seguir este patrón (si aplica).
+```python
+# Code NOT to do and why
+```
+
+### Exceptions
+
+When it is allowed not to follow this pattern (if applicable).
 ```
 
 ---
 
 #### hooks/
 
-Los hooks son **protocolos ejecutables** que definen qué hacer automáticamente ante eventos específicos. Cada hook es un archivo `.md` que describe los pasos a seguir — puede ser ejecutado por un agente de IA, por un script, o por un hook real de herramientas como Claude Code (`.claude/hooks/`).
+Hooks are **executable protocols** that define what to do automatically on specific events. Each hook is a `.md` file that describes the steps to follow — it can be executed by an AI agent, by a script, or by a real hook of tools like Claude Code (`.claude/hooks/`).
 
 ##### session-start.md
 
-| Aspecto | Protocolo |
+| Aspect | Protocol |
 |---------|-----------|
-| **Propósito** | Cargar contexto al inicio de sesión |
-| **Ejecutor** | Agente IA o hook de herramienta |
-| **Obligatorio** | Sí — sin contexto, el agente trabaja a ciegas |
+| **Purpose** | Load context at session start |
+| **Executor** | AI agent or tool hook |
+| **Mandatory** | Yes — without context, the agent works blind |
 
-**Formato de entrada:**
+**Entry format:**
 ```markdown
 # Hook: Session Start
 
-> Protocolo de inicio de sesión de desarrollo.
+> Development session start protocol.
 
-## Pasos
+## Steps
 
-1. Chequear versión del seed:
-   - Leer `.roots/roots_seed.md` (copia local, self-contained) → campo `**Versión:**`
-   - Leer canonical (si está accesible en el repo) → mismo campo
-   - Si copia local y canonical difieren → disparar `hooks/on-seed-update.md` antes de continuar
-   - Si la versión es distinta a la última conocida por la memoria del
-     agente → releer seed completo y aplicar convenciones nuevas.
-   - Si `.roots/roots_seed.md` NO existe → copiar el canonical con header
-     de distribución (regla obligatoria § "Distribución del seed").
-2. Leer `context.md` — entender qué es el proyecto.
-3. Leer `journal/diary.md` — últimas 5 entradas.
-4. Leer `journal/notes.md` — ideas pendientes y observaciones técnicas.
-5. Leer `tasks/todo.md` — backlog pendiente.
-6. Leer `tasks/tasks.md` — trabajo en progreso (si existe, retomar).
-7. Leer `debug/errors-log.md` — errores activos sin resolver.
-8. Listar `workbench/` — si hay archivos nuevos o recientes, leer o
-   mencionar su existencia al humano. Son materiales de referencia.
-9. Leer `_meta.json` — `active_branch` y `current_feature`.
-10. Verificar git state:
+1. Check the seed version:
+   - Read `.roots/roots_seed.md` (local copy, self-contained) → `**Version:**` field
+   - Read the canonical (if accessible in the repo) → same field
+   - If the local copy and canonical differ → trigger `hooks/on-seed-update.md` before continuing
+   - If the version differs from the last one known by the agent's
+     memory → re-read the full seed and apply the new conventions.
+   - If `.roots/roots_seed.md` does NOT exist → copy the canonical with the
+     distribution header (mandatory rule § "Seed distribution").
+2. Read `context.md` — understand what the project is.
+3. Read `journal/diary.md` — last 5 entries.
+4. Read `journal/notes.md` — pending ideas and technical observations.
+5. Read `tasks/todo.md` — pending backlog.
+6. Read `tasks/tasks.md` — work in progress (if any, resume).
+7. Read `debug/errors-log.md` — active unresolved errors.
+8. List `workbench/` — if there are new or recent files, read or
+   mention their existence to the human. They are reference materials.
+9. Read `_meta.json` — `active_branch` and `current_feature`.
+10. Verify git state:
     - `git branch --show-current`
     - `git log --oneline -10`
     - `git status`
-11. Si `_meta.json.active_branch` o `tasks/tasks.md` no reflejan la rama
-    actual → el `.roots/` está desincronizado. Avisar al humano antes de
-    hacer suposiciones; no decidir a ciegas.
-12. Si hay feature activa, buscar design docs en `docs/design-*.md` y
-    leer la sección relevante antes de tocar código.
+11. If `_meta.json.active_branch` or `tasks/tasks.md` do not reflect the
+    current branch → the `.roots/` is out of sync. Warn the human before
+    making assumptions; don't decide blindly.
+12. If there is an active feature, look for design docs in `docs/design-*.md` and
+    read the relevant section before touching code.
 
-## Output esperado
+## Expected output
 
-Resumen interno de: estado del proyecto, tareas pendientes,
-errores activos, contexto de última sesión, estado git sincronizado
-con `.roots/`, materiales de referencia disponibles en workbench.
+Internal summary of: project state, pending tasks,
+active errors, context of the last session, git state synced
+with `.roots/`, reference materials available in workbench.
 ```
 
 ##### session-end.md
 
-| Aspecto | Protocolo |
+| Aspect | Protocol |
 |---------|-----------|
-| **Propósito** | Persistir lo aprendido antes de cerrar sesión |
-| **Ejecutor** | Agente IA o hook de herramienta |
-| **Obligatorio** | Recomendado — previene pérdida de contexto |
+| **Purpose** | Persist what was learned before closing the session |
+| **Executor** | AI agent or tool hook |
+| **Mandatory** | Recommended — prevents loss of context |
 
-**Formato de entrada:**
+**Entry format:**
 ```markdown
 # Hook: Session End
 
-> Protocolo de cierre de sesión.
+> Session close protocol.
 
-## Pasos
+## Steps
 
-1. Agregar entrada a `journal/diary.md` con resumen del trabajo
-2. Si hubo errores nuevos → agregar a `debug/errors-log.md`
-3. Si se arregló algo → agregar a `debug/fixes-log.md`
-4. Si se completó tarea → marcar en `tasks/tasks.md`
-5. Si se identificó patrón → proponer para `skills/patterns.md`
-6. Si hubo commits → actualizar `docs/commits.md`
+1. Add an entry to `journal/diary.md` with a summary of the work
+2. If there were new errors → add to `debug/errors-log.md`
+3. If something was fixed → add to `debug/fixes-log.md`
+4. If a task was completed → mark in `tasks/tasks.md`
+5. If a pattern was identified → propose for `skills/patterns.md`
+6. If there were commits → update `docs/commits.md`
 
-## Output esperado
+## Expected output
 
-Archivos de .roots/ actualizados con el trabajo de la sesión.
+`.roots/` files updated with the session's work.
 ```
 
 ##### on-error.md
 
-| Aspecto | Protocolo |
+| Aspect | Protocol |
 |---------|-----------|
-| **Propósito** | Documentar error de forma estructurada al detectarlo |
-| **Trigger** | Exception, test fallido, comportamiento inesperado |
+| **Purpose** | Document an error in a structured way when detected |
+| **Trigger** | Exception, failed test, unexpected behavior |
 
-**Formato de entrada:**
+**Entry format:**
 ```markdown
 # Hook: On Error
 
-> Protocolo al detectar un error.
+> Protocol when detecting an error.
 
-## Pasos
+## Steps
 
-1. Determinar siguiente ID: revisar último ERROR-XXX en errors-log.md
-2. Agregar entrada con formato estándar a `debug/errors-log.md`
-3. Si el error es crítico → agregar a `tasks/tasks.md` como tarea
-4. Si hay hipótesis de causa → documentar en sección Análisis
+1. Determine the next ID: review the last ERROR-XXX in errors-log.md
+2. Add an entry with the standard format to `debug/errors-log.md`
+3. If the error is critical → add to `tasks/tasks.md` as a task
+4. If there is a cause hypothesis → document in the Analysis section
 
 ## Template
 
-Usar el formato ERROR-XXX definido en el protocolo de errors-log.md.
+Use the ERROR-XXX format defined in the errors-log.md protocol.
 ```
 
 ##### on-fix.md
 
-| Aspecto | Protocolo |
+| Aspect | Protocol |
 |---------|-----------|
-| **Propósito** | Documentar fix y cerrar ciclo del error |
-| **Trigger** | Commit que resuelve un error conocido |
+| **Purpose** | Document the fix and close the error cycle |
+| **Trigger** | Commit that resolves a known error |
 
-**Formato de entrada:**
+**Entry format:**
 ```markdown
 # Hook: On Fix
 
-> Protocolo al commitear una corrección.
+> Protocol when committing a fix.
 
-## Pasos
+## Steps
 
-1. Agregar entrada a `debug/fixes-log.md` con formato estándar
-2. Si resuelve un ERROR-XXX → actualizar estado a "Resuelto" en errors-log.md
-3. Si el fix introduce patrón reutilizable → proponer para patterns.md
-4. Si el fix requiere migración de datos → agregar a migrations.md
+1. Add an entry to `debug/fixes-log.md` with the standard format
+2. If it resolves an ERROR-XXX → update status to "Resolved" in errors-log.md
+3. If the fix introduces a reusable pattern → propose for patterns.md
+4. If the fix requires a data migration → add to migrations.md
 
 ## Template
 
-Usar el formato definido en el protocolo de fixes-log.md.
+Use the format defined in the fixes-log.md protocol.
 ```
 
 ##### on-seed-update.md
 
-| Aspecto | Protocolo |
+| Aspect | Protocol |
 |---------|-----------|
-| **Propósito** | Re-distribuir el seed canonical a todas las copias locales (`.roots/roots_seed.md`) del repo cuando cambia la versión canónica |
-| **Ejecutor** | Agente IA o desarrollador humano |
-| **Trigger** | (a) Se bumpea la versión del seed canonical, (b) un `session-start` detecta desync entre copia local y canonical, (c) se crea un `.roots/` nuevo y hay que poblarlo |
-| **Obligatorio** | Sí — sin esto los módulos dejan de ser self-contained y el seed deja de ser reprocesable localmente |
+| **Purpose** | Re-distribute the canonical seed to all the repo's local copies (`.roots/roots_seed.md`) when the canonical version changes |
+| **Executor** | AI agent or human developer |
+| **Trigger** | (a) The canonical seed version is bumped, (b) a `session-start` detects desync between the local copy and canonical, (c) a new `.roots/` is created and must be populated |
+| **Mandatory** | Yes — without this the modules stop being self-contained and the seed stops being reprocessable locally |
 
-**Formato de entrada:**
+**Entry format:**
 ```markdown
 # Hook: On Seed Update
 
-> Protocolo al bumpear el seed canonical o detectar desync con copias locales.
+> Protocol when bumping the canonical seed or detecting desync with local copies.
 
-## Pasos
+## Steps
 
-1. Identificar el canonical (una sola fuente de verdad en el repo).
-2. Para cada directorio `.roots/` del repo:
-    - Escribir `<dir>/roots_seed.md` con el header de distribución
-      seguido del contenido del canonical.
-3. Verificar con `diff` (o equivalente) que todas las copias coinciden
-   en contenido (ignorando el header de distribución).
-4. Registrar la re-distribución en `journal/diary.md` o `docs/commits.md`.
-5. Si algún `.roots/` tenía modificaciones locales al seed → preservarlas
-   como nota al pie de la copia local antes de sobrescribir. Avisar al
-   humano si hay conflicto.
+1. Identify the canonical (a single source of truth in the repo).
+2. For each `.roots/` directory in the repo:
+    - Write `<dir>/roots_seed.md` with the distribution header
+      followed by the canonical's content.
+3. Verify with `diff` (or equivalent) that all copies match
+   in content (ignoring the distribution header).
+4. Record the re-distribution in `journal/diary.md` or `docs/commits.md`.
+5. If any `.roots/` had local modifications to the seed → preserve them
+   as a footnote in the local copy before overwriting. Warn the
+   human if there is a conflict.
+6. **Language-lock (no noise):** this hook updates ONLY the `roots_seed.md` copy
+   (canonical, English) — it does **NOT** touch, translate or rewrite any other
+   file in the `.roots/`. Each deployment keeps writing in its `_meta.json.lang`.
+   See § "Language & glossary (i18n)".
 
-## Comando de referencia (bash, tool-agnostic)
+## Reference command (bash, tool-agnostic)
 
 SEED="odoo_moldeo_roots/roots_seed.md"
 find . -type d -name ".roots" -not -path "*/node_modules/*" | while read -r dir; do
     cp "$SEED" "$dir/roots_seed.md"
 done
 
-## Output esperado
+## Expected output
 
-Todas las copias `.roots/roots_seed.md` alineadas con el canonical.
-Cada módulo vuelve a ser self-contained y reprocesable aisladamente.
+All `.roots/roots_seed.md` copies aligned with the canonical.
+Each module is again self-contained and reprocessable in isolation.
 ```
 
 ##### on-task-done.md
 
-| Aspecto | Protocolo |
+| Aspect | Protocol |
 |---------|-----------|
-| **Propósito** | Cerrar correctamente cada tarea individual (no al final de la sesión) manteniendo `.roots/` sincronizado |
-| **Ejecutor** | Agente IA o desarrollador humano |
-| **Trigger** | Una tarea listada en `tasks/tasks.md` o `tasks/todo.md` queda completada y está por reportarse al humano |
-| **Obligatorio** | Sí — evita dejar el `.roots/` desactualizado entre tareas de la misma sesión |
+| **Purpose** | Properly close each individual task (not at the end of the session) keeping `.roots/` in sync |
+| **Executor** | AI agent or human developer |
+| **Trigger** | A task listed in `tasks/tasks.md` or `tasks/todo.md` is completed and is about to be reported to the human |
+| **Mandatory** | Yes — avoids leaving the `.roots/` out of date between tasks of the same session |
 
-**Formato de entrada:**
+**Entry format:**
 ```markdown
 # Hook: On Task Done
 
-> Protocolo al completar una tarea, antes de reportarla al humano.
+> Protocol when completing a task, before reporting it to the human.
 
-## Pasos mínimos (siempre)
+## Minimum steps (always)
 
-1. `tasks/todo.md` — marcar la tarea como `[x]` o moverla a "Completadas"
-2. `tasks/tasks.md` — mover la tarea de "En Progreso" a "Completadas Recientemente"
-3. `docs/commits.md` — si hubo commit, agregar entrada con hash, motivación y cambios
+1. `tasks/todo.md` — mark the task as `[x]` or move it to "Completed"
+2. `tasks/tasks.md` — move the task from "In Progress" to "Recently Completed"
+3. `docs/commits.md` — if there was a commit, add an entry with hash, motivation and changes
 
-## Pasos condicionales
+## Conditional steps
 
-- Si se encontró un error durante la tarea → `debug/errors-log.md` (ERROR-XXX)
-- Si se aplicó un fix → `debug/fixes-log.md` (FIX-XXX)
-- Si se tomó una decisión arquitectónica → `design/decisions.md` (ADR-XXX)
-- Si surgió una idea → `journal/notes.md`
-- Si aparece término nuevo del dominio → `docs/glossary.md`
-- Si cambió esquema/datos → `debug/migrations.md`
+- If an error was found during the task → `debug/errors-log.md` (ERROR-XXX)
+- If a fix was applied → `debug/fixes-log.md` (FIX-XXX)
+- If an architectural decision was made → `design/decisions.md` (ADR-XXX)
+- If an idea arose → `journal/notes.md`
+- If a new domain term appears → `docs/glossary.md`
+- If schema/data changed → `debug/migrations.md`
 
-## Output esperado
+## Expected output
 
-`.roots/` sincronizado con la tarea completada ANTES de reportar al humano.
-Un humano que lea sólo `.roots/` debe poder reconstruir qué se hizo y por qué.
+`.roots/` synced with the completed task BEFORE reporting to the human.
+A human reading only `.roots/` should be able to reconstruct what was done and why.
 ```
 
 ##### on-topic-shift.md
 
-| Aspecto | Protocolo |
+| Aspect | Protocol |
 |---------|-----------|
-| **Propósito** | Garantizar que el agente no trabaje a ciegas cuando la conversación pivota a un archivo/sistema no cubierto por el bootstrap |
-| **Ejecutor** | Agente IA, desarrollador o cualquier herramienta de asistencia de código |
-| **Trigger** | Aparece en la conversación un archivo, módulo o sistema no tocado en los últimos pasos |
-| **Obligatorio** | Sí — evita preguntas redundantes y decisiones sin contexto |
+| **Purpose** | Ensure the agent does not work blind when the conversation pivots to a file/system not covered by the bootstrap |
+| **Executor** | AI agent, developer or any code assistance tool |
+| **Trigger** | A file, module or system not touched in the last steps appears in the conversation |
+| **Mandatory** | Yes — avoids redundant questions and decisions without context |
 
-**Formato de entrada:**
+**Entry format:**
 ```markdown
 # Hook: On Topic Shift
 
-> Protocolo al cambiar de foco a un archivo/sistema no cubierto por el bootstrap de sesión.
+> Protocol when shifting focus to a file/system not covered by the session bootstrap.
 
-## Pasos
+## Steps
 
-1. Listar `.roots/docs/` (`ls` o equivalente).
-2. Buscar un doc con nombre relacionado al nuevo foco.
-3. Si existe, leer la sección relevante ANTES de preguntar aclaraciones
-   o proponer un diseño.
-4. Revisar `.roots/journal/notes.md` y `.roots/design/decisions.md` por
-   observaciones o ADRs sobre el mismo sistema.
-5. Revisar `.roots/workbench/` por materiales de referencia relacionados.
-6. Solo preguntar al humano lo que quede genuinamente no documentado.
-7. Si al terminar la tarea se descubre información que debería haber
-   estado en `.roots/docs/` pero no estaba → agregarla o proponer un
-   nuevo doc.
+1. List `.roots/docs/` (`ls` or equivalent).
+2. Look for a doc with a name related to the new focus.
+3. If it exists, read the relevant section BEFORE asking for clarification
+   or proposing a design.
+4. Review `.roots/journal/notes.md` and `.roots/design/decisions.md` for
+   observations or ADRs about the same system.
+5. Review `.roots/workbench/` for related reference materials.
+6. Only ask the human what remains genuinely undocumented.
+7. If on finishing the task you discover information that should have
+   been in `.roots/docs/` but wasn't → add it or propose a
+   new doc.
 
-## Output esperado
+## Expected output
 
-Contexto cargado del sistema nuevo antes de escribir código o pedir
-aclaraciones. Preguntas al humano reducidas a lo no documentado.
+Context of the new system loaded before writing code or asking for
+clarification. Questions to the human reduced to the undocumented.
 
-## Compatibilidad
+## Compatibility
 
-Este protocolo es tool-agnostic. Aplica a cualquier asistente de IA
-(Claude Code, Cursor, Copilot Workspace, Aider, etc.) o desarrollador
-humano que retome el repo.
+This protocol is tool-agnostic. It applies to any AI assistant
+(Claude Code, Cursor, Copilot Workspace, Aider, etc.) or human
+developer who picks up the repo.
 ```
 
 ##### on-seed-process.md
 
-| Aspecto | Protocolo |
+| Aspect | Protocol |
 |---------|-----------|
-| **Propósito** | Consolidar todos los pasos de bootstrap/reprocesamiento del seed en un solo hook ejecutable |
-| **Ejecutor** | Agente IA o desarrollador humano |
-| **Trigger** | (a) Se inicializa un `.roots/` nuevo, (b) se bumpea la versión del seed, (c) se detecta desync con upstream o canonical, (d) el humano pide "procesar el seed" explícitamente |
-| **Obligatorio** | Sí — es el punto de entrada para cualquier operación sobre el seed |
+| **Purpose** | Consolidate all the seed bootstrap/reprocessing steps into a single executable hook |
+| **Executor** | AI agent or human developer |
+| **Trigger** | (a) A new `.roots/` is initialized, (b) the seed version is bumped, (c) desync with upstream or canonical is detected, (d) the human explicitly asks to "process the seed" |
+| **Mandatory** | Yes — it is the entry point for any operation on the seed |
 
-**Formato de entrada:**
+**Entry format:**
 ```markdown
 # Hook: On Seed Process
 
-> Protocolo maestro al procesar/reprocesar el seed. Consolida sync
-> upstream, distribución, y verificación de CLAUDE.md.
+> Master protocol when processing/reprocessing the seed. Consolidates upstream
+> sync, distribution, and CLAUDE.md verification.
 
-## Pasos
+## Steps
 
-0. **Detectar modo de trabajo (solo en bootstrap inicial):**
-   - Si `_meta.json` ya existe y tiene `working_mode` → usar ese modo, no preguntar
-   - Si no existe `_meta.json` o no tiene `working_mode` → preguntar al usuario:
-     - Client branch → pedir formato de contexto (ver § Context Format Registry),
-       datos del contexto, y sources a vincular → crear `.roots/{context}.{project}/`
-     - Source → crear `.roots/{module}/` directamente
-   - Persistir la respuesta en `_meta.json.working_mode`, `context_format`, `context_parsed`
-   - Este paso NO se repite en sesiones posteriores
+0. **Detect working mode (only on initial bootstrap):**
+   - If `_meta.json` already exists and has `working_mode` → use that mode, don't ask
+   - If `_meta.json` does not exist or has no `working_mode` → ask the user:
+     - Client branch → ask for the context format (see § Context Format Registry),
+       context data, and sources to link → create `.roots/{context}.{project}/`
+     - Source → create `.roots/{module}/` directly
+   - Persist the answer in `_meta.json.working_mode`, `context_format`, `context_parsed`
+   - This step is NOT repeated in later sessions
 
-1. **Sync con upstream público:**
+0b. **Detect working language (language-lock — see § "Language & glossary (i18n)"):**
+   - If `_meta.json.lang` exists → use it, do NOT ask, do NOT re-detect
+   - Else if `.roots/` already has content → detect the dominant language of the
+     existing `*.md` prose (`context.md`, `journal/`, `design/decisions.md`…) and
+     **persist it** to `_meta.json.lang`. **Do NOT translate or rewrite any content.**
+   - Else (brand-new `.roots/`) → default `"en"`; only ask if the user signals another language
+   - **Hard rule:** this is a one-time stamp. From here on, all memory in this `.roots/`
+     is written in `_meta.json.lang`. Code/technical identifiers stay English regardless.
+   - This step is NOT repeated in later sessions
+
+1. **Sync with the public upstream:**
    - Fetch `https://raw.githubusercontent.com/ctmil/roots_seed/main/roots_seed.md`
-   - Comparar versión upstream vs versión del canonical local
-   - Si local < upstream → avisar al humano, proponer aplicar cambios
-   - Si local > upstream → evaluar si hay mejoras genéricas para PR
-   - Si no hay acceso al upstream → anotar en `journal/notes.md`, continuar
+   - Compare the upstream version vs the local canonical version
+   - If local < upstream → warn the human, propose applying changes
+   - If local > upstream → evaluate whether there are generic improvements for a PR
+   - If there is no access to the upstream → note in `journal/notes.md`, continue
 
-2. **Verificar canonical del repo:**
-   - Leer `odoo_moldeo_roots/roots_seed.md` (o la ruta canonical configurada)
-   - Confirmar que el campo `**Versión:**` coincide con lo esperado
-   - Si hay ediciones locales no bumpeadas → avisar al humano
+2. **Verify the repo's canonical:**
+   - Read `odoo_moldeo_roots/roots_seed.md` (or the configured canonical path)
+   - Confirm the `**Version:**` field matches what is expected
+   - If there are local un-bumped edits → warn the human
 
-3. **Distribuir a todas las copias:**
-   - Ejecutar `hooks/on-seed-update.md`
-   - Cada `.roots/roots_seed.md` queda alineado con el canonical
-   - Verificar con diff que no quedaron copias desincronizadas
+3. **Distribute to all copies:**
+   - Run `hooks/on-seed-update.md`
+   - Each `.roots/roots_seed.md` ends up aligned with the canonical
+   - Verify with diff that no copies were left out of sync
 
-4. **Vincular/sincronizar sources (solo modo client):**
-   - Si `_sources.json` existe → para cada source registrado:
-     - Comparar `sources/{source_id}/` embebido vs source original
-     - Si hay diff → proponer sync al humano (no mergear a ciegas)
-     - Actualizar `last_sync` en `_sources.json`
-   - Si `_sources.json` no existe y es modo client → preguntar al humano
-     qué sources vincular, crear `_sources.json` y `sources/` con copias
-   - Respetar `sync_include`/`sync_exclude` del manifest
+4. **Link/sync sources (client mode only):**
+   - If `_sources.json` exists → for each registered source:
+     - Compare the embedded `sources/{source_id}/` vs the original source
+     - If there is a diff → propose a sync to the human (don't merge blindly)
+     - Update `last_sync` in `_sources.json`
+   - If `_sources.json` does not exist and it is client mode → ask the human
+     which sources to link, create `_sources.json` and `sources/` with copies
+   - Respect `sync_include`/`sync_exclude` from the manifest
 
-5. **Verificar/crear CLAUDE.md:**
-   - Si no existe `CLAUDE.md` en la raíz → crearlo con el template
-     definido en § "Integración con CLAUDE.md"
-   - Si existe → verificar que la lista de módulos con `.roots/`
-     está actualizada (agregar nuevos, marcar removidos)
-   - Si existe `.claude/` → verificar que sus hooks referencian
-     `.roots/` sin duplicar lógica
+5. **Verify/create CLAUDE.md:**
+   - If `CLAUDE.md` does not exist at the root → create it with the template
+     defined in § "Integration with CLAUDE.md"
+   - If it exists → verify that the list of modules with `.roots/`
+     is up to date (add new ones, mark removed ones)
+   - If `.claude/` exists → verify that its hooks reference
+     `.roots/` without duplicating logic
 
-6. **Verificar workbench/:**
-   - Para cada `.roots/{module}/` que no tenga `workbench/` → crearla
-   - No agregar contenido — es espacio del usuario
+6. **Verify workbench/:**
+   - For each `.roots/{module}/` that has no `workbench/` → create it
+   - Don't add content — it is the user's space
 
-7. **Registrar:**
-   - Agregar entrada en `journal/diary.md` o `docs/commits.md`
-     documentando el procesamiento del seed, versión, y acciones tomadas
+7. **Record:**
+   - Add an entry in `journal/diary.md` or `docs/commits.md`
+     documenting the seed processing, version, and actions taken
 
-## Output esperado
+## Expected output
 
-- Canonical local alineado (o con delta documentado) con upstream
-- Todas las copias `.roots/roots_seed.md` sincronizadas
-- Sources embebidos sincronizados (modo client)
-- `CLAUDE.md` actualizado con índice de módulos
-- Carpetas `workbench/` existentes en todos los módulos
-- Registro del procesamiento en journal o commits
+- Local canonical aligned (or with documented delta) with the upstream
+- All `.roots/roots_seed.md` copies synced
+- Embedded sources synced (client mode)
+- `CLAUDE.md` updated with the module index
+- `workbench/` folders existing in all modules
+- Record of the processing in journal or commits
 ```
 
 ---
 
-#### tasks.md y todo.md
+#### tasks.md and todo.md
 
-| Aspecto | tasks.md | todo.md |
+| Aspect | tasks.md | todo.md |
 |---------|----------|---------|
-| **Contenido** | Trabajo activo | Backlog |
-| **Estado items** | En progreso, Bloqueado | Pendiente |
-| **Límite** | 3-5 tareas máximo | Sin límite |
-| **Movimiento** | todo.md → tasks.md → Completado |
+| **Content** | Active work | Backlog |
+| **Item status** | In progress, Blocked | Pending |
+| **Limit** | 3-5 tasks max | No limit |
+| **Movement** | todo.md → tasks.md → Completed |
 
-**Formato tasks.md:**
+**tasks.md format:**
 ```markdown
-## En Progreso
+## In Progress
 
-### TASK-XXX: Título
-**Asignado:** Nombre o "IA"
-**Inicio:** DD Mes
-**Estado:** En progreso | Bloqueado por XXX
+### TASK-XXX: Title
+**Assigned:** Name or "AI"
+**Start:** DD Month
+**Status:** In progress | Blocked by XXX
 
-Descripción breve de la tarea.
+Brief description of the task.
 
-- [ ] Subtarea 1
-- [x] Subtarea 2 (completada)
+- [ ] Subtask 1
+- [x] Subtask 2 (completed)
 ```
 
-**Formato todo.md:**
+**todo.md format:**
 ```markdown
-## Alta Prioridad
+## High Priority
 
-- [ ] Tarea importante 1
-- [ ] Tarea importante 2
+- [ ] Important task 1
+- [ ] Important task 2
 
-## Media Prioridad
+## Medium Priority
 
-- [ ] Tarea normal
+- [ ] Normal task
 
 ## Ideas / Backlog
 
-- [ ] Cosa que algún día podríamos hacer
+- [ ] Something we could do someday
 ```
 
 ---
 
-## Uso con Agentes de IA
+## Use with AI Agents
 
-### Instrucciones para el Agente
+### Instructions for the Agent
 
-Al iniciar sesión en un proyecto con `.roots/`:
+When starting a session in a project with `.roots/`:
 
 ```
-1. LEER contexto (seguir hooks/session-start.md):
-   - .roots/{module}/context.md (briefing rápido)
-   - .roots/{module}/journal/diary.md (últimas 5 entradas)
+1. READ context (follow hooks/session-start.md):
+   - .roots/{module}/context.md (quick briefing)
+   - .roots/{module}/journal/diary.md (last 5 entries)
    - .roots/{module}/tasks/todo.md
-   - .roots/{module}/debug/errors-log.md (errores activos)
+   - .roots/{module}/debug/errors-log.md (active errors)
 
-2. DURANTE el trabajo:
-   - Al encontrar error: seguir hooks/on-error.md → errors-log.md
-   - Al arreglar algo: seguir hooks/on-fix.md → fixes-log.md
-   - Al tener idea de mejora: AGREGAR a notes.md
-   - Al tomar decisión importante: PREGUNTAR si documentar en decisions.md
-   - Al usar término de dominio nuevo: AGREGAR a glossary.md
-   - Al cambiar esquema/campos: AGREGAR a migrations.md
+2. DURING the work:
+   - When finding an error: follow hooks/on-error.md → errors-log.md
+   - When fixing something: follow hooks/on-fix.md → fixes-log.md
+   - When having an improvement idea: ADD to notes.md
+   - When making an important decision: ASK whether to document in decisions.md
+   - When using a new domain term: ADD to glossary.md
+   - When changing schema/fields: ADD to migrations.md
 
-3. AL FINALIZAR sesión (seguir hooks/session-end.md):
-   - AGREGAR entrada a diary.md resumiendo el trabajo
-   - Si hubo patrón reutilizable: PROPONER agregarlo a patterns.md
-   - Si creé prompt útil: PROPONER agregarlo a prompts.md
-   - Si cambió el estado del proyecto: ACTUALIZAR context.md
+3. WHEN ENDING the session (follow hooks/session-end.md):
+   - ADD an entry to diary.md summarizing the work
+   - If there was a reusable pattern: PROPOSE adding it to patterns.md
+   - If I created a useful prompt: PROPOSE adding it to prompts.md
+   - If the project state changed: UPDATE context.md
 
-4. NUNCA:
-   - Borrar contenido existente sin preguntar
-   - Modificar decisions.md (solo agregar o marcar deprecado)
-   - Inventar IDs que ya existen (revisar último número)
-   - Ignorar hooks/ — son el protocolo estándar
+4. NEVER:
+   - Delete existing content without asking
+   - Modify decisions.md (only add or mark deprecated)
+   - Invent IDs that already exist (review the last number)
+   - Ignore hooks/ — they are the standard protocol
 ```
 
-### Triggers Automáticos para IA
+### Automatic Triggers for AI
 
-| Situación | Acción |
+| Situation | Action |
 |-----------|--------|
-| Inicio de sesión | → Ejecutar hooks/session-start.md |
-| Exception en código | → Ejecutar hooks/on-error.md → errors-log.md |
-| Commit con fix | → Ejecutar hooks/on-fix.md → fixes-log.md |
-| Usuario dice "versión X.Y lista" | → Proponer actualizar changelog.md |
-| Patrón de código repetido 3+ veces | → Proponer documentar en patterns.md |
-| Explicación compleja dada | → Proponer guardar en documentation.md |
-| Término de dominio sin definir | → Proponer agregar a glossary.md |
-| Cambio de esquema/campos | → Proponer agregar a migrations.md |
-| Final de sesión larga | → Ejecutar hooks/session-end.md |
-| Bootstrap o bump del seed | → Ejecutar hooks/on-seed-process.md |
-| Nuevo material en workbench/ | → Leer/mencionar al humano |
+| Session start | → Run hooks/session-start.md |
+| Exception in code | → Run hooks/on-error.md → errors-log.md |
+| Commit with a fix | → Run hooks/on-fix.md → fixes-log.md |
+| User says "version X.Y ready" | → Propose updating changelog.md |
+| Code pattern repeated 3+ times | → Propose documenting in patterns.md |
+| Complex explanation given | → Propose saving in documentation.md |
+| Undefined domain term | → Propose adding to glossary.md |
+| Schema/field change | → Propose adding to migrations.md |
+| End of a long session | → Run hooks/session-end.md |
+| Bootstrap or seed bump | → Run hooks/on-seed-process.md |
+| New material in workbench/ | → Read/mention to the human |
 
 ---
 
-## Script de Inicialización
+## Initialization Script
 
 ```bash
 #!/bin/bash
-# init_roots.sh - Inicializa estructura .roots para un módulo
+# init_roots.sh - Initializes the .roots structure for a module
 
 MODULE_NAME=${1:-"module"}
 BASE_PATH=".roots/$MODULE_NAME"
@@ -2074,8 +2141,8 @@ SEED_VERSION="1.7"
 
 mkdir -p "$BASE_PATH"/{journal,debug,design,docs,tasks,hooks,skills,workbench}
 
-# Meta — layout flat por default (v1.7). Para namespaced (Source multi-módulo
-# o Client branch) ver "Modos de trabajo": cambiar layout + agregar subdir.
+# Meta — flat layout by default (v1.7). For namespaced (multi-module Source
+# or Client branch) see "Working modes": change layout + add subdir.
 cat > ".roots/_meta.json" << EOF
 {
   "seed_version": "$SEED_VERSION",
@@ -2091,25 +2158,25 @@ EOF
 cat > "$BASE_PATH/context.md" << 'EOF'
 # {MODULE} - Context
 
-> Breve descripción de qué hace el módulo.
+> Brief description of what the module does.
 
 ---
 
 ## Stack
 
 - **Framework:** ...
-- **Lenguaje:** ...
-- **Base de datos:** ...
+- **Language:** ...
+- **Database:** ...
 
-## Estado Actual
+## Current State
 
-En desarrollo / producción / mantenimiento.
+In development / production / maintenance.
 
-## Convenciones Clave
+## Key Conventions
 
 - ...
 
-## Dependencias Críticas
+## Critical Dependencies
 
 - ...
 
@@ -2120,11 +2187,11 @@ EOF
 cat > "$BASE_PATH/journal/changelog.md" << 'EOF'
 # {MODULE} - Changelog
 
-> Historial de versiones y cambios.
+> Version and change history.
 
 ---
 
-*Sin releases aún*
+*No releases yet*
 
 ---
 EOF
@@ -2132,13 +2199,13 @@ EOF
 cat > "$BASE_PATH/journal/diary.md" << 'EOF'
 # {MODULE} - Development Diary
 
-> Reflexiones diarias sobre el desarrollo.
+> Daily reflections on the development.
 
 ---
 
 ## $(date +%Y)
 
-*Comenzar a documentar aquí*
+*Start documenting here*
 
 ---
 EOF
@@ -2146,13 +2213,13 @@ EOF
 cat > "$BASE_PATH/journal/notes.md" << 'EOF'
 # {MODULE} - Notes
 
-> Ideas y notas que podrían convertirse en features.
+> Ideas and notes that could become features.
 
 ---
 
-## Ideas pendientes
+## Pending ideas
 
-*Agregar ideas aquí*
+*Add ideas here*
 
 ---
 EOF
@@ -2161,19 +2228,19 @@ EOF
 cat > "$BASE_PATH/debug/errors-log.md" << 'EOF'
 # {MODULE} - Errors Log
 
-> Registro de errores encontrados.
+> Log of errors found.
 
 ---
 
-## Errores Activos
+## Active Errors
 
-*Ninguno actualmente*
+*None currently*
 
 ---
 
-## Errores Resueltos
+## Resolved Errors
 
-Ver [fixes-log.md](./fixes-log.md)
+See [fixes-log.md](./fixes-log.md)
 
 ---
 EOF
@@ -2181,11 +2248,11 @@ EOF
 cat > "$BASE_PATH/debug/fixes-log.md" << 'EOF'
 # {MODULE} - Fixes Log
 
-> Historial de correcciones implementadas.
+> History of implemented fixes.
 
 ---
 
-*Sin fixes documentados aún*
+*No fixes documented yet*
 
 ---
 EOF
@@ -2193,11 +2260,11 @@ EOF
 cat > "$BASE_PATH/debug/migrations.md" << 'EOF'
 # {MODULE} - Migrations
 
-> Registro de migraciones de datos, campos y esquemas.
+> Log of data, field and schema migrations.
 
 ---
 
-*Sin migraciones documentadas aún*
+*No migrations documented yet*
 
 ---
 EOF
@@ -2206,11 +2273,11 @@ EOF
 cat > "$BASE_PATH/design/decisions.md" << 'EOF'
 # {MODULE} - Architecture Decisions
 
-> Decisiones de diseño y arquitectura (ADRs).
+> Design and architecture decisions (ADRs).
 
 ---
 
-*Sin decisiones documentadas aún*
+*No decisions documented yet*
 
 ---
 EOF
@@ -2218,11 +2285,11 @@ EOF
 cat > "$BASE_PATH/design/sketchbook.md" << 'EOF'
 # {MODULE} - Sketchbook
 
-> Bocetos, diagramas e ideas visuales.
+> Sketches, diagrams and visual ideas.
 
 ---
 
-*Sin bocetos aún*
+*No sketches yet*
 
 ---
 EOF
@@ -2231,17 +2298,17 @@ EOF
 cat > "$BASE_PATH/docs/README.md" << 'EOF'
 # {MODULE} - Documentation
 
-> Índice de documentación.
+> Documentation index.
 
 ---
 
-## Documentos
+## Documents
 
-| Archivo | Descripción |
+| File | Description |
 |---------|-------------|
-| [manual.md](./manual.md) | Manual de usuario |
-| [documentation.md](./documentation.md) | Documentación técnica |
-| [architecture.md](./architecture.md) | Arquitectura del sistema |
+| [manual.md](./manual.md) | User manual |
+| [documentation.md](./documentation.md) | Technical documentation |
+| [architecture.md](./architecture.md) | System architecture |
 
 ---
 EOF
@@ -2253,11 +2320,11 @@ touch "$BASE_PATH/docs/architecture.md"
 cat > "$BASE_PATH/docs/glossary.md" << 'EOF'
 # {MODULE} - Glossary
 
-> Términos del dominio y convenciones de nomenclatura.
+> Domain terms and naming conventions.
 
 ---
 
-*Agregar términos en orden alfabético*
+*Add terms in alphabetical order*
 
 ---
 EOF
@@ -2266,13 +2333,13 @@ EOF
 cat > "$BASE_PATH/tasks/tasks.md" << 'EOF'
 # {MODULE} - Tasks
 
-> Tareas en progreso.
+> Tasks in progress.
 
 ---
 
-## En Progreso
+## In Progress
 
-*Sin tareas activas*
+*No active tasks*
 
 ---
 EOF
@@ -2280,17 +2347,17 @@ EOF
 cat > "$BASE_PATH/tasks/todo.md" << 'EOF'
 # {MODULE} - TODO
 
-> Backlog y tareas pendientes.
+> Backlog and pending tasks.
 
 ---
 
-## Alta Prioridad
+## High Priority
 
-*Sin tareas pendientes*
+*No pending tasks*
 
 ---
 
-## Media Prioridad
+## Medium Priority
 
 ---
 
@@ -2303,11 +2370,11 @@ EOF
 cat > "$BASE_PATH/skills/prompts.md" << 'EOF'
 # {MODULE} - Prompts
 
-> Prompts reutilizables para tareas frecuentes.
+> Reusable prompts for frequent tasks.
 
 ---
 
-*Sin prompts documentados aún*
+*No prompts documented yet*
 
 ---
 EOF
@@ -2315,11 +2382,11 @@ EOF
 cat > "$BASE_PATH/skills/workflows.md" << 'EOF'
 # {MODULE} - Workflows
 
-> Flujos de trabajo comunes.
+> Common workflows.
 
 ---
 
-*Sin workflows documentados aún*
+*No workflows documented yet*
 
 ---
 EOF
@@ -2327,11 +2394,11 @@ EOF
 cat > "$BASE_PATH/skills/patterns.md" << 'EOF'
 # {MODULE} - Patterns
 
-> Patrones de código y convenciones.
+> Code patterns and conventions.
 
 ---
 
-*Sin patrones documentados aún*
+*No patterns documented yet*
 
 ---
 EOF
@@ -2340,22 +2407,22 @@ EOF
 cat > "$BASE_PATH/hooks/session-start.md" << 'EOF'
 # Hook: Session Start
 
-> Protocolo de inicio de sesión de desarrollo.
+> Development session start protocol.
 
 ---
 
-## Pasos
+## Steps
 
-1. Leer `context.md` — entender qué es el proyecto
-2. Leer `journal/diary.md` — últimas 5 entradas
-3. Leer `tasks/todo.md` — backlog pendiente
-4. Leer `debug/errors-log.md` — errores activos
-5. Si hay `tasks/tasks.md` con tareas en progreso → retomar
+1. Read `context.md` — understand what the project is
+2. Read `journal/diary.md` — last 5 entries
+3. Read `tasks/todo.md` — pending backlog
+4. Read `debug/errors-log.md` — active errors
+5. If there is `tasks/tasks.md` with tasks in progress → resume
 
-## Output esperado
+## Expected output
 
-Resumen interno de: estado del proyecto, tareas pendientes,
-errores activos, contexto de última sesión.
+Internal summary of: project state, pending tasks,
+active errors, context of the last session.
 
 ---
 EOF
@@ -2363,23 +2430,23 @@ EOF
 cat > "$BASE_PATH/hooks/session-end.md" << 'EOF'
 # Hook: Session End
 
-> Protocolo de cierre de sesión.
+> Session close protocol.
 
 ---
 
-## Pasos
+## Steps
 
-1. Agregar entrada a `journal/diary.md` con resumen del trabajo
-2. Si hubo errores nuevos → agregar a `debug/errors-log.md`
-3. Si se arregló algo → agregar a `debug/fixes-log.md`
-4. Si se completó tarea → marcar en `tasks/tasks.md`
-5. Si se identificó patrón → proponer para `skills/patterns.md`
-6. Si hubo commits → actualizar `docs/commits.md`
-7. Si cambió estado del proyecto → actualizar `context.md`
+1. Add an entry to `journal/diary.md` with a summary of the work
+2. If there were new errors → add to `debug/errors-log.md`
+3. If something was fixed → add to `debug/fixes-log.md`
+4. If a task was completed → mark in `tasks/tasks.md`
+5. If a pattern was identified → propose for `skills/patterns.md`
+6. If there were commits → update `docs/commits.md`
+7. If the project state changed → update `context.md`
 
-## Output esperado
+## Expected output
 
-Archivos de .roots/ actualizados con el trabajo de la sesión.
+`.roots/` files updated with the session's work.
 
 ---
 EOF
@@ -2387,20 +2454,20 @@ EOF
 cat > "$BASE_PATH/hooks/on-error.md" << 'EOF'
 # Hook: On Error
 
-> Protocolo al detectar un error.
+> Protocol when detecting an error.
 
 ---
 
-## Pasos
+## Steps
 
-1. Determinar siguiente ID: revisar último ERROR-XXX en errors-log.md
-2. Agregar entrada con formato estándar a `debug/errors-log.md`
-3. Si el error es crítico → agregar a `tasks/tasks.md` como tarea
-4. Si hay hipótesis de causa → documentar en sección Análisis
+1. Determine the next ID: review the last ERROR-XXX in errors-log.md
+2. Add an entry with the standard format to `debug/errors-log.md`
+3. If the error is critical → add to `tasks/tasks.md` as a task
+4. If there is a cause hypothesis → document in the Analysis section
 
 ## Template
 
-Usar el formato ERROR-XXX definido en el protocolo de errors-log.md.
+Use the ERROR-XXX format defined in the errors-log.md protocol.
 
 ---
 EOF
@@ -2408,20 +2475,20 @@ EOF
 cat > "$BASE_PATH/hooks/on-fix.md" << 'EOF'
 # Hook: On Fix
 
-> Protocolo al commitear una corrección.
+> Protocol when committing a fix.
 
 ---
 
-## Pasos
+## Steps
 
-1. Agregar entrada a `debug/fixes-log.md` con formato estándar
-2. Si resuelve un ERROR-XXX → actualizar estado a "Resuelto" en errors-log.md
-3. Si el fix introduce patrón reutilizable → proponer para patterns.md
-4. Si el fix requiere migración de datos → agregar a migrations.md
+1. Add an entry to `debug/fixes-log.md` with the standard format
+2. If it resolves an ERROR-XXX → update status to "Resolved" in errors-log.md
+3. If the fix introduces a reusable pattern → propose for patterns.md
+4. If the fix requires a data migration → add to migrations.md
 
 ## Template
 
-Usar el formato definido en el protocolo de fixes-log.md.
+Use the format defined in the fixes-log.md protocol.
 
 ---
 EOF
@@ -2430,41 +2497,41 @@ EOF
 find "$BASE_PATH" -type f -name "*.md" -exec sed -i "s/{MODULE}/$MODULE_NAME/g" {} \;
 
 echo "✓ Created .roots/$MODULE_NAME structure (seed v$SEED_VERSION)"
-echo "  - context.md: briefing del módulo"
+echo "  - context.md: module briefing"
 echo "  - journal/: changelog, diary, notes"
 echo "  - debug/: errors-log, fixes-log, migrations"
 echo "  - design/: decisions, sketchbook"
 echo "  - docs/: README, manual, documentation, architecture, glossary"
 echo "  - tasks/: tasks, todo"
 echo "  - skills/: prompts, workflows, patterns"
-echo "  - workbench/: materiales de referencia (vacío)"
+echo "  - workbench/: reference materials (empty)"
 echo "  - hooks/: session-start, session-end, on-error, on-fix"
-echo "  - _meta.json: metadata de inicialización"
+echo "  - _meta.json: initialization metadata"
 ```
 
 ---
 
-## Mejores Prácticas
+## Best practices
 
-1. **context.md es la puerta de entrada** — Lo primero que lee cualquier agente o dev nuevo
-2. **diary.md es la memoria a corto plazo** — Actualizar al final de cada sesión
-3. **changelog.md es para clientes** — Sin jerga técnica, enfocado en beneficios
-4. **decisions.md es inmutable** — No borrar, solo deprecar o reemplazar
-5. **errors-log.md es temporal** — Mover a fixes-log.md cuando se resuelve
-6. **notes.md es libre** — Ideas rápidas, procesar semanalmente
-7. **glossary.md evita ambigüedades** — Definir términos del dominio una sola vez
-8. **migrations.md previene pérdida de datos** — Documentar todo cambio de esquema
-9. **hooks/ son el protocolo estándar** — Seguirlos garantiza consistencia entre sesiones
-10. **skills/ es específico del módulo** — No duplicar patrones genéricos
-11. **patterns.md incluye anti-patrones** — Qué NO hacer es igual de importante
-12. **workflows.md debe ser ejecutable** — Pasos claros que un agente pueda seguir
-13. **Mantener IDs únicos** — Revisar último número antes de crear nuevo
-14. **Consistencia de formato** — Seguir las plantillas de este documento
-15. **_meta.json es automático** — No editarlo manualmente, es para herramientas
-16. **workbench/ es del usuario** — El agente consulta pero no inventa contenido ahí; revisar al inicio de cada sesión
-17. **Sources embebidos son referencia** — En modo client, `sources/` es una copia de consulta; los cambios se hacen en el source original y se sincronizan
-18. **Namespace evita conflictos** — Usar `source.skill_name` cuando dos sources definen el mismo concepto
-19. **Promoción es explícita** — El agente sugiere, el usuario decide si un descubrimiento del cliente se sube al source
-20. **Context format es parseable** — El nombre del directorio `.roots/` tiene estructura semántica, no es un string libre
+1. **context.md is the front door** — The first thing any new agent or dev reads
+2. **diary.md is short-term memory** — Update at the end of each session
+3. **changelog.md is for clients** — No technical jargon, focused on benefits
+4. **decisions.md is immutable** — Do not delete, only deprecate or replace
+5. **errors-log.md is temporary** — Move to fixes-log.md when resolved
+6. **notes.md is free** — Quick ideas, process weekly
+7. **glossary.md avoids ambiguities** — Define domain terms only once
+8. **migrations.md prevents data loss** — Document every schema change
+9. **hooks/ are the standard protocol** — Following them guarantees consistency between sessions
+10. **skills/ is module-specific** — Do not duplicate generic patterns
+11. **patterns.md includes anti-patterns** — What NOT to do is equally important
+12. **workflows.md must be executable** — Clear steps an agent can follow
+13. **Keep IDs unique** — Review the last number before creating a new one
+14. **Format consistency** — Follow the templates in this document
+15. **_meta.json is automatic** — Don't edit it manually, it is for tools
+16. **workbench/ is the user's** — The agent consults but does not invent content there; review at the start of each session
+17. **Embedded sources are reference** — In client mode, `sources/` is a consultation copy; changes are made in the original source and synced
+18. **Namespace avoids conflicts** — Use `source.skill_name` when two sources define the same concept
+19. **Promotion is explicit** — The agent suggests, the user decides whether a client discovery goes up to the source
+20. **Context format is parseable** — The `.roots/` directory name has semantic structure, it is not a free string
 
 ---

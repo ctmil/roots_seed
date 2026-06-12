@@ -1,0 +1,358 @@
+{
+  "meta": {
+    "primary_lang": "en",
+    "languages": ["en", "es", "fr"],
+    "version": "1.0",
+    "note": "Canonical source of truth for the roots_seed vocabulary across languages. English (en) is primary: it is the key and the reference definition. Other languages are translations and may lag. Edit this file, then run gen.py to regenerate the GLOSSARY.<lang>.md tables. Code/JSON identifiers (e.g. forest.json, _meta.json, relations[]) are NOT translated."
+  },
+  "categories": {
+    "metaphor": { "en": "Forest metaphor", "es": "Metáfora Forest", "fr": "Métaphore Forest" },
+    "axis": { "en": "Tree axes", "es": "Ejes del Tree", "fr": "Axes du Tree" },
+    "mode": { "en": "Working modes", "es": "Modos de trabajo", "fr": "Modes de travail" },
+    "multisource": { "en": "Multi-source machinery", "es": "Maquinaria multi-source", "fr": "Mécanique multi-source" },
+    "registry": { "en": "Registries & metadata", "es": "Registros y metadata", "fr": "Registres et métadonnées" },
+    "memory": { "en": "Memory layers (.roots files)", "es": "Capas de memoria (archivos .roots)", "fr": "Couches de mémoire (fichiers .roots)" },
+    "distribution": { "en": "Seed distribution", "es": "Distribución del seed", "fr": "Distribution du seed" },
+    "economy": { "en": "Token economy", "es": "Economía de tokens", "fr": "Économie de tokens" },
+    "lifecycle": { "en": "Lifecycle hooks", "es": "Hooks de ciclo de vida", "fr": "Hooks de cycle de vie" },
+    "i18n": { "en": "Language & i18n", "es": "Idioma e i18n", "fr": "Langue et i18n" }
+  },
+  "terms": {
+    "roots": {
+      "category": "metaphor",
+      "see_also": ["forest", "seed"],
+      "en": { "term": "Roots", "def": "The `.roots/` folder: the persistent memory/knowledge layer that lives with the code (context, decisions, journal, tasks, skills, docs). The metaphor starts here and grows upward." },
+      "es": { "term": "Roots (Raíces)", "def": "La carpeta `.roots/`: la capa de memoria/conocimiento persistente que vive con el código (contexto, decisiones, bitácora, tareas, skills, docs). La metáfora arranca acá y sube." },
+      "fr": { "term": "Roots (Racines)", "def": "Le dossier `.roots/` : la couche de mémoire/connaissance persistante qui vit avec le code (contexte, décisions, journal, tâches, skills, docs). La métaphore part d'ici et grandit vers le haut." }
+    },
+    "forest": {
+      "category": "metaphor",
+      "see_also": ["grove", "tree", "workspace-mode", "forest-json"],
+      "en": { "term": "Forest", "def": "The whole workspace — every coordinated repo. The folder that contains the repos. Modeled by `forest.json` in workspace mode." },
+      "es": { "term": "Forest (Bosque)", "def": "El workspace entero — todos los repos coordinados. La carpeta que contiene los repos. Se modela con `forest.json` en modo workspace." },
+      "fr": { "term": "Forest (Forêt)", "def": "L'espace de travail entier — tous les dépôts coordonnés. Le dossier qui contient les dépôts. Modélisé par `forest.json` en mode workspace." }
+    },
+    "grove": {
+      "category": "metaphor",
+      "see_also": ["forest", "tree", "grove-axis"],
+      "en": { "term": "Grove", "def": "A product / suite: a cluster of Trees with a common function (e.g. Meli, OCAPI, GeoEcon). A Tree's primary grove answers 'what it is'." },
+      "es": { "term": "Grove (Arboleda)", "def": "Un producto / suite: un cluster de Trees con función común (ej. Meli, OCAPI, GeoEcon). El grove primario de un Tree responde 'qué es'." },
+      "fr": { "term": "Grove (Bosquet)", "def": "Un produit / une suite : un groupe de Trees ayant une fonction commune (ex. Meli, OCAPI, GeoEcon). Le grove primaire d'un Tree répond à « ce qu'il est »." }
+    },
+    "tree": {
+      "category": "metaphor",
+      "see_also": ["branch", "grove", "vendor", "kind"],
+      "en": { "term": "Tree", "def": "A repo, mounted bare + worktrees (e.g. `meli_oerp`, `geoecon_map`). Described by orthogonal axes: grove, vendor, kind, org." },
+      "es": { "term": "Tree (Árbol)", "def": "Un repo, montado bare + worktrees (ej. `meli_oerp`, `geoecon_map`). Se describe con ejes ortogonales: grove, vendor, kind, org." },
+      "fr": { "term": "Tree (Arbre)", "def": "Un dépôt, monté bare + worktrees (ex. `meli_oerp`, `geoecon_map`). Décrit par des axes orthogonaux : grove, vendor, kind, org." }
+    },
+    "branch": {
+      "category": "metaphor",
+      "see_also": ["tree", "branch-primitive"],
+      "en": { "term": "Branch", "def": "A git branch / worktree of a Tree (e.g. `17.0`, `mapdev`). One worktree per branch under the bare+worktrees pattern." },
+      "es": { "term": "Branch (Rama)", "def": "Un git branch / worktree de un Tree (ej. `17.0`, `mapdev`). Un worktree por branch bajo el patrón bare+worktrees." },
+      "fr": { "term": "Branch (Branche)", "def": "Une branche / un worktree git d'un Tree (ex. `17.0`, `mapdev`). Un worktree par branche selon le motif bare+worktrees." }
+    },
+    "vendor": {
+      "category": "axis",
+      "see_also": ["tree", "kind", "grove-axis"],
+      "en": { "term": "vendor", "def": "Authorship/ownership axis of a Tree (`vendor: <slug>`, e.g. `moldeo-interactive`, `oca`, `odoo-sa`). A field, not a structural node; may have an optional profile at `.roots/vendors/<slug>.md`." },
+      "es": { "term": "vendor", "def": "Eje de autoría/propiedad de un Tree (`vendor: <slug>`, ej. `moldeo-interactive`, `oca`, `odoo-sa`). Es un campo, no un nodo estructural; puede tener perfil opcional en `.roots/vendors/<slug>.md`." },
+      "fr": { "term": "vendor", "def": "Axe de paternité/propriété d'un Tree (`vendor: <slug>`, ex. `moldeo-interactive`, `oca`, `odoo-sa`). Un champ, pas un nœud structurel ; peut avoir un profil optionnel dans `.roots/vendors/<slug>.md`." }
+    },
+    "relations": {
+      "category": "axis",
+      "see_also": ["tree", "golden-rule"],
+      "en": { "term": "relations[]", "def": "A directed graph (DAG) of dependencies between Trees/modules/services: `{from, to, type}` with types `depends-on`, `extends`, `integrates`, `relates`. Dependencies are edges — NEVER nesting or tags." },
+      "es": { "term": "relations[]", "def": "Un grafo dirigido (DAG) de dependencias entre Trees/módulos/servicios: `{from, to, type}` con tipos `depends-on`, `extends`, `integrates`, `relates`. Las dependencias son aristas — NUNCA anidamiento ni tags." },
+      "fr": { "term": "relations[]", "def": "Un graphe orienté (DAG) de dépendances entre Trees/modules/services : `{from, to, type}` avec les types `depends-on`, `extends`, `integrates`, `relates`. Les dépendances sont des arêtes — JAMAIS de l'imbrication ni des tags." }
+    },
+    "grove-axis": {
+      "category": "axis",
+      "see_also": ["grove", "also-groves", "golden-rule"],
+      "en": { "term": "grove (axis)", "def": "The primary-product axis of a Tree (cardinality: exactly 1). Answers 'what is it part of'." },
+      "es": { "term": "grove (eje)", "def": "El eje de producto primario de un Tree (cardinalidad: exactamente 1). Responde 'de qué es parte'." },
+      "fr": { "term": "grove (axe)", "def": "L'axe produit-primaire d'un Tree (cardinalité : exactement 1). Répond à « de quoi fait-il partie »." }
+    },
+    "also-groves": {
+      "category": "axis",
+      "see_also": ["grove-axis", "golden-rule"],
+      "en": { "term": "also_groves", "def": "Optional tags (0..N) of genuine co-membership in another product — NOT a dependency. The 'also a part of' tag in the golden rule." },
+      "es": { "term": "also_groves", "def": "Tags opcionales (0..N) de co-pertenencia genuina a otro producto — NO una dependencia. El tag de 'también es de' en la regla de oro." },
+      "fr": { "term": "also_groves", "def": "Tags optionnels (0..N) d'appartenance partagée et réelle à un autre produit — PAS une dépendance. Le tag « aussi de » dans la règle d'or." }
+    },
+    "kind": {
+      "category": "axis",
+      "see_also": ["tree", "vendor"],
+      "en": { "term": "kind", "def": "The nature of a Tree (cardinality 1). Enum: `product-suite`, `platform` (abstract base others depend on), `aggregator` (deployment nesting modules from many Groves), `external-upstream` (vendored: Odoo core, OCA), `seed` (roots tooling)." },
+      "es": { "term": "kind", "def": "La naturaleza de un Tree (cardinalidad 1). Enum: `product-suite`, `platform` (base abstracta de la que dependen otros), `aggregator` (deployment que anida módulos de varios Groves), `external-upstream` (vendorizado: Odoo core, OCA), `seed` (tooling de roots)." },
+      "fr": { "term": "kind", "def": "La nature d'un Tree (cardinalité 1). Enum : `product-suite`, `platform` (base abstraite dont d'autres dépendent), `aggregator` (déploiement imbriquant des modules de plusieurs Groves), `external-upstream` (vendorisé : Odoo core, OCA), `seed` (outillage roots)." }
+    },
+    "org": {
+      "category": "axis",
+      "see_also": ["tree", "vendor"],
+      "en": { "term": "org", "def": "The hosting axis of a Tree (cardinality 1): where the repo lives (the hosting org/namespace). Distinct from `vendor` (who authors it)." },
+      "es": { "term": "org", "def": "El eje de hosting de un Tree (cardinalidad 1): dónde vive el repo (la org/namespace de hosting). Distinto de `vendor` (quién lo autora)." },
+      "fr": { "term": "org", "def": "L'axe d'hébergement d'un Tree (cardinalité 1) : où vit le dépôt (l'org/namespace d'hébergement). Distinct de `vendor` (qui en est l'auteur)." }
+    },
+    "golden-rule": {
+      "category": "axis",
+      "see_also": ["grove-axis", "relations", "also-groves"],
+      "en": { "term": "golden rule (graph)", "def": "`grove` = what it IS · edge (`relations[]`) = what it USES · tag (`also_groves`) = what it's ALSO part of. Dependencies are always edges, never membership or nesting." },
+      "es": { "term": "regla de oro (grafo)", "def": "`grove` = qué ES · arista (`relations[]`) = qué USA · tag (`also_groves`) = de qué TAMBIÉN es. Las dependencias son siempre aristas, nunca pertenencia ni anidamiento." },
+      "fr": { "term": "règle d'or (graphe)", "def": "`grove` = ce que c'est · arête (`relations[]`) = ce qu'il utilise · tag (`also_groves`) = ce dont il fait aussi partie. Les dépendances sont toujours des arêtes, jamais de l'appartenance ni de l'imbrication." }
+    },
+    "branch-primitive": {
+      "category": "axis",
+      "see_also": ["branch", "vendor", "relations"],
+      "en": { "term": "branch (primitive)", "def": "One of the 3 reusable primitives (vendor · relations[] · branch). A fork carrying `stage`/`merged_into`/`created_by: human|AI`: a git branch, a design variant, or a story arc." },
+      "es": { "term": "branch (primitivo)", "def": "Uno de los 3 primitivos reusables (vendor · relations[] · branch). Una bifurcación con `stage`/`merged_into`/`created_by: human|AI`: branch git, variante de diseño o arco narrativo." },
+      "fr": { "term": "branch (primitif)", "def": "L'un des 3 primitifs réutilisables (vendor · relations[] · branch). Une bifurcation portant `stage`/`merged_into`/`created_by: human|AI` : branche git, variante de design ou arc narratif." }
+    },
+    "flat-mode": {
+      "category": "mode",
+      "see_also": ["source-mode", "client-branch-mode", "workspace-mode"],
+      "en": { "term": "Flat mode", "def": "The default, simplest layout: `.roots/` directly at the root, no internal namespace. For a single-project repo with few/no embedded remote sources." },
+      "es": { "term": "Modo Flat", "def": "El layout default, el más simple: `.roots/` directo en la raíz, sin namespace interno. Para un repo de proyecto único con pocas/ninguna fuente remota embebida." },
+      "fr": { "term": "Mode Flat", "def": "Le layout par défaut, le plus simple : `.roots/` directement à la racine, sans namespace interne. Pour un dépôt mono-projet avec peu ou pas de sources distantes embarquées." }
+    },
+    "source-mode": {
+      "category": "mode",
+      "see_also": ["flat-mode", "client-branch-mode"],
+      "en": { "term": "Source mode", "def": "Namespaced layout `.roots/{module}/` for a multi-module source repo (the source of truth for several modules)." },
+      "es": { "term": "Modo Source", "def": "Layout namespaced `.roots/{module}/` para un repo source multi-módulo (la fuente de verdad de varios módulos)." },
+      "fr": { "term": "Mode Source", "def": "Layout namespacé `.roots/{module}/` pour un dépôt source multi-module (la source de vérité de plusieurs modules)." }
+    },
+    "client-branch-mode": {
+      "category": "mode",
+      "see_also": ["source-mode", "embedded-source", "sources-manifest"],
+      "en": { "term": "Client-branch mode", "def": "Namespaced layout `.roots/{context}.{project}/` for a client branch that consumes/embeds one or more sources. Uses the full multi-source machinery." },
+      "es": { "term": "Modo Client branch", "def": "Layout namespaced `.roots/{context}.{project}/` para un branch de cliente que consume/embebe uno o más sources. Usa toda la maquinaria multi-source." },
+      "fr": { "term": "Mode Client branch", "def": "Layout namespacé `.roots/{context}.{project}/` pour une branche client qui consomme/embarque une ou plusieurs sources. Utilise toute la mécanique multi-source." }
+    },
+    "workspace-mode": {
+      "category": "mode",
+      "see_also": ["forest", "forest-json"],
+      "en": { "term": "Workspace mode", "def": "A `.roots/` that does not document one project but coordinates N repos from the folder that contains them (the Forest). Golden rule: index and point, do not duplicate." },
+      "es": { "term": "Modo Workspace", "def": "Un `.roots/` que no documenta un proyecto sino que coordina N repos desde la carpeta que los contiene (el Forest). Regla de oro: indexar y apuntar, no duplicar." },
+      "fr": { "term": "Mode Workspace", "def": "Un `.roots/` qui ne documente pas un projet mais coordonne N dépôts depuis le dossier qui les contient (la Forest). Règle d'or : indexer et pointer, ne pas dupliquer." }
+    },
+    "migration-mode": {
+      "category": "mode",
+      "see_also": ["flat-mode"],
+      "en": { "term": "Migration mode", "def": "A flat repo may temporarily fork into namespaced during a migration (e.g. `.roots/17.0/` + `.roots/19.0/` side by side) and collapse back to flat on the new version." },
+      "es": { "term": "Modo Migración", "def": "Un repo flat puede forkear temporalmente a namespaced durante una migración (ej. `.roots/17.0/` + `.roots/19.0/` lado a lado) y colapsar de vuelta a flat sobre la versión nueva." },
+      "fr": { "term": "Mode Migration", "def": "Un dépôt flat peut temporairement bifurquer en namespacé pendant une migration (ex. `.roots/17.0/` + `.roots/19.0/` côte à côte) puis se replier en flat sur la nouvelle version." }
+    },
+    "domain-pack": {
+      "category": "mode",
+      "see_also": ["workspace-mode"],
+      "en": { "term": "domain pack", "def": "A domain overlay (e.g. `working_mode: narrative`) layered on top of any base mode, adding domain-specific folders (worldbible, character sheets, arcs as branches)." },
+      "es": { "term": "domain pack", "def": "Un overlay de dominio (ej. `working_mode: narrative`) por encima de cualquier modo base, que agrega carpetas de dominio (worldbible, fichas, arcos como branches)." },
+      "fr": { "term": "domain pack", "def": "Une surcouche de domaine (ex. `working_mode: narrative`) posée sur n'importe quel mode de base, ajoutant des dossiers spécifiques au domaine (worldbible, fiches, arcs comme branches)." }
+    },
+    "embedded-source": {
+      "category": "multisource",
+      "see_also": ["sources-manifest", "precedence-cascade", "client-branch-mode"],
+      "en": { "term": "embedded source", "def": "A copy of a source's `.roots/` placed under `sources/` in a client branch, linked via `_sources.json`. Lets the client carry the source's memory locally." },
+      "es": { "term": "source embebido", "def": "Una copia del `.roots/` de un source colocada bajo `sources/` en un client branch, vinculada vía `_sources.json`. Deja al cliente cargar la memoria del source localmente." },
+      "fr": { "term": "source embarquée", "def": "Une copie du `.roots/` d'une source placée sous `sources/` dans une branche client, liée via `_sources.json`. Permet au client de porter localement la mémoire de la source." }
+    },
+    "sources-manifest": {
+      "category": "multisource",
+      "see_also": ["embedded-source", "precedence-cascade"],
+      "en": { "term": "_sources.json", "def": "The manifest that links embedded sources to their originals: source ids, paths, `last_sync`, and `sync_include`/`sync_exclude` rules." },
+      "es": { "term": "_sources.json", "def": "El manifest que vincula sources embebidos con sus originales: ids de source, rutas, `last_sync`, y reglas `sync_include`/`sync_exclude`." },
+      "fr": { "term": "_sources.json", "def": "Le manifeste qui lie les sources embarquées à leurs originaux : ids de source, chemins, `last_sync`, et règles `sync_include`/`sync_exclude`." }
+    },
+    "precedence-cascade": {
+      "category": "multisource",
+      "see_also": ["embedded-source", "conflict-namespace"],
+      "en": { "term": "precedence cascade", "def": "Resolution order when the same knowledge exists at multiple levels: root client > embedded source > original source." },
+      "es": { "term": "cascada de precedencia", "def": "Orden de resolución cuando el mismo conocimiento existe en varios niveles: cliente raíz > source embebido > source original." },
+      "fr": { "term": "cascade de précédence", "def": "Ordre de résolution quand la même connaissance existe à plusieurs niveaux : client racine > source embarquée > source originale." }
+    },
+    "conflict-namespace": {
+      "category": "multisource",
+      "see_also": ["precedence-cascade", "discovery-promotion"],
+      "en": { "term": "conflict namespace", "def": "Pattern `source.skill_name` to disambiguate same-named items across sources, with client overrides taking precedence." },
+      "es": { "term": "namespace de conflictos", "def": "Patrón `source.skill_name` para desambiguar items con el mismo nombre entre sources, con overrides del cliente que tienen precedencia." },
+      "fr": { "term": "namespace de conflits", "def": "Motif `source.skill_name` pour désambiguïser des éléments de même nom entre sources, les surcharges du client ayant la précédence." }
+    },
+    "discovery-promotion": {
+      "category": "multisource",
+      "see_also": ["embedded-source", "upstream-sync"],
+      "en": { "term": "discovery promotion", "def": "Semi-automatic promotion of a discovery made in the client back to the original source (e.g. a reusable skill, a fix, a decision)." },
+      "es": { "term": "promoción de descubrimientos", "def": "Promoción semi-automática de un descubrimiento hecho en el cliente de vuelta al source original (ej. un skill reutilizable, un fix, una decisión)." },
+      "fr": { "term": "promotion des découvertes", "def": "Promotion semi-automatique d'une découverte faite dans le client vers la source originale (ex. un skill réutilisable, un correctif, une décision)." }
+    },
+    "context-format": {
+      "category": "registry",
+      "see_also": ["context-parsed", "meta-json"],
+      "en": { "term": "context_format", "def": "A registered, domain-specific context schema declared in `_meta.json` (Odoo is the first: `{major}.{minor}.{infra}.{project}`). Lets the agent reason about the environment without guessing." },
+      "es": { "term": "context_format", "def": "Un schema de contexto registrado y específico de dominio declarado en `_meta.json` (Odoo es el primero: `{major}.{minor}.{infra}.{project}`). Deja al agente razonar sobre el entorno sin adivinar." },
+      "fr": { "term": "context_format", "def": "Un schéma de contexte enregistré et spécifique à un domaine déclaré dans `_meta.json` (Odoo est le premier : `{major}.{minor}.{infra}.{project}`). Permet à l'agent de raisonner sur l'environnement sans deviner." }
+    },
+    "context-parsed": {
+      "category": "registry",
+      "see_also": ["context-format", "meta-json"],
+      "en": { "term": "context_parsed", "def": "The parsed object form of `context_format` in `_meta.json` (e.g. `{major:17, minor:0, infra:'sh', project:'acme'}`). Metadata for reasoning, independent of the directory layout." },
+      "es": { "term": "context_parsed", "def": "La forma de objeto parseada de `context_format` en `_meta.json` (ej. `{major:17, minor:0, infra:'sh', project:'acme'}`). Metadata para razonar, independiente del layout del directorio." },
+      "fr": { "term": "context_parsed", "def": "La forme objet analysée de `context_format` dans `_meta.json` (ex. `{major:17, minor:0, infra:'sh', project:'acme'}`). Métadonnée de raisonnement, indépendante du layout du répertoire." }
+    },
+    "forest-json": {
+      "category": "registry",
+      "see_also": ["forest", "fleet-json", "relations"],
+      "en": { "term": "forest.json", "def": "The structured registry of the Forest (workspace mode): `vocabulary`, `groves[]`, `vendors[]`, `repos[]` (Trees with grove/vendor/kind/org) and `relations[]`. Rename of `fleet.json`." },
+      "es": { "term": "forest.json", "def": "El registro estructurado del Forest (modo workspace): `vocabulary`, `groves[]`, `vendors[]`, `repos[]` (Trees con grove/vendor/kind/org) y `relations[]`. Rename de `fleet.json`." },
+      "fr": { "term": "forest.json", "def": "Le registre structuré de la Forest (mode workspace) : `vocabulary`, `groves[]`, `vendors[]`, `repos[]` (Trees avec grove/vendor/kind/org) et `relations[]`. Renommage de `fleet.json`." }
+    },
+    "fleet-json": {
+      "category": "registry",
+      "see_also": ["forest-json"],
+      "en": { "term": "fleet.json", "def": "The former name of `forest.json`, kept as a compatibility symlink so older tools / the forest-dashboard (which read `repos[]`) keep working." },
+      "es": { "term": "fleet.json", "def": "El nombre anterior de `forest.json`, conservado como symlink de compatibilidad para que tools viejos / el forest-dashboard (que leen `repos[]`) sigan funcionando." },
+      "fr": { "term": "fleet.json", "def": "L'ancien nom de `forest.json`, conservé comme lien symbolique de compatibilité pour que les anciens outils / le forest-dashboard (qui lisent `repos[]`) continuent de fonctionner." }
+    },
+    "meta-json": {
+      "category": "registry",
+      "see_also": ["context-format", "lang", "working-mode"],
+      "en": { "term": "_meta.json", "def": "Per-`.roots/` state file: `seed_version`, `layout`, `working_mode`, `lang`, `context_format`/`context_parsed`, `project`, `modules`, `sources`, `current_feature`." },
+      "es": { "term": "_meta.json", "def": "Archivo de estado por-`.roots/`: `seed_version`, `layout`, `working_mode`, `lang`, `context_format`/`context_parsed`, `project`, `modules`, `sources`, `current_feature`." },
+      "fr": { "term": "_meta.json", "def": "Fichier d'état par `.roots/` : `seed_version`, `layout`, `working_mode`, `lang`, `context_format`/`context_parsed`, `project`, `modules`, `sources`, `current_feature`." }
+    },
+    "working-mode": {
+      "category": "registry",
+      "see_also": ["meta-json", "flat-mode", "workspace-mode"],
+      "en": { "term": "working_mode", "def": "The `_meta.json` field that records the chosen mode (`source`, `client`, `workspace`, optionally a domain like `narrative`). Decided once on seed-process, never re-asked." },
+      "es": { "term": "working_mode", "def": "El campo de `_meta.json` que registra el modo elegido (`source`, `client`, `workspace`, opcionalmente un dominio como `narrative`). Se decide una vez al procesar el seed, no se vuelve a preguntar." },
+      "fr": { "term": "working_mode", "def": "Le champ de `_meta.json` qui enregistre le mode choisi (`source`, `client`, `workspace`, optionnellement un domaine comme `narrative`). Décidé une fois au traitement du seed, jamais redemandé." }
+    },
+    "context-doc": {
+      "category": "memory",
+      "see_also": ["roots"],
+      "en": { "term": "context.md", "def": "The 30-second briefing of a `.roots/`: what it is, stack, current state, key conventions, critical dependencies. Read first on session-start." },
+      "es": { "term": "context.md", "def": "El briefing de 30 segundos de un `.roots/`: qué es, stack, estado actual, convenciones clave, dependencias críticas. Se lee primero en session-start." },
+      "fr": { "term": "context.md", "def": "Le briefing de 30 secondes d'un `.roots/` : ce que c'est, la stack, l'état actuel, les conventions clés, les dépendances critiques. Lu en premier au session-start." }
+    },
+    "glossary-doc": {
+      "category": "memory",
+      "see_also": ["glossary-system", "context-doc"],
+      "en": { "term": "glossary.md (per-module)", "def": "The domain glossary of a single `.roots/`: project-specific terms, written in the deployment's working language. Distinct from the seed's multilingual `glossary/` of Forest vocabulary." },
+      "es": { "term": "glossary.md (por-módulo)", "def": "El glosario de dominio de un `.roots/`: términos específicos del proyecto, escritos en el idioma de trabajo del deployment. Distinto del `glossary/` multilingüe del seed con el vocabulario Forest." },
+      "fr": { "term": "glossary.md (par module)", "def": "Le glossaire de domaine d'un `.roots/` : termes spécifiques au projet, rédigés dans la langue de travail du déploiement. Distinct du `glossary/` multilingue du seed (vocabulaire Forest)." }
+    },
+    "workbench": {
+      "category": "memory",
+      "see_also": ["collective"],
+      "en": { "term": "workbench/", "def": "An ephemeral free space for user-provided reference material (images, PDFs, datasets). The user fills it; the agent only consults it. Not redistributed." },
+      "es": { "term": "workbench/", "def": "Un espacio libre efímero para material de referencia que aporta el usuario (imágenes, PDFs, datasets). El usuario lo llena; el agente solo lo consulta. No se redistribuye." },
+      "fr": { "term": "workbench/", "def": "Un espace libre éphémère pour le matériel de référence fourni par l'utilisateur (images, PDF, jeux de données). L'utilisateur le remplit ; l'agent ne fait que le consulter. Non redistribué." }
+    },
+    "collective": {
+      "category": "memory",
+      "see_also": ["workbench"],
+      "en": { "term": "collective/", "def": "Permanent memory of the third-party influences/references that feed the project (people, ideas, sites, works, organizations, books), with attribution. The permanent counterpart of `workbench/`." },
+      "es": { "term": "collective/", "def": "Memoria permanente de las influencias/referencias de terceros que nutren al proyecto (personas, ideas, sitios, obras, organizaciones, libros), con atribución. La contraparte permanente del `workbench/`." },
+      "fr": { "term": "collective/", "def": "Mémoire permanente des influences/références tierces qui nourrissent le projet (personnes, idées, sites, œuvres, organisations, livres), avec attribution. La contrepartie permanente du `workbench/`." }
+    },
+    "seed": {
+      "category": "distribution",
+      "see_also": ["canonical", "distribution", "upstream-sync"],
+      "en": { "term": "seed", "def": "The master template (`roots_seed.md`) that defines the `.roots/` format, style standards and population protocols. Each `.roots/` carries a local copy to be self-contained." },
+      "es": { "term": "seed (semilla)", "def": "La plantilla maestra (`roots_seed.md`) que define el formato `.roots/`, los estándares de estilo y los protocolos de poblado. Cada `.roots/` lleva una copia local para ser self-contained." },
+      "fr": { "term": "seed (graine)", "def": "Le modèle maître (`roots_seed.md`) qui définit le format `.roots/`, les standards de style et les protocoles de peuplement. Chaque `.roots/` porte une copie locale pour être autonome." }
+    },
+    "canonical": {
+      "category": "distribution",
+      "see_also": ["seed", "distribution", "upstream-sync"],
+      "en": { "term": "canonical", "def": "The single editable source of the seed (the module that maintains it). Distributed copies carry a header pointing back to the canonical; diff = pending delta to apply." },
+      "es": { "term": "canonical", "def": "La única fuente editable del seed (el módulo que lo mantiene). Las copias distribuidas llevan un header que apunta al canonical; el diff = delta pendiente de aplicar." },
+      "fr": { "term": "canonical", "def": "L'unique source éditable du seed (le module qui le maintient). Les copies distribuées portent un en-tête pointant vers le canonical ; le diff = delta restant à appliquer." }
+    },
+    "distribution": {
+      "category": "distribution",
+      "see_also": ["seed", "canonical"],
+      "en": { "term": "distribution (seed)", "def": "The mandatory rule that every `.roots/` carries a copy of the seed as `.roots/roots_seed.md`, making the module self-contained and reprocessable." },
+      "es": { "term": "distribución (seed)", "def": "La regla obligatoria de que cada `.roots/` lleva una copia del seed como `.roots/roots_seed.md`, haciendo al módulo self-contained y reprocesable." },
+      "fr": { "term": "distribution (seed)", "def": "La règle obligatoire selon laquelle chaque `.roots/` porte une copie du seed comme `.roots/roots_seed.md`, rendant le module autonome et retraitable." }
+    },
+    "upstream-sync": {
+      "category": "distribution",
+      "see_also": ["canonical", "seed"],
+      "en": { "term": "upstream sync", "def": "Always check the public upstream `github.com/ctmil/roots_seed` before using/processing a seed copy — it may be a distributed, outdated copy. Compare the `Version`/changelog." },
+      "es": { "term": "sync con upstream", "def": "Consultar SIEMPRE el upstream público `github.com/ctmil/roots_seed` antes de usar/procesar una copia del seed — puede ser una copia distribuida y desactualizada. Comparar el campo `Versión`/changelog." },
+      "fr": { "term": "sync upstream", "def": "Consulter TOUJOURS l'upstream public `github.com/ctmil/roots_seed` avant d'utiliser/traiter une copie du seed — elle peut être une copie distribuée et obsolète. Comparer le champ `Version`/changelog." }
+    },
+    "layer-ladder": {
+      "category": "economy",
+      "see_also": ["cer", "fs", "tier"],
+      "en": { "term": "layer ladder (L0–L3)", "def": "Read by layers, not everything: L0 index → L1 active slice → L2 domain doc → L3 corpus. The core of the token economy." },
+      "es": { "term": "escalera de capas (L0–L3)", "def": "Leer por capas, no todo: L0 índice → L1 slice activo → L2 doc de dominio → L3 corpus. El núcleo de la economía de tokens." },
+      "fr": { "term": "échelle de couches (L0–L3)", "def": "Lire par couches, pas tout : L0 index → L1 tranche active → L2 doc de domaine → L3 corpus. Le cœur de l'économie de tokens." }
+    },
+    "cer": {
+      "category": "economy",
+      "see_also": ["fs", "layer-ladder", "tier"],
+      "en": { "term": "CER", "def": "Context Efficiency Ratio = useful / loaded tokens. How much of what you loaded actually got used." },
+      "es": { "term": "CER", "def": "Context Efficiency Ratio = tokens útiles / cargados. Cuánto de lo que cargaste se usó realmente." },
+      "fr": { "term": "CER", "def": "Context Efficiency Ratio = tokens utiles / chargés. Quelle part de ce que vous avez chargé a réellement servi." }
+    },
+    "fs": {
+      "category": "economy",
+      "see_also": ["cer", "layer-ladder"],
+      "en": { "term": "FS", "def": "Frugality Score = if_I_read_everything / loaded. How much you saved by reading in layers instead of loading the whole corpus." },
+      "es": { "term": "FS", "def": "Frugality Score = si_leo_todo / cargados. Cuánto ahorraste leyendo por capas en vez de cargar el corpus entero." },
+      "fr": { "term": "FS", "def": "Frugality Score = si_je_lis_tout / chargés. Combien vous avez économisé en lisant par couches plutôt qu'en chargeant tout le corpus." }
+    },
+    "tier": {
+      "category": "economy",
+      "see_also": ["cer", "fs"],
+      "en": { "term": "tier (budget)", "def": "The task budget tier that sets how deep to read: trivial / normal / deep / full." },
+      "es": { "term": "tier (presupuesto)", "def": "El tier de presupuesto de la tarea que fija cuánto leer: trivial / normal / deep / full." },
+      "fr": { "term": "tier (budget)", "def": "Le palier de budget de la tâche qui fixe la profondeur de lecture : trivial / normal / deep / full." }
+    },
+    "sync-semaphore": {
+      "category": "lifecycle",
+      "see_also": ["workspace-mode"],
+      "en": { "term": "sync semaphore", "def": "A multi-session lock (`.SYNCING` flag per module) so concurrent sessions on the same source don't clobber each other's uncommitted changes. Helper: `sync-lock.sh`." },
+      "es": { "term": "semáforo de sync", "def": "Un lock multi-sesión (flag `.SYNCING` por módulo) para que sesiones concurrentes sobre el mismo source no se pisen los cambios sin commitear. Helper: `sync-lock.sh`." },
+      "fr": { "term": "sémaphore de sync", "def": "Un verrou multi-session (drapeau `.SYNCING` par module) pour que des sessions concurrentes sur la même source n'écrasent pas leurs changements non commités. Helper : `sync-lock.sh`." }
+    },
+    "on-seed-process": {
+      "category": "lifecycle",
+      "see_also": ["on-seed-update", "lang", "working-mode"],
+      "en": { "term": "on-seed-process", "def": "The master hook run when processing/reprocessing a seed: detect mode and language, upstream sync, distribution, source sync, CLAUDE.md verification, workbench check." },
+      "es": { "term": "on-seed-process", "def": "El hook maestro que corre al procesar/reprocesar un seed: detectar modo e idioma, sync upstream, distribución, sync de sources, verificación de CLAUDE.md, chequeo de workbench." },
+      "fr": { "term": "on-seed-process", "def": "Le hook maître exécuté au traitement/retraitement d'un seed : détecter le mode et la langue, sync upstream, distribution, sync des sources, vérification de CLAUDE.md, contrôle du workbench." }
+    },
+    "on-seed-update": {
+      "category": "lifecycle",
+      "see_also": ["on-seed-process", "distribution"],
+      "en": { "term": "on-seed-update", "def": "The hook run when the canonical seed version is bumped: re-distribute the local copy to every `.roots/`. Never rewrites or translates existing memory." },
+      "es": { "term": "on-seed-update", "def": "El hook que corre al bumpear la versión del seed canónico: re-distribuir la copia local a cada `.roots/`. Nunca reescribe ni traduce la memoria existente." },
+      "fr": { "term": "on-seed-update", "def": "Le hook exécuté quand la version du seed canonical est incrémentée : redistribuer la copie locale à chaque `.roots/`. Ne réécrit ni ne traduit jamais la mémoire existante." }
+    },
+    "lang": {
+      "category": "i18n",
+      "see_also": ["glossary-system", "language-lock", "meta-json"],
+      "en": { "term": "lang", "def": "The `_meta.json` field that records the working language of a `.roots/` deployment (`en` default, `es`, `fr`, …). Code/technical identifiers are always English regardless of `lang`." },
+      "es": { "term": "lang", "def": "El campo de `_meta.json` que registra el idioma de trabajo de un deployment `.roots/` (`en` default, `es`, `fr`, …). El código y los identificadores técnicos van siempre en inglés, sin importar `lang`." },
+      "fr": { "term": "lang", "def": "Le champ de `_meta.json` qui enregistre la langue de travail d'un déploiement `.roots/` (`en` par défaut, `es`, `fr`, …). Le code et les identifiants techniques sont toujours en anglais, quel que soit `lang`." }
+    },
+    "language-lock": {
+      "category": "i18n",
+      "see_also": ["lang", "on-seed-process", "on-seed-update"],
+      "en": { "term": "language lock", "def": "The no-noise rule: the canonical seed is English, but each deployment keeps its own `lang`. On seed-process the agent auto-detects the language of existing `.roots/` content and persists it; updating/redistributing the seed NEVER translates or rewrites existing memory." },
+      "es": { "term": "language lock", "def": "La regla sin-ruido: el seed canónico está en inglés, pero cada deployment conserva su propio `lang`. Al procesar el seed el agente auto-detecta el idioma del contenido `.roots/` existente y lo persiste; actualizar/re-distribuir el seed NUNCA traduce ni reescribe la memoria existente." },
+      "fr": { "term": "verrou de langue", "def": "La règle sans-bruit : le seed canonical est en anglais, mais chaque déploiement conserve son propre `lang`. Au traitement du seed, l'agent auto-détecte la langue du contenu `.roots/` existant et la persiste ; mettre à jour/redistribuer le seed ne traduit ni ne réécrit JAMAIS la mémoire existante." }
+    },
+    "glossary-system": {
+      "category": "i18n",
+      "see_also": ["lang", "glossary-doc", "language-lock"],
+      "en": { "term": "glossary system", "def": "The seed's multilingual vocabulary at `glossary/`: `glossary.json` (canonical, EN key + es/fr) generates `GLOSSARY.<lang>.md` tables via `gen.py`. Gives consistent Forest terminology in any `lang`." },
+      "es": { "term": "sistema de glosario", "def": "El vocabulario multilingüe del seed en `glossary/`: `glossary.json` (canónico, key EN + es/fr) genera las tablas `GLOSSARY.<lang>.md` vía `gen.py`. Da terminología Forest consistente en cualquier `lang`." },
+      "fr": { "term": "système de glossaire", "def": "Le vocabulaire multilingue du seed dans `glossary/` : `glossary.json` (canonical, clé EN + es/fr) génère les tables `GLOSSARY.<lang>.md` via `gen.py`. Fournit une terminologie Forest cohérente dans n'importe quelle `lang`." }
+    }
+  }
+}
