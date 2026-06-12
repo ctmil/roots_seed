@@ -36,7 +36,7 @@
 
 `.roots/` is a **persistent memory** folder you drop into a repo: decisions, error/fix logs, design docs, tasks, reusable skills — written for **AI agents and humans alike**, in a stable format so any tool can read and grow it. The canonical spec is **[`roots_seed.md`](roots_seed.md)** (currently **v1.14**); the navigable front door is **[`manual.md`](manual.md)**.
 
-> **Language:** the spec is **canonical in English**, but each `.roots/` deployment writes its memory in its own language (`_meta.json.lang`) — updating the seed never rewrites existing memory. The cross-language Forest vocabulary lives in **[`glossary/`](glossary/)**. See *Language & glossary (i18n)*.
+> **Language:** the spec is **canonical in English**; each deployment keeps its own working language. See **[Language & glossary](#language--glossary-i18n)** below.
 
 Not just for code: the same model spans software, design and narrative. See **[`recipes/`](recipes/)** — Odoo suites, a forest of design repos, narrative/game worlds, and a token-economy playbook.
 
@@ -58,7 +58,43 @@ Each Tree carries orthogonal tags — `grove` (what it *is*), `vendor` (who *mak
 
 > **`grove` = what it is · edge = what it uses · tag = what it also belongs to.**
 
+Three **primitives** carry across every domain (code, design, narrative): **`vendor`** (authorship), **`relations[]`** (a directed dependency/relationship graph), and **`branch`** (a fork with `stage`/`merged_into`/`created_by: human|AI`).
+
 See **[`roots_seed.md` → Forest Model](roots_seed.md)** for the full schema (`forest.json`, relations DAG, vendor profiles).
+
+---
+
+## Working modes
+
+A `.roots/` adapts to what it documents. The mode is chosen once on bootstrap and persisted in `_meta.json`:
+
+| Mode | When | Layout |
+|---|---|---|
+| **Flat** (default) | one repo, one project | `.roots/` directly |
+| **Source** | a multi-module source repo | `.roots/{module}/` |
+| **Client branch** | a client branch that embeds sources | `.roots/{context}.{project}/` + `sources/` + `_sources.json` |
+| **Workspace** | a `.roots/` that coordinates N repos (the Forest) | root + `forest.json` |
+| **+ domain pack** | a domain overlay (e.g. `narrative`) on any of the above | extra domain folders |
+
+The namespaced modes (Source / Client branch) share the multi-source machinery — embedded sources, a **precedence cascade** (client > embedded > original), a **conflict namespace**, and semi-automatic **discovery promotion** back to the source. A **migration** can temporarily fork a flat repo into namespaced and collapse back. Detail: **[`roots_seed.md` → Working modes](roots_seed.md)**.
+
+---
+
+## Language & glossary (i18n)
+
+The **canonical seed is written in English** — a single source that evolves. But the language of the *memory you write into a `.roots/`* is a **per-deployment** choice, recorded in `_meta.json.lang` (`"en"` default · `"es"` · `"fr"` · …). Code and technical identifiers stay English regardless.
+
+> **No-noise rule:** updating or re-distributing the seed **never** translates or rewrites existing memory. On `on-seed-process` the agent **auto-detects** the language of an already-deployed `.roots/` and keeps it — a Spanish project stays Spanish. Switching a deployment's language is explicit and rare.
+
+The cross-language **Forest vocabulary** lives in **[`glossary/`](glossary/)**:
+
+| File | Role |
+|---|---|
+| `glossary.json` | **canonical** source of truth (English key + `es`/`fr` term + definition, `category`, `see_also`) |
+| `gen.py` | generator → emits `GLOSSARY.{en,es,fr}.md` (English primary; missing translations fall back, flagged) |
+| `GLOSSARY.<lang>.md` | **generated** tables — never edited by hand |
+
+Edit `glossary.json`, run `python3 gen.py`, commit the regenerated tables. This is distinct from a project's own `docs/glossary.md` (domain terms, in that deployment's `lang`). Detail: **[`roots_seed.md` → Language & glossary (i18n)](roots_seed.md)**.
 
 ---
 
