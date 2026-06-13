@@ -13,5 +13,6 @@
 ## Seed
 
 - [ ] Agregar sección `tools/` a `roots_seed.md` (spec) si el patrón se consolida; eventual PR al upstream.
+- [ ] **Extender `skills/odoo-module-merging.md`** con el eje **ALIGN horizontal** (convergencia cross-versión de un suite: forward/backport, "migrar ≠ refactor", recipe de cherry-pick, gotchas de versión Odoo). Mejora futura, NO ahora — genérico + inglés, scrubeado de la topología ctmil. Ver `journal/notes.md`.
 
 ---
