@@ -686,6 +686,37 @@ coordinate without git commits or locks, the seed defines a **lightweight per-mo
 > Why container and not per-branch: a cross-version sync touches **all** the branches of the module,
 > so the natural flag is at the module level (one file, fast), not 1-per-branch (N files, stale).
 
+### Inter-session comms (`state/comms.md` — point-to-point fallback)
+
+The semaphore is a **mutex** (prevents two sessions from colliding on a module); it carries **no
+information**. When a session or agent needs to *tell another* something durable and async — there
+is **no live IPC between Claude sessions** — the seed defines a **file-based message bus**, the
+**fallback channel** that always works because it is just a file in the repo:
+
+- **One append-only log per repo/workspace**: `state/comms.md` (committed — survives sessions; lives
+  beside the other `state/` docs). At the **workspace** level it coordinates the Forest; inside a
+  Tree it is local to that repo.
+- **Each message is a block, newest on top:**
+  ```
+  ## <ISO-8601> · from: <who> · to: <who|@all> · re: <topic> · status: open
+  <body: what happened / what to keep in mind / what is requested>
+  ```
+- **Fields:** `from`/`to` = session/agent identity (reuse `SYNC_WHO`, or the branch/worktree it runs
+  on). `to: @all` = broadcast. `status`: `open` → `ack` (read/seen) → `done` (resolved/obsolete).
+- **Etiquette:**
+  - On session start, and **before any push/sync**, READ `state/comms.md`; act on messages addressed
+    `to: me | @all` with `status: open`.
+  - To acknowledge, flip `status` to `ack` (or append a reply block under it); mark `done` when resolved.
+  - Keep messages short and **link** to the detail (commit SHAs, files, other `state/` docs) — don't
+    inline it. Prune `done` messages older than ~2 weeks to keep the log light.
+- **Semaphore vs comms (complementary):** `.SYNCING` = *mutual exclusion* ("don't both touch module
+  X"); `state/comms.md` = *information* ("here's what you need to know / a heads-up / a hand-off").
+  Use the lock to avoid collisions, the bus to pass context.
+- **Fallback discipline:** prefer a live channel (the human relaying, a shared ticket) when one
+  exists; `comms.md` is the durable async default. It is point-to-point (`to: <who>`) **and**
+  broadcast (`to: @all`); a hand-off between agents is just a message whose `body` says what was left
+  half-done and where.
+
 ---
 
 ## Per-domain recipes (`recipes/` + `manual.md`)
