@@ -1750,7 +1750,7 @@ with `.roots/`, reference materials available in workbench.
 |---------|-----------|
 | **Purpose** | Persist what was learned before closing the session |
 | **Executor** | AI agent or tool hook |
-| **Mandatory** | Recommended — prevents loss of context |
+| **Mandatory** | Yes — always update `.roots/` before closing; prevents loss of context |
 
 **Entry format:**
 ```markdown
