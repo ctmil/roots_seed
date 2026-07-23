@@ -14,6 +14,8 @@
 | **Grove (Bosquet)** | Un produit / une suite : un groupe de Trees ayant une fonction commune (ex. Meli, OCAPI, GeoEcon). Le grove primaire d'un Tree répond à « ce qu'il est ». | Forest (Forêt) · Tree (Arbre) · grove (axe) |
 | **Tree (Arbre)** | Un dépôt, monté bare + worktrees (ex. `meli_oerp`, `geoecon_map`). Décrit par des axes orthogonaux : grove, vendor, kind, org. | Branch (Branche) · Grove (Bosquet) · vendor · kind |
 | **Branch (Branche)** | Une branche / un worktree git d'un Tree (ex. `17.0`, `mapdev`). Un worktree par branche selon le motif bare+worktrees. | Tree (Arbre) · branch (primitif) |
+| **Folio (Feuille)** | Le dossier `folios/` : un document tourné **vers l'extérieur** — publié, exposé, regardé. *Folio*, c'est *folium* : feuille. Ce qui le sépare de `roots/` est la direction, pas la matière : le même document a une face interne (mémoire) et une face externe (folio). Un folio pend d'une **branche** (on publie une version, pas un projet) et c'est une **vue, jamais un second original** : sa substance reste dans le document `.roots/` dont il est la face (`of:`). | Roots (Racines) · Branch (Branche) · Réception (Photosynthèse) |
+| **Réception (Photosynthèse)** | `folios/<slug>/reception.md` : ce qui est revenu d'un folio publié — ce qui a été demandé, cité, mal compris, réclamé, qui a pris contact. C'est **la seule chose qui entre dans un projet depuis l'extérieur**, et par défaut elle n'atterrit nulle part. Ce qu'elle enseigne est promu vers l'intérieur : une question récurrente devient de la documentation, une mauvaise lecture récurrente devient un ADR, une demande devient une tâche. Le cycle se ferme : matière entrante → mémoire en bas → structure en haut → feuille dehors → réception qui redescend. | Folio (Feuille) · collective/ · workbench/ |
 
 ## Axes du Tree
 
@@ -115,4 +117,4 @@
 | **fiche d'entité** | Dans la recette narrative, un fichier par entité (`kind: PC \| NPC \| scene \| item \| faction \| concept`) — la fiche « card », reliée dans le graphe narratif `relations.json`. | worldbible/ · skill de personnage ≡ skill d'IA · relations[] |
 
 ---
-<!-- 54 terms · primary_lang=en · languages=en,es,fr -->
+<!-- 56 terms · primary_lang=en · languages=en,es,fr -->

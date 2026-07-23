@@ -7,9 +7,10 @@
 > **distributed copy** and out of date with respect to the canonical (compare the `Version` field /
 > changelog). The seed evolves — do not assume this copy is the latest. See § "Sync with the canonical upstream".
 
-**Version:** 1.15
+**Version:** 1.16
 
 **Changelog:**
+- **1.16** (23 July 2026) — **The leaf.** *Folio* is *folium*: the model had roots (memory, inward) and branches (git, the structure that carries) and **no leaf** — nothing that faces outward. New section **Folios — the leaf**, and `folios/` added to the base structure as a **primitive**, not a domain pack: what separates it from `roots/` is **direction**, not material — the same document with an inner and an outer face, so publishing is not a pipeline bolted onto the memory. Three consequences fall out of the metaphor rather than being added to it: **a leaf hangs from a branch** (you publish a *branch* — a version/variant — so a preview and a canonical page are two leaves, not a page and its draft), **a folio is a view and never a second original** (the substance stays in the `.roots/` document named by `of:`; the same dual-truth failure, and the same rule, as store↔activation), and **photosynthesis closes the cycle**: a leaf in the light returns energy, so each folio carries a **`reception.md`** — reception is the only thing that enters a project from outside, and what it teaches is promoted inward (a recurring question → documentation, a recurring misreading → an ADR, a demand → a task). Full cycle: *material in → memory down → structure up → leaf out → reception back down.* Front-matter contract (`of`, `branch`, `state`, `channels`, `layout`, `seo`), `channels.yaml`, state as a **gate** (`draft → preview → published`), lazy creation, and a public-hygiene note (publishing a folio publishes its media and its reception too).
 - **1.15** (23 July 2026) — **The agent library stops being a promise and becomes a shelf**, plus the two rules that a live Forest proved were missing. `roots_seed/agents/` now **exists** and ships a base catalog (`bug-hunter`, `grove-keeper`, `designer`, `odoo-architect`, `odoo-migrator`) plus **`domain-keeper.template.md`**; `roots_seed/skills/` gains `roots-refresh` and `allowlist-sync`. § *Agents and skills* rewritten around what the pattern actually converged to: the **domain triad** (`<domain>-keeper` agent = owner · `/<domain>` skill = session framing, deliberately does not act · `/<playbook>` skills = operations), **negative routing** in every `description` (past ~5 agents the failure mode is ambiguity, not absence), and the **store↔activation contract** — activation is a *copy, never a rewrite*, the store carries the same front-matter, skills convert flat `<name>.md` ↔ `<name>/SKILL.md`, and `scripts/sync-agents-skills.sh {activate,harvest,import,check,list}` makes the conversion mechanical and the drift detectable (including skills that live **only** in `.claude/` and are therefore unversioned). New section **Deploy discipline (git-first)**: a server is always *a commit* with a clean `git status` — branch per task → commit → deploy = `fetch`+`checkout`; **never** write files into a versioned checkout (`scp`/in-place edit/`git apply` leave an invisible drift); the exception is admin/data work that touches no versioned file; and the **two pushes** are different — the work branch is automatic, the merge/deploy is always confirmed. **`state/` promoted to the base structure** (context-card per topic — the present, rewritten in place, vs `journal/` = the past; dated one-shots; gitignored secrets, with the re-exclusion that must come *after* `!.roots/**`). **Lazy folders**: the base tree is a reference, not a scaffold (on a live Forest ~75% of scaffolded folders stayed empty). New § *Public hygiene* for contributions upstream. Does not change the `.roots/` format.
 - **1.14** (12 June 2026) — **English becomes the canonical language of the seed** + a multilingual **glossary system** + a **language-lock**. The spec (`roots_seed.md`, `manual.md`) is now maintained in English (single evolving source). New section **Language & glossary (i18n)**: each `.roots/` deployment carries its own working language in `_meta.json.lang` (`"en"` default, `"es"`, `"fr"`, …) — **independent** of the seed's language; code/technical identifiers stay English regardless. **No-noise rule:** updating/re-distributing the seed NEVER translates or rewrites existing memory; `on-seed-process` gains step **0b** that **auto-detects** the language of an already-deployed `.roots/` and persists it (a Spanish project stays Spanish), and `on-seed-update` only refreshes the canonical `roots_seed.md` copy. New **`glossary/`** subsystem: `glossary.json` (canonical, English key + `es`/`fr` term+def + `category`/`see_also`) → `gen.py` generates `GLOSSARY.{en,es,fr}.md` tables (English primary; missing translations fall back to English, flagged). The per-module `docs/glossary.md` (domain terms, in the deployment's `lang`) is distinct from this Forest-vocabulary glossary. The `**Language**` style rows are now `lang`-driven. Does not change the `.roots/` format.
 - **1.13** (08 June 2026) — New folder **`collective/`**: **permanent** memory of third-party influences/references that nourish the project (people, ideas, sites, works, organizations, books). It is the permanent counterpart of `workbench/` (ephemeral) — the difference is **permanence**; whatever in the workbench deserves to stay is **promoted** to collective. It branches inward into emergent subfolders (`code/inspiration` is not forced): for code it works as a **contrib**, for creative projects as attributed **inspiration sources**. First-class **`library/`** subfolder (annotated bibliography as a corpus + graduation to a per-book entry). Each entry carries **attribution/copyright**, **Contact** (email/phone/WhatsApp/IG) and **Media** (images/videos, local or remote) with a privacy rule. The `.roots/` as a **new writing format**: the entry is living text with a follow-up log. The **`forest-dashboard`** surfaces the collective (new **Collective** tab: families → per-project entries, with inline opening of the `.md` + **contact preview** —email/IG— **and image** per entry). Reinforcement of the directive to always check the upstream `ctmil/roots_seed`.
@@ -617,8 +618,11 @@ The metaphor starts at `.roots` and goes up:
 | **Grove** | a **product/suite**: a cluster of Trees with a common function | Meli · OCAPI · GeoEcon |
 | **Tree** | a **repo** (mounted bare+worktrees) | `meli_oerp`, `geoecon_map` |
 | **Branch** | a git branch / worktree of the Tree | `17.0`, `mapdev` |
+| **Folio** (`folios/`) | the **leaf**: a document turned outward — published, exposed, seen | a landing page, a manual, a release note |
 
 > Fits git: a worktree contains a *working **tree*** and the branches are *branches*.
+> And *folio* is *folium*: **leaf**. Roots absorb, branches carry, leaves face the light — see
+> § *Folios — the leaf*.
 
 ### Axes of each Tree (orthogonal)
 
@@ -756,6 +760,100 @@ is **no live IPC between Claude sessions** — the seed defines a **file-based m
   exists; `comms.md` is the durable async default. It is point-to-point (`to: <who>`) **and**
   broadcast (`to: @all`); a hand-off between agents is just a message whose `body` says what was left
   half-done and where.
+
+---
+
+## Folios — the leaf (the outward face)
+
+> *Folio* is *folium*: **leaf**. The model had roots (memory, downward, private) and branches (git,
+> the structure that carries) — and no leaf. This is the other half.
+
+### Why it is a primitive and not a publishing feature
+
+What separates `roots/` from `folios/` is **direction**, not material:
+
+| | `roots/` | `folios/` |
+|---|---|---|
+| Direction | inward / down | outward / up |
+| Visibility | private | exposed |
+| Function | absorbs and retains | shows itself and **captures** |
+| Material | the same markdown | the same markdown |
+
+It is **the same document with two faces**. That is why publishing is not a pipeline bolted onto the
+side of the memory: a `docs/manual.md` and its published page are not two artifacts to keep in sync —
+they are the inner and outer face of one leaf. A project with no folios is not a different *kind* of
+project; it is a project that does not show itself.
+
+### A leaf hangs from a branch
+
+You do not publish a project. **You publish a branch** — a version, a variant, a state. This falls
+out of the model rather than being added to it: the folio carries the branch it is *of*, so a preview
+of `ai/hero-v2` and the canonical page of `main` are two leaves of the same tree, not a page and its
+draft. Merge the branch and the leaf follows; abandon it and the leaf falls.
+
+### Photosynthesis: the return path
+
+A leaf exposed to light **brings energy back down**. This is the half that publishing systems
+usually lack, and it is what makes the difference between a distribution pipeline and something
+alive: the reception of a published thing — who read it, what they asked, what they cited, who got
+in touch, what they misunderstood — is **the only thing that enters a project from the outside**, and
+by default it lands nowhere. It has to have a place, or the cycle is open and the tree only spends.
+
+So each folio carries a **`reception.md`**, and what that reception *teaches* is promoted inward:
+a recurring question becomes documentation, a recurring misreading becomes an ADR in
+`design/decisions.md`, a demand becomes an entry in `tasks/`. That promotion is the energy reaching
+the root.
+
+### Structure
+
+```
+folios/
+├── channels.yaml           # where folios publish: stages, approval, auto-promote
+└── <slug>/
+    ├── folio.md            # front-matter (below) + presentation-only body
+    ├── sections/           # optional: the body split into ordered pieces
+    ├── media/              # assets + media.yaml (renditions / profiles)
+    └── reception.md        # THE RETURN: what came back, and what it taught
+```
+
+```yaml
+---
+slug: <url-slug>
+title: <what it is called outward>
+of: docs/manual.md          # the ROOT document this is the outer face of
+branch: main                # the leaf hangs from a branch
+state: draft | preview | published
+channels: [site, print]
+layout: <layout name>
+seo: { title: ..., description: ..., image: ... }
+---
+```
+
+### Rules
+
+- **A folio is a view, not a second original.** The substance lives in the `.roots/` document named
+  by `of:`; the folio adds only what is presentational — slug, layout, channel, SEO, ordering. The
+  moment a folio holds content that exists nowhere else, you have two truths and the published one
+  silently wins. (Same failure, same rule, as store↔activation in § *Agents and skills*.)
+- **State is a gate, not a label:** `draft` → `preview` (visible, not announced) → `published`.
+  Channels declare which states they accept; that is what makes a preview URL safe.
+- **`folios/` is created lazily**, on the first thing you publish.
+- **A public folio publishes its whole leaf** — media and `reception.md` included. Apply
+  § *Public hygiene* before the first publish, and keep personal data out of `reception.md`:
+  record *what was asked*, not who asked it, unless you have a reason to keep the identity.
+
+### Where it sits next to the other folders
+
+`journal/` is the past, `state/` is the present, `docs/` is what the thing *is* — all inward.
+`folios/` is the outward face, and `reception.md` is the only inbound channel among them.
+`workbench/` and `collective/` are the other two directions: raw material coming in, and influences
+that stay. Together they close the cycle: **material in → memory down → structure up → leaf out →
+reception back down.**
+
+> Reference implementation: the models of a portfolio/publication platform (works, docs, releases,
+> publications, layouts, channels, image profiles) are the same objects seen from a database instead
+> of from files — see `recipes/design-forest.md`. Files-first inverts the ownership: the repo is the
+> source of truth and such a platform becomes a renderer and an index over it, not the origin.
 
 ---
 
@@ -1269,6 +1367,7 @@ The structure varies according to the layout (see § "Working modes"):
 ├── design/   (decisions, sketchbook)
 ├── docs/     (architecture, glossary, commits, manual, ...)
 ├── state/    ← where the work stands NOW (context-cards, comms.md, secrets: gitignored)
+├── folios/   ← the leaf: what faces outward (published) + reception.md (what comes back)
 ├── hooks/
 ├── skills/      (+ agents/ once the repo has any)
 ├── workbench/   ← ephemeral work materials

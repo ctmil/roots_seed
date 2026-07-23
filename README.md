@@ -53,6 +53,7 @@ Memory grows from roots, so the whole model does too. When `.roots/` coordinates
 | 🌳 **Grove** | a **product / suite**: a cluster of Trees | *Meli*, *OCAPI*, *GeoEcon* |
 | 🪵 **Tree** | a **repo** (mounted bare + worktrees) | `meli_oerp`, `geoecon_map` |
 | 🌿 **Branch** | a git branch / worktree of a Tree | `17.0`, `mapdev` |
+| 🍃 **Folio** (`folios/`) | the **leaf**: a document turned outward — published, exposed, seen | a landing page, a manual, a release note |
 
 Each Tree carries orthogonal tags — `grove` (what it *is*), `vendor` (who *makes* it), `kind` (its nature), `org` (where it *lives*) — and dependencies between Trees/Groves are **edges in a graph**, never nesting. The golden rule:
 
@@ -61,6 +62,40 @@ Each Tree carries orthogonal tags — `grove` (what it *is*), `vendor` (who *mak
 Three **primitives** carry across every domain (code, design, narrative): **`vendor`** (authorship), **`relations[]`** (a directed dependency/relationship graph), and **`branch`** (a fork with `stage`/`merged_into`/`created_by: human|AI`).
 
 See **[`roots_seed.md` → Forest Model](roots_seed.md)** for the full schema (`forest.json`, relations DAG, vendor profiles).
+
+---
+
+## Roots and folios — the two faces of a document
+
+*Folio* is *folium*: **leaf**. Roots absorb and retain, branches carry, and leaves face the light.
+What separates `.roots/` from `folios/` is **direction**, not material:
+
+| | 🌱 `roots/` | 🍃 `folios/` |
+|---|---|---|
+| Direction | inward / down | outward / up |
+| Visibility | private | exposed |
+| Function | absorbs and retains | shows itself and **captures** |
+| Material | the same markdown | the same markdown |
+
+It is the same document with two faces — so publishing is not a pipeline bolted onto the memory, and
+a `docs/manual.md` and its published page are not two artifacts to keep in sync. Three things follow
+from the metaphor rather than being added to it:
+
+- **A leaf hangs from a branch.** You do not publish a project, you publish a *branch* — a version, a
+  variant, a state. A preview and a canonical page are two leaves of one tree, not a page and its draft.
+- **A folio is a view, never a second original.** The substance stays in the `.roots/` document it is
+  the outer face `of:`. The moment a folio holds content that exists nowhere else, there are two
+  truths and the published one silently wins.
+- **Photosynthesis closes the cycle.** A leaf in the light returns energy: the reception of a
+  published thing — what was asked, cited, misread, requested — is the *only* thing that enters a
+  project from outside, and by default it lands nowhere. Each folio carries a `reception.md`, and
+  what it teaches is promoted inward: a recurring question becomes documentation, a recurring
+  misreading becomes an ADR, a demand becomes a task.
+
+> **material in → memory down → structure up → leaf out → reception back down.**
+
+See **[`roots_seed.md` → Folios](roots_seed.md)** for the front-matter contract, `channels.yaml` and
+the publication states.
 
 ---
 

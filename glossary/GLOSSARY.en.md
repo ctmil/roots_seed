@@ -14,6 +14,8 @@
 | **Grove** | A product / suite: a cluster of Trees with a common function (e.g. Meli, OCAPI, GeoEcon). A Tree's primary grove answers 'what it is'. | Forest · Tree · grove (axis) |
 | **Tree** | A repo, mounted bare + worktrees (e.g. `meli_oerp`, `geoecon_map`). Described by orthogonal axes: grove, vendor, kind, org. | Branch · Grove · vendor · kind |
 | **Branch** | A git branch / worktree of a Tree (e.g. `17.0`, `mapdev`). One worktree per branch under the bare+worktrees pattern. | Tree · branch (primitive) |
+| **Folio (Leaf)** | The `folios/` folder: a document turned **outward** — published, exposed, seen. *Folio* is *folium*: leaf. What separates it from `roots/` is direction, not material: the same document has an inner face (memory) and an outer face (folio). A folio hangs from a **branch** (you publish a version, not a project) and is a **view, never a second original**: its substance stays in the `.roots/` document it is the face `of:`. | Roots · Branch · Reception (Photosynthesis) |
+| **Reception (Photosynthesis)** | `folios/<slug>/reception.md`: what came back from a published folio — what was asked, cited, misread, requested, who got in touch. It is the **only thing that enters a project from the outside**, and by default it lands nowhere. What it teaches is promoted inward: a recurring question becomes documentation, a recurring misreading becomes an ADR, a demand becomes a task. It closes the cycle: material in → memory down → structure up → leaf out → reception back down. | Folio (Leaf) · collective/ · workbench/ |
 
 ## Tree axes
 
@@ -115,4 +117,4 @@
 | **entity card** | In the narrative recipe, one file per entity (`kind: PC \| NPC \| scene \| item \| faction \| concept`) — the 'card' sheet, linked into the `relations.json` narrative graph. | worldbible/ · character skill ≡ AI skill · relations[] |
 
 ---
-<!-- 54 terms · primary_lang=en · languages=en,es,fr -->
+<!-- 56 terms · primary_lang=en · languages=en,es,fr -->

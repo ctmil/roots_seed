@@ -54,6 +54,20 @@
       "es": { "term": "Branch (Rama)", "def": "Un git branch / worktree de un Tree (ej. `17.0`, `mapdev`). Un worktree por branch bajo el patrón bare+worktrees." },
       "fr": { "term": "Branch (Branche)", "def": "Une branche / un worktree git d'un Tree (ex. `17.0`, `mapdev`). Un worktree par branche selon le motif bare+worktrees." }
     },
+    "folio": {
+      "category": "metaphor",
+      "see_also": ["roots", "branch", "reception"],
+      "en": { "term": "Folio (Leaf)", "def": "The `folios/` folder: a document turned **outward** — published, exposed, seen. *Folio* is *folium*: leaf. What separates it from `roots/` is direction, not material: the same document has an inner face (memory) and an outer face (folio). A folio hangs from a **branch** (you publish a version, not a project) and is a **view, never a second original**: its substance stays in the `.roots/` document it is the face `of:`." },
+      "es": { "term": "Folio (Hoja)", "def": "La carpeta `folios/`: un documento vuelto **hacia afuera** — publicado, expuesto, mirado. *Folio* es *folium*: hoja. Lo que lo separa de `roots/` es la dirección, no el material: el mismo documento tiene una cara interna (memoria) y una externa (folio). Un folio cuelga de una **rama** (se publica una versión, no un proyecto) y es una **vista, nunca un segundo original**: su sustancia queda en el documento `.roots/` del que es cara (`of:`)." },
+      "fr": { "term": "Folio (Feuille)", "def": "Le dossier `folios/` : un document tourné **vers l'extérieur** — publié, exposé, regardé. *Folio*, c'est *folium* : feuille. Ce qui le sépare de `roots/` est la direction, pas la matière : le même document a une face interne (mémoire) et une face externe (folio). Un folio pend d'une **branche** (on publie une version, pas un projet) et c'est une **vue, jamais un second original** : sa substance reste dans le document `.roots/` dont il est la face (`of:`)." }
+    },
+    "reception": {
+      "category": "metaphor",
+      "see_also": ["folio", "collective", "workbench"],
+      "en": { "term": "Reception (Photosynthesis)", "def": "`folios/<slug>/reception.md`: what came back from a published folio — what was asked, cited, misread, requested, who got in touch. It is the **only thing that enters a project from the outside**, and by default it lands nowhere. What it teaches is promoted inward: a recurring question becomes documentation, a recurring misreading becomes an ADR, a demand becomes a task. It closes the cycle: material in → memory down → structure up → leaf out → reception back down." },
+      "es": { "term": "Recepción (Fotosíntesis)", "def": "`folios/<slug>/reception.md`: lo que volvió de un folio publicado — qué preguntaron, citaron, malinterpretaron, pidieron, quién se puso en contacto. Es **lo único que entra al proyecto desde afuera**, y por defecto no aterriza en ningún lado. Lo que enseña se promueve hacia adentro: una pregunta recurrente se vuelve documentación, una mala lectura recurrente se vuelve un ADR, una demanda se vuelve una tarea. Cierra el ciclo: material adentro → memoria abajo → estructura arriba → hoja afuera → recepción de vuelta abajo." },
+      "fr": { "term": "Réception (Photosynthèse)", "def": "`folios/<slug>/reception.md` : ce qui est revenu d'un folio publié — ce qui a été demandé, cité, mal compris, réclamé, qui a pris contact. C'est **la seule chose qui entre dans un projet depuis l'extérieur**, et par défaut elle n'atterrit nulle part. Ce qu'elle enseigne est promu vers l'intérieur : une question récurrente devient de la documentation, une mauvaise lecture récurrente devient un ADR, une demande devient une tâche. Le cycle se ferme : matière entrante → mémoire en bas → structure en haut → feuille dehors → réception qui redescend." }
+    },
     "vendor": {
       "category": "axis",
       "see_also": ["tree", "kind", "grove-axis"],

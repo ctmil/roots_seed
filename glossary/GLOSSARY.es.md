@@ -14,6 +14,8 @@
 | **Grove (Arboleda)** | Un producto / suite: un cluster de Trees con función común (ej. Meli, OCAPI, GeoEcon). El grove primario de un Tree responde 'qué es'. | Forest (Bosque) · Tree (Árbol) · grove (eje) |
 | **Tree (Árbol)** | Un repo, montado bare + worktrees (ej. `meli_oerp`, `geoecon_map`). Se describe con ejes ortogonales: grove, vendor, kind, org. | Branch (Rama) · Grove (Arboleda) · vendor · kind |
 | **Branch (Rama)** | Un git branch / worktree de un Tree (ej. `17.0`, `mapdev`). Un worktree por branch bajo el patrón bare+worktrees. | Tree (Árbol) · branch (primitivo) |
+| **Folio (Hoja)** | La carpeta `folios/`: un documento vuelto **hacia afuera** — publicado, expuesto, mirado. *Folio* es *folium*: hoja. Lo que lo separa de `roots/` es la dirección, no el material: el mismo documento tiene una cara interna (memoria) y una externa (folio). Un folio cuelga de una **rama** (se publica una versión, no un proyecto) y es una **vista, nunca un segundo original**: su sustancia queda en el documento `.roots/` del que es cara (`of:`). | Roots (Raíces) · Branch (Rama) · Recepción (Fotosíntesis) |
+| **Recepción (Fotosíntesis)** | `folios/<slug>/reception.md`: lo que volvió de un folio publicado — qué preguntaron, citaron, malinterpretaron, pidieron, quién se puso en contacto. Es **lo único que entra al proyecto desde afuera**, y por defecto no aterriza en ningún lado. Lo que enseña se promueve hacia adentro: una pregunta recurrente se vuelve documentación, una mala lectura recurrente se vuelve un ADR, una demanda se vuelve una tarea. Cierra el ciclo: material adentro → memoria abajo → estructura arriba → hoja afuera → recepción de vuelta abajo. | Folio (Hoja) · collective/ · workbench/ |
 
 ## Ejes del Tree
 
@@ -115,4 +117,4 @@
 | **ficha de entidad** | En la receta narrativa, un archivo por entidad (`kind: PC \| NPC \| scene \| item \| faction \| concept`) — la ficha 'card', vinculada en el grafo narrativo `relations.json`. | worldbible/ · skill de personaje ≡ skill de IA · relations[] |
 
 ---
-<!-- 54 terms · primary_lang=en · languages=en,es,fr -->
+<!-- 56 terms · primary_lang=en · languages=en,es,fr -->

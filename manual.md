@@ -26,6 +26,11 @@ When `.roots` coordinates **many repos** (working_mode `workspace`):
 | 🌳 **Grove** | a product / suite (cluster of Trees) |
 | 🪵 **Tree** | a repo |
 | 🌿 **Branch** | a git branch / worktree |
+| 🍃 **Folio** (`folios/`) | the **leaf**: a document turned outward — published, exposed, seen |
+
+> Roots absorb (inward, private), branches carry, **folios face the light** (outward, published).
+> A folio is a *view* of a `.roots/` document, hanging from a branch; its reception (`reception.md`)
+> is the only thing that enters a project from outside. See `roots_seed.md` § *Folios — the leaf*.
 
 And **three primitives reused across every domain** (see `recipes/`):
 - **vendor** — authorship: ownership of each Tree (`vendor: <slug>`) with an optional profile in `vendors/<slug>.md`.
@@ -46,10 +51,13 @@ And **three primitives reused across every domain** (see `recipes/`):
 ├── debug/            errors-log · fixes-log · migrations
 ├── design/           decisions (ADRs) · sketchbook
 ├── docs/             architecture · glossary · manual · commits · design-*
+├── state/            where the work stands NOW · comms.md · secrets (gitignored)
+├── folios/           the leaf: what faces outward (published) + reception.md
 ├── hooks/            session-start/end · on-error/fix/task-done/topic-shift · on-seed-*
 ├── skills/           prompts · workflows · patterns (+ AI techniques, character skills)
 └── workbench/        user reference material
 ```
+> Folders are created **lazily** — bootstrap writes only `_meta.json`, `context.md`, `roots_seed.md`.
 Detail of each file and the populating standards: [`roots_seed.md`](roots_seed.md).
 
 ## 4. Working modes
