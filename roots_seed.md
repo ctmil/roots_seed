@@ -7,9 +7,10 @@
 > **distributed copy** and out of date with respect to the canonical (compare the `Version` field /
 > changelog). The seed evolves — do not assume this copy is the latest. See § "Sync with the canonical upstream".
 
-**Version:** 1.14
+**Version:** 1.15
 
 **Changelog:**
+- **1.15** (23 July 2026) — **The agent library stops being a promise and becomes a shelf**, plus the two rules that a live Forest proved were missing. `roots_seed/agents/` now **exists** and ships a base catalog (`bug-hunter`, `grove-keeper`, `designer`, `odoo-architect`, `odoo-migrator`) plus **`domain-keeper.template.md`**; `roots_seed/skills/` gains `roots-refresh` and `allowlist-sync`. § *Agents and skills* rewritten around what the pattern actually converged to: the **domain triad** (`<domain>-keeper` agent = owner · `/<domain>` skill = session framing, deliberately does not act · `/<playbook>` skills = operations), **negative routing** in every `description` (past ~5 agents the failure mode is ambiguity, not absence), and the **store↔activation contract** — activation is a *copy, never a rewrite*, the store carries the same front-matter, skills convert flat `<name>.md` ↔ `<name>/SKILL.md`, and `scripts/sync-agents-skills.sh {activate,harvest,import,check,list}` makes the conversion mechanical and the drift detectable (including skills that live **only** in `.claude/` and are therefore unversioned). New section **Deploy discipline (git-first)**: a server is always *a commit* with a clean `git status` — branch per task → commit → deploy = `fetch`+`checkout`; **never** write files into a versioned checkout (`scp`/in-place edit/`git apply` leave an invisible drift); the exception is admin/data work that touches no versioned file; and the **two pushes** are different — the work branch is automatic, the merge/deploy is always confirmed. **`state/` promoted to the base structure** (context-card per topic — the present, rewritten in place, vs `journal/` = the past; dated one-shots; gitignored secrets, with the re-exclusion that must come *after* `!.roots/**`). **Lazy folders**: the base tree is a reference, not a scaffold (on a live Forest ~75% of scaffolded folders stayed empty). New § *Public hygiene* for contributions upstream. Does not change the `.roots/` format.
 - **1.14** (12 June 2026) — **English becomes the canonical language of the seed** + a multilingual **glossary system** + a **language-lock**. The spec (`roots_seed.md`, `manual.md`) is now maintained in English (single evolving source). New section **Language & glossary (i18n)**: each `.roots/` deployment carries its own working language in `_meta.json.lang` (`"en"` default, `"es"`, `"fr"`, …) — **independent** of the seed's language; code/technical identifiers stay English regardless. **No-noise rule:** updating/re-distributing the seed NEVER translates or rewrites existing memory; `on-seed-process` gains step **0b** that **auto-detects** the language of an already-deployed `.roots/` and persists it (a Spanish project stays Spanish), and `on-seed-update` only refreshes the canonical `roots_seed.md` copy. New **`glossary/`** subsystem: `glossary.json` (canonical, English key + `es`/`fr` term+def + `category`/`see_also`) → `gen.py` generates `GLOSSARY.{en,es,fr}.md` tables (English primary; missing translations fall back to English, flagged). The per-module `docs/glossary.md` (domain terms, in the deployment's `lang`) is distinct from this Forest-vocabulary glossary. The `**Language**` style rows are now `lang`-driven. Does not change the `.roots/` format.
 - **1.13** (08 June 2026) — New folder **`collective/`**: **permanent** memory of third-party influences/references that nourish the project (people, ideas, sites, works, organizations, books). It is the permanent counterpart of `workbench/` (ephemeral) — the difference is **permanence**; whatever in the workbench deserves to stay is **promoted** to collective. It branches inward into emergent subfolders (`code/inspiration` is not forced): for code it works as a **contrib**, for creative projects as attributed **inspiration sources**. First-class **`library/`** subfolder (annotated bibliography as a corpus + graduation to a per-book entry). Each entry carries **attribution/copyright**, **Contact** (email/phone/WhatsApp/IG) and **Media** (images/videos, local or remote) with a privacy rule. The `.roots/` as a **new writing format**: the entry is living text with a follow-up log. The **`forest-dashboard`** surfaces the collective (new **Collective** tab: families → per-project entries, with inline opening of the `.md` + **contact preview** —email/IG— **and image** per entry). Reinforcement of the directive to always check the upstream `ctmil/roots_seed`.
 - **1.12** (04 June 2026) — New section **Agents and skills — importable library (on-demand)**. Two layers + base: **store** in `<repo>/.roots/{agents,skills}/` (**tracked** → versioned, evolves, copyable), **activation** in `<repo>/.claude/{agents,skills}/` (local, **not tracked** → you copy there what you want to use generally), and a cross-client **base** in `roots_seed/{agents,skills}/`. Rule: **do not preload everything** — the seed reports what exists; you import on demand. Cycle: design in the workspace's `.roots/agents/` → activate in `.claude/` and test → promote to `roots_seed/` → reference here. Forest-aware subagents by *concern* (e.g. `odoo-architect`, `bug-hunter`, `odoo-migrator`, `designer`).
@@ -686,6 +687,45 @@ coordinate without git commits or locks, the seed defines a **lightweight per-mo
 > Why container and not per-branch: a cross-version sync touches **all** the branches of the module,
 > so the natural flag is at the module level (one file, fast), not 1-per-branch (N files, stale).
 
+### `state/` — live operational memory
+
+The folders of the base structure answer *what this module is* (`docs/`), *what was decided*
+(`design/`), *what happened* (`journal/`), *what is broken* (`debug/`). None of them answers the
+question a session actually opens with: **where does the work stand right now.** That is `state/`.
+
+```
+state/
+├── comms.md              # the inter-session bus (below)
+├── <topic>.md            # living context-card per open topic — rewritten, not appended
+├── <audit>-YYYY-MM-DD.md # dated one-shots: audits, diagnostics, snapshots
+└── *.secret, *.local.env # credentials — GITIGNORED, never committed
+```
+
+- **Context-card per topic** (`state/<topic>.md`): the durable hand-off between sessions on a piece
+  of work that outlives one session. Unlike `journal/`, it is **rewritten in place** — it describes
+  the *present*, not the history. Rule of thumb: if a new session would have to re-derive it by
+  reading code and git log, it belongs here.
+- **Dated one-shots** carry the date **in the filename**: they are snapshots, and a snapshot without
+  its date silently becomes a lie.
+- **`state/` vs `workbench/`:** `state/` is *our* current understanding (authored, tracked);
+  `workbench/` is *incoming* raw material (ephemeral). `state/` vs `journal/`: present vs past.
+- **Secrets:** `state/` is where credential files naturally land, so the gitignore rule ships with
+  the structure — and note that `.roots/` is otherwise **tracked wholesale**, so the exclusion has to
+  be re-stated *after* the `!.roots/**` un-ignore or it does not apply:
+
+  ```gitignore
+  !.roots/
+  !.roots/**
+  # re-exclude AFTER the un-ignore, or these get committed:
+  .roots/**/*.secret
+  .roots/**/*.local.env
+  .roots/**/secrets.local.env
+  .roots/**/__pycache__/
+  ```
+
+> Everything a **public** repo's `.roots/` carries is published with it. Before making a repo public,
+> grep its `state/` for hostnames, client names, account ids and tokens — see § *Public hygiene*.
+
 ### Inter-session comms (`state/comms.md` — point-to-point fallback)
 
 The semaphore is a **mutex** (prevents two sessions from colliding on a module); it carries **no
@@ -716,6 +756,49 @@ is **no live IPC between Claude sessions** — the seed defines a **file-based m
   exists; `comms.md` is the durable async default. It is point-to-point (`to: <who>`) **and**
   broadcast (`to: @all`); a hand-off between agents is just a message whose `body` says what was left
   half-done and where.
+
+---
+
+## Deploy discipline (git-first)
+
+> The `.roots/` memory lives on repos; those repos end up **running somewhere**. This section is the
+> minimum contract that keeps the two in step. It is not Odoo-specific and not fleet-specific: it
+> applies wherever an agent can reach a server.
+
+**The rule: a server is always *a commit*, with a clean `git status`.**
+
+### The cycle
+1. **A branch per task.** Cut `<agent>/<task>` from the deploy branch. Never work directly on it.
+2. **Commit there.** The work is committed before it is deployed, not after.
+3. **Deploy = the server does `git fetch` + `git checkout <commit>`** (or `reset --hard <branch>`).
+   Nothing else.
+
+### What an agent must never do on a versioned checkout
+Writing files into a checkout that git tracks — `scp`, editing in place over SSH, applying a `.patch`
+— leaves it **drifted**: modified files that were never committed. From that moment the next
+`checkout`/`pull` conflicts, the next patch collides, and *nobody can tell what is actually running*.
+The failure is not the drift itself; it is that it is **invisible until the next deploy**, and by
+then the drifted state is the only copy of something.
+
+**Code reaches a server only through git.** The single exception is administration and data work that
+touches **no versioned file**: an application shell (seeds, queries, data writes), a service restart,
+a backup. Code through git; data and admin through scripts.
+
+### Two different pushes — do not confuse them
+
+| Push | Confirmation | Why |
+|---|---|---|
+| **The work branch** (`<agent>/<task>`) | **automatic** | It is the agent's own branch. It backs up the work and affects nobody. |
+| **Merge to the deploy branch / deploy to production** | **always confirmed with the human** | It affects every other session and the live system. |
+
+An agent that asks permission to push its own branch is noise; an agent that deploys without asking
+is a hazard. The line between them is *who else is affected*.
+
+### Verify what is live, not what you remember
+Before deploying, confirm the target is actually the machine you think it is and is actually up —
+stored credentials and old notes outlive the servers they describe. After deploying, verify the
+service answers, not just that the command exited 0: a compile check does **not** catch a missing
+import that only fails at runtime.
 
 ---
 
@@ -791,18 +874,83 @@ Detail: `recipes/token-economy.md`.
 3. **Reference** here so every client discovers it.
 4. In each client: the copy lives in its `.roots/` (tracked) and is **activated on-demand** in `.claude/` when needed.
 
-**Subagent** (`<name>.md`): an expert persona with **its own context**, restricted `tools` and `model`. Initial catalog (Forest-aware: they read `forest.json`/`.roots`, respect `grove`/`vendor` and the read-only sources):
+**Subagent** (`<name>.md`): an expert persona with **its own context**, restricted `tools` and `model`. **Skill** (`<name>.md` in the store): a reusable procedure; an agent can use skills (e.g. `odoo-migrator` uses `odoo-module-merging`).
+
+### File format, and the store↔activation conversion
+
+```markdown
+---
+name: <kebab-case, matches the filename>
+description: <what it is for + WHEN to use it + what it is NOT for, naming the sibling that owns it>
+tools: Read, Grep, Glob, Bash, Edit      # agents only — least privilege; omit to inherit everything
+model: opus | sonnet | haiku             # optional
+---
+<body: for an agent, its system prompt; for a skill, its procedure>
+```
+
+| | Store (`.roots/`) | Activation (`.claude/`) |
+|---|---|---|
+| Agent | `agents/<name>.md` | `agents/<name>.md` (same file) |
+| Skill | `skills/<name>.md` (flat) | `skills/<name>/SKILL.md` (**directory**) |
+
+**Rule: activation is a copy, never a rewrite.** The store file carries the same front-matter as the
+activated one, so the conversion is purely mechanical (`scripts/sync-agents-skills.sh`). The failure
+mode this rule exists to prevent is real and silent: the two layers slowly become **two different
+documents** — a long one in the store that nobody loads, and a short one in `.claude/` that is the
+one actually running. Whenever they differ, the activated copy is what the agent believes.
+Run `sync-agents-skills.sh check` at session close; it exits non-zero on drift, and it also catches
+the other leak — a skill that exists **only** in `.claude/` and is therefore **not versioned at all**.
+
+### The domain triad (the shape this converges to)
+
+Past a handful of agents, what emerges is not a flat list of helpers but **one triad per domain**:
+
+| Piece | Form | Role | Does it act? |
+|---|---|---|---|
+| `<domain>-keeper` | agent | **owner** of the domain — you delegate a whole task to it | yes, with its own context |
+| `/<domain>` | skill | **session framing** — loads state + topology and leaves the session primed | no, on purpose |
+| `/<playbook>` | skill | one concrete **operation** (sync a grove, deploy, close a batch) | yes, step by step |
+
+The framing skill is worth its own file precisely *because* it does not act: it is how a fresh
+session (or a human) gets to "I know where the work stands" without reading the whole `.roots/`.
+The keeper is who you ask; the playbooks are what it runs.
+
+**A domain is not a repo.** It is the area a single owner should hold end-to-end — usually spanning
+several Trees, and one Tree may serve two domains. The unit is the domain because that is the unit
+of *who do I ask*. Template: `agents/domain-keeper.template.md`.
+
+### Negative routing (the rule that keeps a catalog usable)
+
+Beyond ~5 agents the orchestrator's failure mode stops being "no agent fits" and becomes **"several
+look plausible"** — and a mis-routed task is worse than an unrouted one, because it runs. So every
+`description` must close by saying what the agent is **not** for, naming the sibling that is:
+
+> `…Use it for X, Y, Z. NOT for version migrations — that is `odoo-migrator`; NOT for tickets — that is the support keeper.`
+
+Check it as a set, not one by one: read all the descriptions together and confirm that for any
+plausible request exactly one agent claims it.
+
+### Base catalog (`roots_seed/agents/`, `roots_seed/skills/`)
 
 | Agent | For | Model |
 |---|---|---|
+| `bug-hunter` | diagnosis + minimal verified fix | sonnet |
+| `grove-keeper` | keep a grove's branches in sync, in dependency order | opus |
+| `designer` | UI/UX: layout, components, tokens, theming (Figma MCP) | sonnet |
 | `odoo-architect` | architecture: models, inheritance, ADRs | opus |
-| `bug-hunter` | diagnosis + minimal bug fix | sonnet |
-| `odoo-migrator` | backport/forward-port 16↔17↔18↔19 | opus |
-| `designer` | UI/UX: Folio layouts, geoecon_map, dark theme (Figma MCP) | sonnet |
+| `odoo-migrator` | backport/forward-port between majors | opus |
+| `domain-keeper.template` | **template** to derive one keeper per domain | opus |
 
-**Skill** (`<name>/SKILL.md`): a reusable procedure/knowledge; an agent can use skills (e.g. `odoo-migrator` uses `odoo-module-merging`).
+| Skill | For |
+|---|---|
+| `roots-refresh` | closing step of a batch: bring the `.roots/` up to date across module·version |
+| `allowlist-sync` | keep the permission allowlist in step with real usage and structure |
+| `odoo-module-merging` | merge strategy across versions/clients |
+| `md-to-pdf-reporting` | `docs/` → PDF reports |
 
-> The `forest-dashboard` and the toolkit already follow this pattern (referenced, not inlined). Agents are **designed in `.roots/agents/`** and, once tested, promoted to the seed.
+> The Odoo pair is deliberately domain-specific: it is the worked example of the `odoo-suite` recipe,
+> not a dependency of the seed. Domain keepers are **not** promoted to the base — they are derived
+> from the template in each Forest, where the domains actually live.
 
 ---
 
@@ -991,6 +1139,34 @@ If the local canonical evolves with conventions useful to the community:
 3. Generic improvements → PR to `github.com/ctmil/roots_seed`.
 4. Private extensions → stay only in the local canonical.
 
+### Public hygiene (the upstream is a public repo)
+
+Promotion moves text from a private workspace into a **published** repository, and the material most
+worth promoting — a battle-tested agent, a real playbook — is exactly the material most likely to
+carry the traces of the environment that produced it. Scrub before the PR:
+
+| Never | Instead |
+|---|---|
+| Client, employer or partner names | the role: *"the client"*, *"a partner"* |
+| Hostnames, domains, IPs, SSH aliases, ports | *"the production host"*, *"the deploy target"* |
+| Account / ticket / project ids, phone numbers, emails | drop them, or `<account-id>` |
+| Absolute paths from the private workspace | paths relative to the repo |
+| Credential **contents** *and* their exact locations | the convention: *"the gitignored env file"* |
+| Internal endpoints and their payload shapes | describe the capability, not the API surface |
+
+Generalizing is not only redaction — it is the work that makes a skill reusable. If removing the
+specifics leaves nothing behind, the piece was never generic and belongs in the local canonical.
+
+**Mechanical check before pushing** (adjust the terms to your environment):
+
+```bash
+git diff --cached | grep -nEi '<your-domain>|<client-names>|[0-9]{1,3}(\.[0-9]{1,3}){3}|BEGIN [A-Z ]*PRIVATE KEY|secret_key|api[_-]?key|passw' \
+  && echo "REVIEW BEFORE PUSHING" || echo "clean"
+```
+
+Same rule for any `.roots/` that becomes public: it is tracked wholesale, so **making a repo public
+publishes its memory** — `state/`, `journal/` and `workbench/` included.
+
 ---
 
 ## Integration with CLAUDE.md and Claude Code (.claude/)
@@ -1092,11 +1268,18 @@ The structure varies according to the layout (see § "Working modes"):
 ├── debug/    (errors-log, fixes-log, migrations)
 ├── design/   (decisions, sketchbook)
 ├── docs/     (architecture, glossary, commits, manual, ...)
+├── state/    ← where the work stands NOW (context-cards, comms.md, secrets: gitignored)
 ├── hooks/
-├── skills/
+├── skills/      (+ agents/ once the repo has any)
 ├── workbench/   ← ephemeral work materials
 └── collective/  ← permanent influences/references (≠ workbench)
 ```
+
+> **Create folders lazily.** This tree is a **reference**, not a scaffold: bootstrap writes only
+> `_meta.json`, `roots_seed.md` and `context.md`, and every other folder appears **on its first real
+> write**. Measured on a live Forest, a full-scaffold bootstrap leaves ~75% of the folders empty
+> forever — and an empty folder is not neutral: it is read, listed and reasoned about on every
+> session start, and it makes a memory that *is* thin look like one that was *abandoned*.
 
 **Source mode (namespaced multi-module):**
 ```

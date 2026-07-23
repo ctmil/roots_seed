@@ -12,9 +12,27 @@ The `.roots/` memory does not live in thin air: it lives in repos. These scripts
 
 | Script | What it does |
 |--------|----------|
+| `install-macos.sh` | **Bootstraps a whole workspace on macOS**: Command Line Tools, Homebrew, the terminal toolchain, Claude Code (optionally the Desktop app), the fleet scripts, a lazy `.roots/`, the `.gitignore` rules and the entry points. Idempotent; `--check` diagnoses without changing anything |
 | `setup-module.sh` | Clones a repo as **bare** and adds worktrees per branch. `./setup-module.sh <name> <git_url> <branch...>` |
 | `setupbranch.sh` | Adds a worktree for a specific branch in an already-mounted repo (auto-detects: checkout if it exists local/origin, creates it otherwise). `./setupbranch.sh <module>[/<folder>] -b <branch> [<base>]` |
+| `sync-agents-skills.sh` | Moves agents/skills between **base → store → activation**, converting the skill layout (`<name>.md` ↔ `<name>/SKILL.md`). `check` reports drift and exits non-zero |
 | `dashboard.sh` | Brings up `tools/forest-dashboard` pointing at the workspace and opens the browser. `./dashboard.sh` (see flags in the script header) |
+
+## Bootstrap on macOS
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/ctmil/roots_seed/main/scripts/install-macos.sh)"
+# or, from a checkout:
+./install-macos.sh --workspace ~/forest --profile standard --desktop
+./install-macos.sh --check          # what is installed / missing
+```
+
+It installs a GNU-ish toolchain on purpose (`coreutils`, `gnu-sed`, `gawk`, `bash` 5.x): stock macOS
+ships **bash 3.2** and **BSD** sed/awk/date, which is where portable scripts silently break — on
+macOS `sed -i` *requires* an argument. The script points this out and offers to put the `gnubin`
+paths first in your shell.
+
+> Linux/WSL need no installer: clone the seed and run `setup-module.sh` directly.
 
 ## Use
 

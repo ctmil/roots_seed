@@ -132,12 +132,27 @@ roots_seed/
 ├── manual.md              ← navigable front door (start here)
 ├── glossary/              ← multilingual Forest vocabulary (glossary.json → GLOSSARY.{en,es,fr}.md)
 ├── recipes/               ← applied patterns per domain (odoo / design / narrative / tokens)
-├── scripts/               ← mount & operate the Forest (setup-module, setupbranch, dashboard)
-├── skills/                ← shared, well-designed strategies (Odoo module merging, md→PDF)
+├── scripts/               ← mount & operate the Forest (install-macos, setup-module, setupbranch,
+│                            sync-agents-skills, dashboard)
+├── skills/                ← shared, well-designed strategies (roots-refresh, allowlist-sync,
+│                            Odoo module merging, md→PDF)
+├── agents/                ← base subagent library + the domain-keeper template (import on demand)
 ├── tools/
 │   └── forest-dashboard/   ← browsable viewer that reads the .roots
 └── .roots/                ← this repo's own memory (dogfooding)
 ```
+
+## Get started on macOS
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/ctmil/roots_seed/main/scripts/install-macos.sh)"
+```
+
+Installs the terminal toolchain (Homebrew, GNU coreutils/sed/awk, bash 5, git, jq, ripgrep, gh…),
+Claude Code, and a ready workspace with its `.roots/` memory. `--check` diagnoses an existing setup;
+`--desktop` also installs the Claude Desktop app, where **Cowork** runs. Re-running is safe.
+
+> Linux/WSL need no installer — clone and run `scripts/setup-module.sh`.
 
 ## License
 
