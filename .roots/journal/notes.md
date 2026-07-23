@@ -28,7 +28,7 @@ skills privados del workspace (`/sources` y `/sources-align`):
 **Mejora futura (NO ahora):** el eje ALIGN es conocimiento técnico genérico y valioso → **extender el
 skill `skills/odoo-module-merging.md`** del seed con ese playbook (en vez de skills nuevos). Requisitos
 antes de publicar (el seed es upstream **público**): traducir a inglés-canónico, **scrubear la
-topología ctmil** (tabla de groves/clientes/aggregators, ruta `/home/fabricio/...`, links `[[...]]` a
+topología ctmil** (tabla de groves/clientes/aggregators, rutas absolutas del workspace privado, links `[[...]]` a
 memorias privadas). El eje SYNC vertical y la tabla de la flota se quedan en el workspace privado.
 **Estado:** Anotada como mejora futura.
 
