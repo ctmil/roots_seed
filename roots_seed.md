@@ -7,9 +7,10 @@
 > **distributed copy** and out of date with respect to the canonical (compare the `Version` field /
 > changelog). The seed evolves — do not assume this copy is the latest. See § "Sync with the canonical upstream".
 
-**Version:** 1.16
+**Version:** 1.17
 
 **Changelog:**
+- **1.17** (3 August 2026) — **`on-task-start`: the plan is written before EACH action.** New hook, the twin *before* `on-task-done`: the task is written in `tasks/` **before being executed** (what, why, on which module·version·branch·server, done criterion; a `tasks/PLAN-<date>-<slug>.md` if it is a front with several steps), and progress is marked as it happens, not at the end. Born from a real incident: a corrupted `.git` took a session's commits with it and the work **not written beforehand** had to be reconstructed from memory. Rule: **whatever is not written before being done is not recoverable** — writing first turns a loss of work into a resumption. Confirmed again in practice: after a machine crash mid-work, everything planned was resumed intact and **the only unrecoverable thing was the one script that had never been written down**. The trigger is **each action, not the start of the session**: if the priority changes mid-session, a new plan goes before the first action of the new front; **read-only diagnosis may come first** (it is what allows writing a plan with facts instead of assumptions) and the plan goes before the first **write or run**; and if the diagnosis changes the plan, the plan is rewritten before continuing. ⚠️ **Numbering note:** this hook was first written on 27 July 2026 in a *distributed copy* as "v1.10", colliding with the canonical `1.10` (per-domain recipes, 2 June 2026) — it never reached the canonical, which advanced 1.11 → 1.16 without the rule. Any `.roots/` created from the canonical up to 1.16 is **missing this hook**. Does not change the `.roots/` format.
 - **1.16** (23 July 2026) — **The leaf.** *Folio* is *folium*: the model had roots (memory, inward) and branches (git, the structure that carries) and **no leaf** — nothing that faces outward. New section **Folios — the leaf**, and `folios/` added to the base structure as a **primitive**, not a domain pack: what separates it from `roots/` is **direction**, not material — the same document with an inner and an outer face, so publishing is not a pipeline bolted onto the memory. Three consequences fall out of the metaphor rather than being added to it: **a leaf hangs from a branch** (you publish a *branch* — a version/variant — so a preview and a canonical page are two leaves, not a page and its draft), **a folio is a view and never a second original** (the substance stays in the `.roots/` document named by `of:`; the same dual-truth failure, and the same rule, as store↔activation), and **photosynthesis closes the cycle**: a leaf in the light returns energy, so each folio carries a **`reception.md`** — reception is the only thing that enters a project from outside, and what it teaches is promoted inward (a recurring question → documentation, a recurring misreading → an ADR, a demand → a task). Full cycle: *material in → memory down → structure up → leaf out → reception back down.* Front-matter contract (`of`, `branch`, `state`, `channels`, `layout`, `seo`), `channels.yaml`, state as a **gate** (`draft → preview → published`), lazy creation, and a public-hygiene note (publishing a folio publishes its media and its reception too).
 - **1.15** (23 July 2026) — **The agent library stops being a promise and becomes a shelf**, plus the two rules that a live Forest proved were missing. `roots_seed/agents/` now **exists** and ships a base catalog (`bug-hunter`, `grove-keeper`, `designer`, `odoo-architect`, `odoo-migrator`) plus **`domain-keeper.template.md`**; `roots_seed/skills/` gains `roots-refresh` and `allowlist-sync`. § *Agents and skills* rewritten around what the pattern actually converged to: the **domain triad** (`<domain>-keeper` agent = owner · `/<domain>` skill = session framing, deliberately does not act · `/<playbook>` skills = operations), **negative routing** in every `description` (past ~5 agents the failure mode is ambiguity, not absence), and the **store↔activation contract** — activation is a *copy, never a rewrite*, the store carries the same front-matter, skills convert flat `<name>.md` ↔ `<name>/SKILL.md`, and `scripts/sync-agents-skills.sh {activate,harvest,import,check,list}` makes the conversion mechanical and the drift detectable (including skills that live **only** in `.claude/` and are therefore unversioned). New section **Deploy discipline (git-first)**: a server is always *a commit* with a clean `git status` — branch per task → commit → deploy = `fetch`+`checkout`; **never** write files into a versioned checkout (`scp`/in-place edit/`git apply` leave an invisible drift); the exception is admin/data work that touches no versioned file; and the **two pushes** are different — the work branch is automatic, the merge/deploy is always confirmed. **`state/` promoted to the base structure** (context-card per topic — the present, rewritten in place, vs `journal/` = the past; dated one-shots; gitignored secrets, with the re-exclusion that must come *after* `!.roots/**`). **Lazy folders**: the base tree is a reference, not a scaffold (on a live Forest ~75% of scaffolded folders stayed empty). New § *Public hygiene* for contributions upstream. Does not change the `.roots/` format.
 - **1.14** (12 June 2026) — **English becomes the canonical language of the seed** + a multilingual **glossary system** + a **language-lock**. The spec (`roots_seed.md`, `manual.md`) is now maintained in English (single evolving source). New section **Language & glossary (i18n)**: each `.roots/` deployment carries its own working language in `_meta.json.lang` (`"en"` default, `"es"`, `"fr"`, …) — **independent** of the seed's language; code/technical identifiers stay English regardless. **No-noise rule:** updating/re-distributing the seed NEVER translates or rewrites existing memory; `on-seed-process` gains step **0b** that **auto-detects** the language of an already-deployed `.roots/` and persists it (a Spanish project stays Spanish), and `on-seed-update` only refreshes the canonical `roots_seed.md` copy. New **`glossary/`** subsystem: `glossary.json` (canonical, English key + `es`/`fr` term+def + `category`/`see_also`) → `gen.py` generates `GLOSSARY.{en,es,fr}.md` tables (English primary; missing translations fall back to English, flagged). The per-module `docs/glossary.md` (domain terms, in the deployment's `lang`) is distinct from this Forest-vocabulary glossary. The `**Language**` style rows are now `lang`-driven. Does not change the `.roots/` format.
@@ -26,7 +27,7 @@
 - **1.3** (18 April 2026) — Seed distribution rule inside each `.roots/`. Each module/project carries a **local copy** of the seed that generated it, so it is self-contained and reprocessable even if extracted to another repo. New hook `on-seed-update` to re-distribute when the canonical bumps version. `session-start` now compares the local copy vs the canonical and warns if they are out of sync.
 - **1.2** (18 April 2026) — Added three protocols to the seed, tool-agnostic (applicable to any AI assistant or human developer):
   - Hook `on-topic-shift`: when shifting focus mid-session to a file/system not covered by the bootstrap, re-scan `.roots/docs/` before asking for clarification or deciding.
-  - Hook `on-task-done`: when completing each individual task and before reporting it, update at minimum `tasks/todo.md` + `tasks/tasks.md` + `docs/commits.md`. Conditionally `errors-log.md`, `fixes-log.md`, `decisions.md`, `notes.md`, `glossary.md`, `migrations.md`.
+  - Hook `on-task-done`: when completing each individual task and before reporting it, update at minimum `tasks/todo.md` + `tasks/tasks.md` + `docs/commits.md`. Conditionally `errors-log.md`, `fixes-log.md`, `decisions.md`, `notes.md`, `glossary.md`, `migrations.md`. *(Since v1.17 it has a twin before it: `on-task-start` — the task is written **before** being done.)*
   - `session-start` extended: check the seed version against the agent's memory, check git state (`git branch --show-current`, `git log`, `git status`) vs `_meta.json.active_branch`, warn the human if out of sync, read `notes.md` and design docs of the current feature.
 - **1.1** — Base version.
 
@@ -1451,6 +1452,8 @@ Inside each module, the internal structure is identical in both modes:
     │
     ├── hooks/                 # Session hooks and automation
     │   ├── session-start.md   # What to run at session start
+    │   ├── on-task-start.md   # Write the task BEFORE doing it (mandatory)
+    │   ├── on-task-done.md    # Close the task before reporting it (mandatory)
     │   ├── session-end.md     # What to run at session end
     │   ├── on-error.md        # Protocol when detecting an error
     │   ├── on-fix.md          # Protocol when committing a fix
@@ -2180,6 +2183,53 @@ All `.roots/roots_seed.md` copies aligned with the canonical.
 Each module is again self-contained and reprocessable in isolation.
 ```
 
+##### on-task-start.md
+
+| Aspect | Protocol |
+|---------|-----------|
+| **Purpose** | That the work **exists in writing before it exists in the world**: if the session, the commit or the `.git` is lost, another session can **resume from where it left off** instead of reconstructing the intent from memory |
+| **Executor** | AI agent or human developer |
+| **Trigger** | About to **launch an action** — any write or run — for work not yet written in `tasks/`. **Per action, not once per session** |
+| **Mandatory** | Yes — it is the twin *before* `on-task-done`. Work executed without having been written first is not recoverable |
+
+**Entry format:**
+```markdown
+# Hook: On Task Start
+
+> Protocol BEFORE touching anything. The task is written first and done after.
+
+## Minimum steps (always)
+
+1. `tasks/todo.md` (or `tasks/tasks.md` → "In Progress") — **write the task BEFORE executing it**:
+   what is going to be done, why (who asked / what triggered it), on which module·version·branch·server,
+   and what the done criterion is.
+2. If the task is a front with several steps → a `tasks/PLAN-<date>-<slug>.md` listing the steps, so
+   progress can be read step by step (not just "done / not done").
+3. Only then start working. Mark progress **as it happens**, not at the end.
+
+## The trigger is EACH action, not the start of the session
+
+- **Priority changed mid-session ⇒ a new plan before the first action of the new front.** "I already
+  wrote the session plan" does not count. Each front carries its own.
+- **Read-only diagnosis may come first** (reading files, `git status`, counting what survived): it is
+  what allows writing a plan with facts instead of assumptions. The plan goes before the first
+  **write or run**, not before the first read.
+- **If the diagnosis changes the plan, rewrite the plan — before continuing.** The typical case:
+  measuring first and discovering that something else had to be built.
+
+## Why (the rule is born from an incident)
+
+A corrupted `.git` / a crashed session takes the commits with it, **but it does not take `.roots/`**
+if the plan was already written. Whatever is **not** written before being done is lost whole: someone
+has to reconstruct from memory what was being done and why. Writing first turns a loss of work into a
+**resumption**.
+
+## Expected output
+
+A human (or another session) reading only `.roots/tasks/` must be able to say **what is in progress
+and where to resume it**, even if the session that started it no longer exists.
+```
+
 ##### on-task-done.md
 
 | Aspect | Protocol |
@@ -2403,7 +2453,12 @@ When starting a session in a project with `.roots/`:
    - .roots/{module}/tasks/todo.md
    - .roots/{module}/debug/errors-log.md (active errors)
 
-2. DURING the work:
+2. BEFORE launching EACH action (follow hooks/on-task-start.md):
+   - WRITE the task in tasks/ FIRST — what, why, on which module/branch, done criterion
+   - Read-only diagnosis may come first; the plan goes before the first write or run
+   - Mark progress as it happens, not at the end
+
+3. DURING the work:
    - When finding an error: follow hooks/on-error.md → errors-log.md
    - When fixing something: follow hooks/on-fix.md → fixes-log.md
    - When having an improvement idea: ADD to notes.md
@@ -2411,13 +2466,13 @@ When starting a session in a project with `.roots/`:
    - When using a new domain term: ADD to glossary.md
    - When changing schema/fields: ADD to migrations.md
 
-3. WHEN ENDING the session (follow hooks/session-end.md):
+4. WHEN ENDING the session (follow hooks/session-end.md):
    - ADD an entry to diary.md summarizing the work
    - If there was a reusable pattern: PROPOSE adding it to patterns.md
    - If I created a useful prompt: PROPOSE adding it to prompts.md
    - If the project state changed: UPDATE context.md
 
-4. NEVER:
+5. NEVER:
    - Delete existing content without asking
    - Modify decisions.md (only add or mark deprecated)
    - Invent IDs that already exist (review the last number)
@@ -2429,6 +2484,8 @@ When starting a session in a project with `.roots/`:
 | Situation | Action |
 |-----------|--------|
 | Session start | → Run hooks/session-start.md |
+| **About to launch an action (write or run) not yet written in `tasks/`** | → **Run hooks/on-task-start.md → write it FIRST.** Per action, not once per session |
+| Task completed, about to report it | → Run hooks/on-task-done.md |
 | Exception in code | → Run hooks/on-error.md → errors-log.md |
 | Commit with a fix | → Run hooks/on-fix.md → fixes-log.md |
 | User says "version X.Y ready" | → Propose updating changelog.md |
@@ -2450,7 +2507,7 @@ When starting a session in a project with `.roots/`:
 
 MODULE_NAME=${1:-"module"}
 BASE_PATH=".roots/$MODULE_NAME"
-SEED_VERSION="1.7"
+SEED_VERSION="1.17"
 
 mkdir -p "$BASE_PATH"/{journal,debug,design,docs,tasks,hooks,skills,workbench}
 
@@ -2740,6 +2797,42 @@ active errors, context of the last session.
 ---
 EOF
 
+cat > "$BASE_PATH/hooks/on-task-start.md" << 'EOF'
+# Hook: On Task Start
+
+> Protocol BEFORE touching anything. The task is written first and done after.
+
+---
+
+## Minimum steps (always)
+
+1. `tasks/todo.md` (or `tasks/tasks.md` → "In Progress") — **write the task BEFORE executing it**:
+   what, why (who asked / what triggered it), on which module·version·branch·server, and the
+   done criterion.
+2. If it is a front with several steps → a `tasks/PLAN-<date>-<slug>.md` with the list of steps.
+3. Only then start working. Mark progress **as it happens**, not at the end.
+
+## The trigger is EACH action, not the start of the session
+
+- Priority changed mid-session ⇒ **a new plan before the first action of the new front**.
+- **Read-only diagnosis may come first** — it is what allows writing a plan with facts instead of
+  assumptions. The plan goes before the first **write or run**, not before the first read.
+- If the diagnosis changes the plan, **rewrite the plan before continuing**.
+
+## Why
+
+A crashed session or a corrupted `.git` takes the commits with it, **but not `.roots/`** if the plan
+was already written. Whatever is not written before being done is lost whole.
+**Writing first turns a loss of work into a resumption.**
+
+## Expected output
+
+Someone reading only `tasks/` can say **what is in progress and where to resume it**, even if the
+session that started it no longer exists.
+
+---
+EOF
+
 cat > "$BASE_PATH/hooks/session-end.md" << 'EOF'
 # Hook: Session End
 
@@ -2818,7 +2911,7 @@ echo "  - docs/: README, manual, documentation, architecture, glossary"
 echo "  - tasks/: tasks, todo"
 echo "  - skills/: prompts, workflows, patterns"
 echo "  - workbench/: reference materials (empty)"
-echo "  - hooks/: session-start, session-end, on-error, on-fix"
+echo "  - hooks/: session-start, on-task-start, session-end, on-error, on-fix"
 echo "  - _meta.json: initialization metadata"
 ```
 
