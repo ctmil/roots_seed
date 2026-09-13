@@ -183,6 +183,21 @@ reportar. **Nada bloquea esperando la laptop.**
   snippet de la spec ahora muestra el bloque completo y usa `.roots/**/workbench/`, verificado con
   `git check-ignore -v` y `git add -A -n`: entra el `changelog`, no entran ni el borrador ni la hoja.
 
+### Cuarta tanda — el vocabulario y sus restos (13-sep)
+
+- **✅ Glosario** (el contrato i18n del seed, 3 idiomas): entraron **10 términos** de la v1.19
+  (`leaf` al lado de `folio`, `leaf-fall`, `work-semaphore`, `session-liveness`, `declared-loop`,
+  `delivery-layer`, `inbox-delivery`, `session-minutes`, `context-guard`, `capability-ladder`).
+  Y lo importante: **la entrada `workbench` repetía en en/es/fr la definición vieja** — *"el usuario
+  lo llena, el agente sólo consulta"*. Una contradicción **en el glosario viaja más lejos** que una
+  en la prosa, porque el glosario es lo que alguien lee para entender el modelo. 56 → 66 términos,
+  tablas regeneradas, `gen.py --check` pasa; verificado además lo que `gen.py` **no** mira: cero
+  `see_also` rotos, cero idiomas faltantes, cero categorías inválidas.
+- **✅ Dos restos del contrato viejo en `skills/`**: `md-to-pdf-reporting` mandaba a referenciar
+  imágenes desde `workbench/` (con el contrato nuevo = **enlace roto en todo otro clone**), y
+  `roots-issue` usaba como ejemplo una frase que la spec ya no dice, lo que la hacía parecer vigente.
+- **Diario del propio seed** con la entrada de la v1.19 (lo que costó entender, no la lista de commits).
+
 **Queda sólo G10** (patrones de agentes: coordinador · manager read-only de tablero), que es una
 decisión de alcance suya.
 
