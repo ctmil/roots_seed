@@ -250,6 +250,20 @@ reportar. **Nada bloquea esperando la laptop.**
   listado **como si fueran nombres** (dos filas con rutas absolutas). Con **un** directorio `ls` no
   imprime encabezado — por eso nunca se vio.
 
+### Octava tanda — el otro camino de entrada (13-sep)
+
+- **✅ `install-macos.sh`**: el `init_roots.sh` ya estaba arreglado, pero **un usuario nuevo en macOS
+  entra por acá**, y este escribía el `.gitignore` con el par de re-inclusión correcto, los secretos
+  re-excluidos… **y sin la regla del workbench**. Arrancaba versionando la mesa de trabajo.
+- **⚠️ Y lo generalizable, que es peor**: su **guard de idempotencia preguntaba por UN marcador viejo**
+  y, si estaba, se saltaba el bloque entero ⇒ **todo workspace instalado antes de la 1.19 se quedaba
+  sin la regla para siempre**, mientras el instalador informaba *"ya tiene las reglas"*.
+  **Un guard que chequea un solo marcador retiene en silencio todas las reglas agregadas después.**
+  Ahora pregunta por **la regla que va a agregar** y hay camino de upgrade. Escrito en la spec.
+- **✅ Tres escenarios probados** (nuevo escribe todo · viejo recibe sólo lo que falta · dos corridas
+  no duplican) y **el control que cierra es git**, no el `grep`: con la regla agregada, el borrador y
+  la hoja no entran y el `changelog` sí.
+
 **Queda sólo G10** (patrones de agentes: coordinador · manager read-only de tablero), que es una
 decisión de alcance suya.
 
