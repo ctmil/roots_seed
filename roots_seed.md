@@ -620,11 +620,15 @@ The metaphor starts at `.roots` and goes up:
 | **Grove** | a **product/suite**: a cluster of Trees with a common function | Meli · OCAPI · GeoEcon |
 | **Tree** | a **repo** (mounted bare+worktrees) | `meli_oerp`, `geoecon_map` |
 | **Branch** | a git branch / worktree of the Tree | `17.0`, `mapdev` |
-| **Folio** (`folios/`) | the **leaf**: a document turned outward — published, exposed, seen | a landing page, a manual, a release note |
+| **Folio** (`folios/`) | the **leaf kept**: a document turned outward — published, exposed, seen | a landing page, a manual, a release note |
+| **Leaf** (`workbench/leaves/`) | the **leaf shed**: an *ephemeral* session artifact; hangs from a Branch (a task), never from the Forest | a DOM snapshot, a verification capture, a raw API dump |
 
 > Fits git: a worktree contains a *working **tree*** and the branches are *branches*.
 > And *folio* is *folium*: **leaf**. Roots absorb, branches carry, leaves face the light — see
 > § *Folios — the leaf*.
+> **The first five terms are structural — they name what must stay. `Leaf` is the sixth, and it
+> names what must GO** (§ *Workbench*): an artifact with no place in the ontology ends up on the
+> ground — measured once as 1929 loose files invisible to `git status`.
 
 ### Axes of each Tree (orthogonal)
 
@@ -713,8 +717,9 @@ state/
   reading code and git log, it belongs here.
 - **Dated one-shots** carry the date **in the filename**: they are snapshots, and a snapshot without
   its date silently becomes a lie.
-- **`state/` vs `workbench/`:** `state/` is *our* current understanding (authored, tracked);
-  `workbench/` is *incoming* raw material (ephemeral). `state/` vs `journal/`: present vs past.
+- **`state/` vs `workbench/`:** `state/` is *our* current understanding (authored, **tracked**);
+  `workbench/` is the local work surface — raw material, drafts and `leaves/` — and is **never
+  tracked**. `state/` vs `journal/`: present vs past.
 - **Secrets:** `state/` is where credential files naturally land, so the gitignore rule ships with
   the structure — and note that `.roots/` is otherwise **tracked wholesale**, so the exclusion has to
   be re-stated *after* the `!.roots/**` un-ignore or it does not apply:
@@ -1105,28 +1110,112 @@ done
 
 ---
 
-## Workbench — Reference materials
+## Workbench — the local work surface (and `leaves/`, the ephemeral level)
 
-**Rule:** each `.roots/{module}/` includes a `workbench/` folder as free space for reference materials the user shares during work.
+**Rule:** each `.roots/` carries a **`workbench/`** folder: the **work surface**. It holds raw
+material, drafts, heavy assets and session evidence — and it is **entirely outside git**.
 
-### What goes in workbench/
+> **Corrected in 1.19.** Until 1.18 this section said the workbench was *the user's* folder, that the
+> agent "does not invent content there", and that light files "can be committed". Two years of real
+> use inverted all three: the agent is the one who works on the surface, and **a partially ignored
+> workbench is how the repository silently fills up**. The rule is now one line: **the whole
+> `workbench/` is out of the repo.**
 
-- Images, screenshots, mockups
-- PDFs, analysis documents
-- Videos or links to videos
-- Sample datasets, CSVs
-- Third-party files for study
-- Any material the user passes as reference
+### Why it lives *inside* `.roots/`
+
+Because that is what keeps it **out of the visible versioned tree**. `.roots/` is the memory that
+travels (another session, a fresh clone, a server needs it); `workbench/` is the surface that stays
+on this machine. Putting it inside `.roots/` and ignoring it wholesale is what lets the two coexist
+without ever mixing.
+
+```gitignore
+# after the `!.roots/**` re-inclusion — order matters, this must come last
+.roots/workbench/
+```
+
+### What goes on the surface
+
+| | Examples |
+|---|---|
+| **Incoming material** (the human shares it) | screenshots, mockups, PDFs, sample datasets, third-party files to study |
+| **Work in progress** (the agent produces it) | drafts, scratch analyses, generated assets, heavy renders |
+| **`leaves/`** — session evidence | DOM snapshots, verification captures, raw API dumps (see below) |
 
 ### Rules
 
-1. **The user is the one who fills the workbench** — the agent does not invent content here; it only consults it.
-2. **The agent MUST review `workbench/`** at session start (see `session-start`) and on topic shift (see `on-topic-shift`). If there are new files, read them or mention their existence.
-3. **There is no mandatory format** — it is free space, it does not require internal structure.
-4. **Files can be temporary** — the user can delete obsolete materials without consequences.
-5. **It is not redistributed** — unlike the seed, the workbench content is local to the module and is not copied between `.roots/`.
-6. **If a material inspires a decision** → reference it in `design/decisions.md` (e.g.: "see `workbench/mockup-v3.png`").
-7. **Selective gitignore** — heavy files (videos, large datasets) can be added to the module's `.gitignore`; the light ones (screenshots, notes) are committed.
+1. **Both sides write here** — the human drops reference material, the agent works on it. What the
+   agent must not do is treat it as memory: nothing durable lives *only* on the surface.
+2. **The agent MUST review `workbench/`** at session start (see `session-start`) and on topic shift
+   (see `on-topic-shift`). If there are new files, read them or mention that they exist.
+3. **No mandatory format** — it is free space, it needs no internal structure.
+4. **Everything here is deletable** without consequence. That is the contract, not an accident.
+5. **Not redistributed** — unlike the seed, workbench content is local and is never copied between
+   `.roots/`.
+6. **If a material inspires a decision** → reference it from `design/decisions.md` (e.g. *"see
+   `workbench/mockup-v3.png`"*). The decision is tracked; the material is not.
+7. ⚠️ **Never carve an exception into the ignore.** If something on the surface deserves to be
+   versioned — a tool, a preset, a reusable storyboard — **it does not get whitelisted: it MOVES**
+   out of `workbench/`. One exception is how a work surface turns back into a tracked folder.
+
+### `leaves/` — the leaf, the level that is *meant* to fall
+
+> `Roots > Forest > Grove > Tree > Branch > `**`Leaf`**
+
+The first five terms are **structural**: they name what must stay. None of them named what must
+**disappear** — and *an artifact with no place in the ontology ends up on the ground*. Measured on a
+live Forest (27 Aug 2026): **1929 loose files / 246 MB** at the workspace root, **invisible to
+`git status`** because the `.gitignore` starts with `/*`. The origin of the mess was **a missing noun**.
+
+A **leaf** is the **organ of exchange with the outside**: the instant a session touched something
+external and kept the evidence. It hangs from a **Branch** — a task — not from the Forest, and its
+life is the task's life.
+
+**It is designed to fall.** Falling is not failure, it is a season. That reframes the cleanup: it is
+not *"tidying up the mess"* (which is embarrassing, so it gets skipped) but **leaf fall** (which gets
+scheduled).
+
+> **Before the leaf falls, what it taught must already have gone down into `.roots/`.**
+
+The fallen leaf becomes litter → humus → root food. So sweeping is not "throwing away": it is
+**verifying that the finding already reached** the plan, the doc or the decision log. A leaf swept
+with nothing extracted is a lost observation — and one that stays on the ground forever is lost too,
+because nobody will read it. This is also *why* the on-task-start rule exists: **the leaf is the
+by-product, the root keeps the nutrient.**
+
+**Naming — one folder per front and date**, so sweeping can go by age with no human judgement:
+
+```bash
+export LEAVES="$ROOTS/workbench/leaves/$(date +%F)-<front>"   # absolute, always
+mkdir -p "$LEAVES"
+```
+
+⚠️ **Never a bare relative name.** The `cwd` is the root of the workspace, and that is exactly where
+the dirt lands (the 246 MB above got there that way).
+
+**Sweeping** — `scripts/leaf-fall.sh`:
+
+| | |
+|---|---|
+| `status` | counts the litter loose on the ground and what is already filed under `leaves/` |
+| `sweep` | moves what is loose at the root into today's `leaves/` folder |
+| `compost [days]` | lists leaves older than N days (default 30), candidates to delete |
+
+**Hygiene WARNS, it does not block.** A check that rejects a commit ends up bypassed with
+`--no-verify`; one that warns gets read.
+
+### Leaf vs. Folio — the same word, two directions
+
+Both are *leaves*, and the difference is **where they face**:
+
+| | 🍃 **Folio** (`folios/`) | 🍂 **Leaf** (`workbench/leaves/`) |
+|---|---|---|
+| Faces | **outward, to the light** — published, seen | **outward, to the world** — evidence brought back in |
+| Lifetime | as long as what it shows | that of the task |
+| Tracked | yes | **never** |
+| Ends as | reception, which comes back down | litter → humus → root |
+
+A folio is a leaf **kept**; a leaf in `leaves/` is a leaf **shed**. Both close the same cycle from
+opposite ends: *material in → memory down → structure up → leaf out → reception back down.*
 
 ---
 
@@ -1372,7 +1461,7 @@ The structure varies according to the layout (see § "Working modes"):
 ├── folios/   ← the leaf: what faces outward (published) + reception.md (what comes back)
 ├── hooks/
 ├── skills/      (+ agents/ once the repo has any)
-├── workbench/   ← ephemeral work materials
+├── workbench/   ← local work surface (NOT tracked; holds leaves/)
 └── collective/  ← permanent influences/references (≠ workbench)
 ```
 
@@ -1416,7 +1505,7 @@ Inside each module, the internal structure is identical in both modes:
 {module_name}/
     ├── context.md             # Quick module briefing (30 sec)
     │
-    ├── workbench/             # User reference materials (ephemeral, deleted)
+    ├── workbench/             # Local work surface — NOT tracked (holds leaves/)
     │   └── (free files)       # Images, PDFs, videos, analysis, etc.
     │
     ├── collective/           # Permanent influences/references (≠ workbench)
@@ -2916,7 +3005,7 @@ echo "  - design/: decisions, sketchbook"
 echo "  - docs/: README, manual, documentation, architecture, glossary"
 echo "  - tasks/: tasks, todo"
 echo "  - skills/: prompts, workflows, patterns"
-echo "  - workbench/: reference materials (empty)"
+echo "  - workbench/: local work surface, not tracked (empty)"
 echo "  - hooks/: session-start, on-task-start, session-end, on-error, on-fix"
 echo "  - _meta.json: initialization metadata"
 ```
@@ -2940,7 +3029,7 @@ echo "  - _meta.json: initialization metadata"
 13. **Keep IDs unique** — Review the last number before creating a new one
 14. **Format consistency** — Follow the templates in this document
 15. **_meta.json is automatic** — Don't edit it manually, it is for tools
-16. **workbench/ is the user's** — The agent consults but does not invent content there; review at the start of each session
+16. **workbench/ is the work surface, and it is NOT tracked** — both sides write there, nothing durable lives only there, and what deserves versioning MOVES out of it (never a gitignore exception); review it at the start of each session
 17. **Embedded sources are reference** — In client mode, `sources/` is a consultation copy; changes are made in the original source and synced
 18. **Namespace avoids conflicts** — Use `source.skill_name` when two sources define the same concept
 19. **Promotion is explicit** — The agent suggests, the user decides whether a client discovery goes up to the source
