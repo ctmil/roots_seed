@@ -285,6 +285,30 @@ decisión de alcance suya.
       masificar).
 - [ ] ¿Entra **G10** en v1.19 o queda para una v1.20 de "biblioteca de agentes"?
 
+## CIERRE — 13-sep 19:11Z
+
+**Estado: v1.19 publicada.** `origin/main` = `main` = `3e0c9c5`, worktree limpio, rama de trabajo
+pusheada. Ocho tandas, ~30 commits.
+
+**El loop se detuvo** (`CronDelete 6182f0b1`). Motivo, y vale como dato operativo: entre las 09:19Z y
+las 19:11Z la sesión estuvo inactiva **10 h** y el cron de 15 min **acumuló ~40 disparos idénticos**
+que se entregaron todos juntos al volver. Consumirlos habría sido gasto sin trabajo nuevo detrás:
+**un loop de intervalo fijo no sabe que nadie lo está consumiendo.** Si se retoma, va con el frente
+vivo o con intervalo largo.
+
+### Lo que queda, y es todo decisión de FCA
+- [ ] **`gh`**: ¿se instala para que los comandos de comunidad publiquen solos, o queda el escalón 3
+      (URL prellenada, que ya funciona y no necesita credenciales)?
+- [ ] **G10**: ¿entran al seed los patrones de agente que el Forest convergió después de la v1.15
+      (el **coordinador** y el **manager read-only que devuelve tablero**)?
+- [ ] **Redistribución**: la spec manda copiar `roots_seed.md` a los `.roots/` de los demás repos al
+      bumpear. **Frenado a propósito** — toca muchos repos de una (regla dura: no masificar sin OK).
+
+### La tesis, en una línea
+El seed resolvía cómo se **guarda** la memoria y daba por hecho que el lector la iba a buscar. Y de
+todo lo que apareció verificando, **casi nada era una ausencia**: era el arreglo hecho en un lado y
+el contrato viejo vivo en otro.
+
 ## Bitácora (se marca A MEDIDA, no al final)
 
 - **13-sep** — diagnóstico read-only terminado; plan escrito. Nada tocado todavía.
