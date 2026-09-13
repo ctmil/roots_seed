@@ -1,3 +1,8 @@
+---
+name: roots-issue
+description: Report that the seed's own text is wrong, ambiguous or silently harmful: a section that contradicts another, a rule that causes damage if followed literally, a term with two meanings. Invoke it when you can quote the offending line. NOT for proposing a new convention (that is `roots-suggest`) and NOT when you can just write the fix (that is `roots-pr`).
+---
+
 # roots-issue
 
 > **Report that the seed itself is wrong, ambiguous or silently harmful** — as opposed to proposing

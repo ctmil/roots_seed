@@ -1,3 +1,8 @@
+---
+name: roots-refresh
+description: Mandatory closing step of a batch: after porting or syncing changes across a multi-module, multi-version grove, bring every touched module's `.roots/` memory up to date (changelog, fixes-log, documentation, migrations) consistently. Invoke it when a batch closes, before declaring it done. NOT for the code sync itself.
+---
+
 # roots-refresh
 
 > **Mandatory closing step** of a batch: after porting/synchronizing a set of changes across a

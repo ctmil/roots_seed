@@ -1195,6 +1195,15 @@ model: opus | sonnet | haiku             # optional
 | Agent | `agents/<name>.md` | `agents/<name>.md` (same file) |
 | Skill | `skills/<name>.md` (flat) | `skills/<name>/SKILL.md` (**directory**) |
 
+> ⛔ **A skill with no front-matter copies fine, activates fine, and is NEVER LISTED as a command.**
+> It does not error — it is simply absent, which is the hardest failure to notice: you invoke it, the
+> harness does not know it, and nothing anywhere says why. Measured in this very repo: **every agent
+> had front-matter and not one skill did**, while this section already required it — so four
+> commands written to be invoked as `/<name>` would not have been invocable at all. ⇒ `name` and
+> `description` (with its negative routing) are **part of the artifact**, not decoration, and
+> `sync-agents-skills.sh check` now reports their absence and exits non-zero, so a CI or a pre-commit
+> catches it instead of a person noticing months later.
+
 **Rule: activation is a copy, never a rewrite.** The store file carries the same front-matter as the
 activated one, so the conversion is purely mechanical (`scripts/sync-agents-skills.sh`). The failure
 mode this rule exists to prevent is real and silent: the two layers slowly become **two different

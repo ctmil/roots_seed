@@ -160,16 +160,29 @@ case "$CMD" in
       [ -e "$d" ] || continue; base="$(basename "$d")"
       [ -e "$STORE_S/$base.md" ] || { say "activation-only skill: $base (not tracked!)"; drift=1; }
     done
-    [ "$drift" -eq 0 ] && say "✓ store and activation are in sync" || say "→ fix with: $0 activate | harvest"
+    # A skill with no front-matter copies and activates fine and is NEVER LISTED as a command:
+    # it fails by being absent, which is the hardest failure to notice. Agents always had it;
+    # skills did not, and nothing checked. Checking it is what makes the rule happen.
+    for f in "$STORE_S"/*.md "$STORE_A"/*.md; do
+      [ -e "$f" ] || continue
+      case "$(basename "$f")" in README.md) continue ;; esac
+      head -n1 "$f" | grep -q '^---$' || { say "no front-matter (will not be listed as a command): $f"; drift=1; }
+    done
+    [ "$drift" -eq 0 ] && say "✓ store and activation are in sync" || say "→ fix with: $0 activate | harvest, and add front-matter where reported"
     exit "$drift"
     ;;
   list)
     printf '%-28s %-8s %-8s %s\n' NAME BASE STORE ACTIVE
-    seed_names=""; [ -n "$SEED" ] && seed_names="$(ls "$SEED/agents" "$SEED/skills" 2>/dev/null | sed 's/\.md$//')"
-    all="$( { ls "$STORE_A" "$STORE_S" 2>/dev/null | sed 's/\.md$//'
-              ls "$ACT_A" 2>/dev/null | sed 's/\.md$//'
-              ls "$ACT_S" 2>/dev/null
-              printf '%s\n' "$seed_names"; } | grep -v '^README$' | grep -v '^$' | sort -u )"
+    # NOTE: `ls dirA dirB` prints a "dirA:" section header per directory, and those headers used to
+    # end up in this list as if they were entries (two rows of absolute paths). With a single
+    # directory ls prints no header, which is why it stayed invisible until a run had both.
+    # One directory per call, always.
+    ls1() { for d in "$@"; do [ -d "$d" ] && ls -1 "$d" 2>/dev/null; done; }
+    seed_names=""; [ -n "$SEED" ] && seed_names="$(ls1 "$SEED/agents" "$SEED/skills" | sed 's/\.md$//')"
+    all="$( { ls1 "$STORE_A" "$STORE_S" | sed 's/\.md$//'
+              ls1 "$ACT_A" | sed 's/\.md$//'
+              ls1 "$ACT_S"
+              printf '%s\n' "$seed_names"; } | grep -v '^README$' | grep -v '^$' | grep -v ':$' | sort -u )"
     for n in $all; do
       b=" "; s=" "; a=" "
       printf '%s\n' "$seed_names" | grep -qx "$n" && b="yes"

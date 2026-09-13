@@ -1,3 +1,8 @@
+---
+name: roots-triage
+description: Receive: read what the community opened on the seed and decide what enters — correction, convergence, divergence (a recipe, not a core rule), or out of scope. Invoke it weekly and ALWAYS before bumping the spec version. This is the only one of the four that points inward; the other three publish outward.
+---
+
 # roots-triage
 
 > **The hand coming back.** Read what the community opened on the seed and decide what enters.

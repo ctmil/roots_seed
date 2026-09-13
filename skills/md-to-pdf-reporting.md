@@ -1,3 +1,8 @@
+---
+name: md-to-pdf-reporting
+description: Turn a module's `docs/manual.md` or `documentation.md` into a PDF report (pandoc, HTML+CSS, or a template engine), keeping the memory as the single source and the PDF as a view of it. Invoke it when a document has to leave the repo as a deliverable. NOT for publishing a page — that is a folio.
+---
+
 # md → PDF reporting
 
 > Convert memory documentation (`docs/manual.md`, `docs/documentation.md`) to presentable PDF reports. Three approaches depending on need: quick, branded, or Odoo-integrated.

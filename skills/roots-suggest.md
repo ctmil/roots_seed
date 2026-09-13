@@ -1,3 +1,8 @@
+---
+name: roots-suggest
+description: Propose upstream: turn something this deployment learned into a proposal on the public seed, carrying the MEASUREMENT and scrubbed of every specific. Invoke it when real use taught something the spec does not say — or says the opposite of. NOT for reporting that the seed's own text is wrong (that is `roots-issue`), NOT for an improvement already written locally (that is `roots-pr`), and NOT for reading what others sent (that is `roots-triage`).
+---
+
 # roots-suggest
 
 > **Turn something this deployment learned into a proposal on the public seed.** The seed already

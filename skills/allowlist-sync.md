@@ -1,3 +1,8 @@
+---
+name: allowlist-sync
+description: Keep the agent's permission allowlist in step with real usage and with the evolving `.roots`/workspace structure, so a long autonomous run is not interrupted by prompts for routine commands. Invoke it when permission prompts start repeating, after adding scripts or structure, or when asked to update the allowlist.
+---
+
 # allowlist-sync
 
 > Keep the agent's permission allowlist (`.claude/settings.json` → `permissions.allow`) in step with

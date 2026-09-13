@@ -1,3 +1,8 @@
+---
+name: odoo-module-merging
+description: Strategy for merging branches or client forks back into official upstream module repos: layered review, cross-version conflict patterns, and promoting the `.roots/` memory along with the code. Invoke it when landing a fork's work upstream. NOT for porting a module between framework versions on its own.
+---
+
 # Odoo module merging
 
 > Strategy for merging work branches (`claude/*`) or client branches into the official Odoo repos, and for forward/back-porting across versions, minimizing breakage and preserving the `.roots` memory.

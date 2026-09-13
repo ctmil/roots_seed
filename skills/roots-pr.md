@@ -1,3 +1,8 @@
+---
+name: roots-pr
+description: Take an improvement already written in your local canonical up to a PR on the public seed, splitting what generalizes from what is yours. Invoke it when the sync protocol answered 'Local > Upstream'. NOT for an idea you have not written yet (that is `roots-suggest`) and NOT for a defect report (that is `roots-issue`).
+---
+
 # roots-pr
 
 > **Take an improvement that is already written in your local canonical all the way up to a PR** on
