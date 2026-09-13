@@ -216,6 +216,22 @@ reportar. **Nada bloquea esperando la laptop.**
   descripción citando la v1.8, 4 scripts de 9, 2 skills de 8, y `tools` nombrando *fleet*-dashboard,
   que ya no se llama así).
 
+### Sexta tanda — correr el bootstrap por primera vez (13-sep)
+
+- **✅ `init_roots.sh` ejecutado de punta a punta.** Vive **embebido en la spec**, lo había modificado
+  en la segunda tanda y **nunca lo había corrido**. Extraído del bloque y probado en un repo limpio:
+  crea la estructura, escribe el ignore del workbench, y **deja afuera lo que debe** — verificado con
+  un borrador y una hoja adentro: ninguno de los dos entra a git. `exit 0`, `bash -n` limpio.
+- **⚠️ Y creaba tres archivos VACÍOS** (`manual.md`, `documentation.md`, `architecture.md`, con
+  `touch`), que el índice generado listaba **como si existieran**. Contradice la regla **lazy** que la
+  spec tiene desde la **v1.15**, medida en un Forest vivo: el scaffold completo dejaba **~75%** de las
+  carpetas vacías. *Un archivo vacío commiteado el día uno es indistinguible de un documento que nadie
+  escribió, y es lo que hace que una memoria **parezca llena estando vacía**.* Ahora son lazy y la
+  salida nombra lo que deliberadamente **no** crea (esos tres + `state/`, `folios/`, `collective/`).
+- **✅ Y la salida mentía dos veces**: anunciaba los tres archivos como creados, y el bloque nuevo
+  había quedado en el medio del resumen. Corregido y re-verificado: **cero archivos vacíos**.
+- **`main` actualizado** con esta tanda (misma v1.19 autorizada), pusheado y verificado contra el remoto.
+
 **Queda sólo G10** (patrones de agentes: coordinador · manager read-only de tablero), que es una
 decisión de alcance suya.
 
