@@ -4,6 +4,43 @@
 
 ---
 
+**13 Septiembre** - v1.19: el seed sabía guardar la memoria y no sabía entregarla.
+
+Seis semanas de uso separaron la spec de la práctica, y el diagnóstico no fue "faltan features":
+fue que **la spec resuelve cómo se GUARDA la memoria y da por hecho que el lector va a ir a
+buscarla**. Eso falló tres veces con la misma forma — el bus que se escribía y nadie leía (había un
+comando lector y nada obligaba a correrlo), una sesión que violó cinco reglas fechadas *con los
+documentos abiertos*, y la política de contribuir upstream que quedó en prosa **quince versiones**.
+La causa no es descuido y es lo que más me sirvió entender: los documentos se eligen por **tema**, y
+los normativos no compiten en esa selección porque no hablan del tema, hablan de la **forma** del
+trabajo. El documento que habría evitado el error es justo el que no se abre mientras se comete.
+De ahí la sección nueva: la memoria no se busca, **llega**.
+
+Lo que más me sorprendió del día fue cuánto de esto era **contradicción, no ausencia**. El
+`workbench/` estaba documentado al revés de como lo usamos (carpeta del usuario, agente que no
+escribe ahí, gitignore selectivo) — quien siguiera la spec commiteaba la mesa de trabajo. Y arreglar
+la prosa no alcanzaba: el `init_roots.sh` seguía creando la carpeta **sin** su regla de ignore, y el
+`echo` final decía "not tracked" mintiendo. La lección que me llevo es esa: **un arreglo en la prosa
+que deja el script haciendo lo otro no es un arreglo**.
+
+Los controles encontraron tres cosas que no estaban en el plan: el `manual.md` sin la mitad de lo
+que existe desde la 1.17, una referencia `§ *Hooks*` a una sección inexistente (mía, del mismo día),
+y **`sync-lock.sh` nombrado por la spec y ausente del repo**. Los tres salieron de barrer en vez de
+recordar: todas las referencias `§ *…*` contra los H2 reales (7 de 8), todos los `.sh` que los docs
+nombran contra `scripts/` (8 de 9).
+
+Y me equivoqué una vez de forma útil: mi primer control del `.gitignore` dio que git ignoraba
+**todo** y parecía un patrón roto en la spec. El roto era el control — le faltaba `!.roots/`, porque
+git no desciende en un directorio excluido y el `**` solo no re-incluye nada. Quedó escrito en la
+spec junto al snippet, con `git check-ignore -v` como forma de verificarlo. *Si el barrido rompe algo
+ya medido como sano, el roto es el barrido.*
+
+Lo último, y es de FCA: los cuatro comandos de comunidad. `roots-suggest`, `roots-issue`, `roots-pr`
+y `roots-triage` sobre un solo script con escalera de capacidad (`gh` → token → **URL prellenada**,
+que anda sin credenciales, que es como lo va a usar quien baje el seed). El cuarto es el que importa
+de verdad: sin mano de vuelta, "colaborativo" va en una sola dirección y el proyecto es una
+transmisión.
+
 **02 Junio** - Toolkit sistematizado: scripts/ + skills/ + tools/ (seed v1.8).
 
 Sistematizamos el concepto de "memoria persistente con herramientas adecuadas". Copié los `.sh` a `scripts/` (montaje de flota bare+worktrees) y arranqué `skills/` como **biblioteca compartida** de estrategias bien diseñadas — distinta del `skills/` local de cada `.roots`. Primeras dos: `odoo-module-merging` (merge hacia repos oficiales: revisión por capas, patrones de conflicto cross-versión Odoo, promoción del `.roots`) y `md-to-pdf-reporting` (manual/documentation → PDF vía pandoc / HTML+CSS / QWeb Odoo, base del reporting de odoo_moldeo_sync). Bumpeé el seed a **v1.8** con la sección "Toolkit complementario" (referencia, no inlinea código) y regeneré la copia del workspace. Decisión consciente: NO pisar los 74 `roots_seed.md` que viven en `.roots` de otros repos (sería modificar working trees ajenos); esa redistribución, si se quiere, es un merge explícito aparte.
