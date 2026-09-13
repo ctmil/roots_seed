@@ -39,6 +39,20 @@ Each skill is a `.md` with:
 | [odoo-module-merging.md](./odoo-module-merging.md) | Strategy for merging branches/clients into official Odoo repos (cross-version, typical conflict resolution, `.roots` promotion) |
 | [md-to-pdf-reporting.md](./md-to-pdf-reporting.md) | Convert `docs/manual.md` and `documentation.md` to PDF reports (pandoc / HTML+CSS / Odoo QWeb) |
 
+### Community — the two-way relationship with the public seed
+
+The seed had the *policy* for contributing (§ *Contributing to the upstream*, § *Public hygiene*) and
+no **invocable surface** for it, so it did not happen. These four are that surface; all of them run
+on `scripts/roots-upstream.sh` (capability ladder: `gh` → `$GITHUB_TOKEN` → prefilled URL, which
+needs no credentials — and only a real publish counts as published).
+
+| Skill | What for |
+|-------|----------|
+| [roots-suggest.md](./roots-suggest.md) | **Propose**: something this deployment learned should be in the seed (carries the measurement) |
+| [roots-issue.md](./roots-issue.md) | **Report**: the seed's own text is wrong, ambiguous or silently harmful |
+| [roots-pr.md](./roots-pr.md) | **Merge**: an improvement already written locally, split generic-vs-local, up as a PR |
+| [roots-triage.md](./roots-triage.md) | **Receive**: read what the community opened and decide what enters (the hand coming back) |
+
 > Next candidates: security review of access rights, generating `changelog.md` from commits, module installation smoke-test, changelog→client-facing digest.
 
 ## Skill file format: store vs activation

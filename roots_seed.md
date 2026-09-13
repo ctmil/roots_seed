@@ -571,6 +571,8 @@ The `.roots/` structure is **tool-agnostic** and stands on its own, but persiste
 | `setup-module.sh` | Clones a repo as bare + worktrees per branch |
 | `setupbranch.sh` | Adds a worktree for a branch (auto-detects existing/new) |
 | `dashboard.sh` | Launches the viewer (`tools/forest-dashboard`) pointing at the workspace |
+| `leaf-fall.sh` | Leaf fall: `status` · `sweep` · `compost` over `workbench/leaves/` (§ *Workbench*). **Warns, never blocks** |
+| `roots-upstream.sh` | Contributions up to the public seed: `check` · `scrub` · `issue` · `url` (§ *Contributing to the upstream*) |
 
 See `scripts/README.md`.
 
@@ -584,6 +586,7 @@ First skills:
 |-------|----------|
 | `odoo-module-merging.md` | Merge of branches/clients toward official Odoo repos: layered review, cross-version conflict patterns, `.roots` promotion |
 | `md-to-pdf-reporting.md` | `manual.md` / `documentation.md` → PDF (pandoc / HTML+CSS / Odoo QWeb) — reporting base |
+| `roots-suggest.md` · `roots-issue.md` · `roots-pr.md` · `roots-triage.md` | **The community family**: propose · report · merge · receive (§ *Contributing to the upstream*) |
 
 See `skills/README.md`.
 
@@ -1327,6 +1330,42 @@ If the local canonical evolves with conventions useful to the community:
 2. Separate private extensions (repo-specific) from generic improvements.
 3. Generic improvements → PR to `github.com/ctmil/roots_seed`.
 4. Private extensions → stay only in the local canonical.
+
+#### The four commands (1.19) — because a policy with no surface does not run
+
+The four steps above were written in 1.4 and stayed prose for fifteen versions: **nothing invoked
+them**, so contributions happened when someone remembered, which is the same failure mode as a bus
+that gets written and never read. Since 1.19 each direction has a command
+(`skills/roots-{suggest,issue,pr,triage}.md`), all running on `scripts/roots-upstream.sh`:
+
+| Command | Direction | For |
+|---|---|---|
+| `roots-suggest` | out | **propose** something this deployment learned — carries the *measurement*, not the opinion |
+| `roots-issue` | out | **report** that the seed's own text is wrong, ambiguous or silently harmful |
+| `roots-pr` | out | **merge** an improvement already written locally, split generic-vs-local |
+| `roots-triage` | **in** | **receive**: read what the community opened and decide what enters |
+
+> `roots-triage` is the one that is easy to skip and the one that makes the difference: without a
+> hand coming back, "collaborative" runs outward only, and a project that only speaks is a broadcast.
+
+**The capability ladder.** Publishing must not depend on a tool the reader happens to have, so
+`roots-upstream.sh` degrades and **declares which rung it used**:
+
+| | Rung | Result |
+|---|---|---|
+| 1 | `gh` CLI authenticated | publishes directly |
+| 2 | `$GITHUB_TOKEN` in the environment | publishes via the REST API |
+| 3 | **prefilled issue URL** | **always available, no credentials** — a human presses the button |
+
+Two rules that outrank convenience:
+- ⛔ **Never report an issue as "opened" when only a URL was printed.** Rung 3 is a success of the
+  ladder, not of the publication — and the difference is exactly the kind a report tends to blur.
+- ⛔ **Publishing is an outward action**: the text is shown and goes out with an explicit OK, never as
+  a side effect of drafting. `roots-upstream.sh issue` refuses to send without `--yes`.
+
+**And the scrub is part of the command, not a reminder** — `roots-upstream.sh scrub` runs the
+mechanical pass of § *Public hygiene* (domains, IPs, keys, absolute paths, emails) and **warns
+without blocking**: a gate that blocks gets bypassed, one that warns gets read.
 
 ### Public hygiene (the upstream is a public repo)
 
