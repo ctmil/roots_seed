@@ -54,7 +54,11 @@ cmd_check() {
 # Mechanical check. WARNS, never blocks — a gate that blocks gets bypassed.
 cmd_scrub() {
   local f="${1:?file}"
-  local pat='([a-z0-9-]+\.)+(com|net|org|ar|mx|io)|[0-9]{1,3}(\.[0-9]{1,3}){3}|BEGIN [A-Z ]*PRIVATE KEY|secret_key|api[_-]?key|passw|/home/[a-z]|/Users/[a-z]|@[a-z0-9.-]+\.[a-z]{2,}'
+  # Absolute paths: match ANY plausible workspace root, not just the two everyone thinks of.
+  # Found by using this script on itself — the pattern covered /home and /Users and would have
+  # missed the workspace that wrote it, which lived under /media. A scrub with a hole in the
+  # exact place you work is worse than none: it returns "clean" and you believe it.
+  local pat='([a-z0-9-]+\.)+(com|net|org|ar|mx|io)|[0-9]{1,3}(\.[0-9]{1,3}){3}|BEGIN [A-Z ]*PRIVATE KEY|secret_key|api[_-]?key|passw|/(home|Users|media|mnt|srv|opt|data|workspace|repos|projects)/[A-Za-z0-9_.-]|@[a-z0-9.-]+\.[a-z]{2,}'
   echo "scrub: $f"
   if grep -nEi "$pat" "$f"; then
     echo

@@ -1579,6 +1579,13 @@ carry the traces of the environment that produced it. Scrub before the PR:
 Generalizing is not only redaction — it is the work that makes a skill reusable. If removing the
 specifics leaves nothing behind, the piece was never generic and belongs in the local canonical.
 
+> ⚠️ **A scrub with a hole where you actually work is worse than no scrub**, because it answers
+> *clean* and you believe it. The first version of this check matched `/home/…` and `/Users/…` — the
+> two roots everyone thinks of — and would have missed the workspace that wrote it, which lived under
+> `/media/…`. Found by running the check on its own output before a real publish. Widen the path
+> alternation to every root you plausibly work under, and **test it with a positive control**: feed
+> it a line that *should* trip it and confirm it does.
+
 **Mechanical check before pushing** (adjust the terms to your environment):
 
 ```bash
