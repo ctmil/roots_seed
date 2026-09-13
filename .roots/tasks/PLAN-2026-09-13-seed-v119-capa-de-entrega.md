@@ -232,6 +232,24 @@ reportar. **Nada bloquea esperando la laptop.**
   había quedado en el medio del resumen. Corregido y re-verificado: **cero archivos vacíos**.
 - **`main` actualizado** con esta tanda (misma v1.19 autorizada), pusheado y verificado contra el remoto.
 
+### Séptima tanda — el camino de activación, y el hallazgo más caro del día (13-sep)
+
+- **✅ Changelog de la 1.19 completado.** Se había escrito **a mitad de camino**: nueve commits
+  sustantivos posteriores (glosario, manual, `sync-lock`, bootstrap, exit codes, scrub, keeper,
+  `_meta`) no aparecían. Para quien viene de la 1.18, **el changelog ES el contrato de qué cambió**.
+- **⛔ EL HALLAZGO: ninguna skill del seed tenía front-matter ⇒ ningún comando `/` existía.**
+  Probando `sync-agents-skills.sh` de punta a punta (base → store → `.claude`), las cuatro skills que
+  escribí **para invocarse como `/roots-suggest`** no habrían sido invocables. Una skill sin
+  front-matter **se copia bien, se activa bien y NUNCA SE LISTA**: no da error, simplemente no está —
+  el modo de falla más difícil de notar. Y no eran sólo las mías: **0 de 8 skills** lo tenían,
+  mientras **6 de 6 agentes** sí, y **la propia § del seed ya lo exigía**. Las 8 arregladas con
+  `name` + `description` (con ruteo negativo).
+- **✅ Y para que no vuelva: `check` ahora lo detecta y sale ≠ 0** — control positivo (exit 1) y
+  negativo (exit 0) verificados, así lo agarra un CI y no una persona meses después.
+- **✅ Bug real del mismo script**: `ls dirA dirB` imprime encabezados de sección y esos entraban al
+  listado **como si fueran nombres** (dos filas con rutas absolutas). Con **un** directorio `ls` no
+  imprime encabezado — por eso nunca se vio.
+
 **Queda sólo G10** (patrones de agentes: coordinador · manager read-only de tablero), que es una
 decisión de alcance suya.
 
