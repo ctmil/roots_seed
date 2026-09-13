@@ -20,8 +20,10 @@
 ## Steps
 1. **Quote the text.** Not a paraphrase: the sentence, as it is. Reports that paraphrase get
    answered with "that is not what it says".
-2. **Separate `is` from `should`.** *"§ Workbench says light files can be committed"* is the bug;
-   *"the whole folder should be ignored"* is the fix. Send both, labelled.
+2. **Separate `is` from `should`.** *"§ X says the agent may do Y"* is the bug; *"it should say Z"* is
+   the fix. Send both, labelled. (A real one, fixed in 1.19: the spec said light workbench files could
+   be committed, while real use had converged on ignoring the folder wholesale — the section described
+   the opposite of the practice, and anyone following it committed their work surface.)
 3. **Scrub** — `scripts/roots-upstream.sh scrub <draft.md>`.
 4. **Check the ladder and send** — `scripts/roots-upstream.sh issue "<title>" <body.md> bug --yes`,
    with the same rule: only a real publish counts as published.

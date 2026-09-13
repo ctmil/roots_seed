@@ -13,7 +13,10 @@
 ## Inputs / required context
 
 - The source `.md` file(s) (following the seed format: `#` title, `>` description, sections).
-- Referenced images (e.g. `workbench/` or `static/`) with resolvable paths.
+- Referenced images with resolvable paths — under `static/` or beside the document.
+  ⚠️ **Not from `workbench/`**: the work surface is not tracked (§ *Workbench*), so an image
+  referenced from there renders on your machine and is a broken link in every other clone. An asset a
+  versioned document depends on is exactly the case of *"it does not get whitelisted, it MOVES out"*.
 - Optional: style sheet / branding template.
 
 ## Approaches
@@ -43,7 +46,7 @@ weasyprint manual.html manual.pdf     # respects CSS, headers/footers @page
 
 ## Steps (generic)
 
-1. Resolve image paths (relative to the `.md`; copy `static/`/`workbench/` next to the source if needed).
+1. Resolve image paths (relative to the `.md`; copy `static/` next to the source if needed). If a path points into `workbench/`, **move the asset out** before publishing — do not fix it by copying at build time, or the next build breaks again.
 2. Choose an approach (A/B/C) depending on branding/integration.
 3. Generate and **verify** the PDF (TOC, images, page breaks).
 4. If recurring, encapsulate it in a script (`scripts/`) or in an Odoo action.
