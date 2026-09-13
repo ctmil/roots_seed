@@ -15,12 +15,23 @@
 #   3. prefilled issue URL → works ALWAYS, with no credentials: a human presses the button
 #
 # Rule that outranks convenience: **publishing is an outward action.** This script prints what it is
-# about to send and requires --yes (or an interactive confirmation) before step 1 or 2.
-# And it never claims to have published when it only printed a URL.
+# about to send and requires --yes before rung 1 or 2, and it never claims to have published when it
+# only printed a URL.
+#
+# EXIT CODES — because "it printed a URL" and "it published" must not look alike to a caller:
+#   0  published for real (rung 1 or 2)
+#   3  not sent: it can publish, but --yes was not given
+#   4  NOT PUBLISHED: no capability — a prefilled URL was handed over instead
+#   5  refused: the scrub flagged the body and --scrubbed was not given
+# A human reads the sentence; a script reads the code. Both must reach the same conclusion.
 set -uo pipefail
 
 UPSTREAM="${ROOTS_UPSTREAM:-ctmil/roots_seed}"
-YES=0; for a in "$@"; do [ "$a" = "--yes" ] && YES=1; done
+YES=0; SCRUBBED=0
+for a in "$@"; do
+  [ "$a" = "--yes" ] && YES=1
+  [ "$a" = "--scrubbed" ] && SCRUBBED=1
+done
 
 have_gh()    { command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; }
 have_token() { [ -n "${GITHUB_TOKEN:-${GH_TOKEN:-}}" ]; }
@@ -72,10 +83,18 @@ cmd_url() {
 }
 
 cmd_issue() {
-  local title="${1:?title}" body_file="${2:?body.md}" label="${3:-}"
-  cmd_scrub "$body_file"; echo
+  local title="${1:?title}" body_file="${2:?body.md}" label="${3:-}" dirty=0
+  cmd_scrub "$body_file" || dirty=1
+  echo
   echo "--- about to send to $UPSTREAM ---"; echo "TITLE: $title"; sed 's/^/  /' "$body_file"; echo "---"
   if have_gh || have_token; then
+    # Hygiene WARNS elsewhere; here it BLOCKS. Leaf-fall can be re-run — a public issue cannot be
+    # unpublished, and a leaked credential is leaked the moment it renders.
+    if [ "$dirty" -eq 1 ] && [ "$SCRUBBED" -ne 1 ]; then
+      echo; echo "REFUSED: the scrub flagged the body above and this would publish it."
+      echo "Fix it, or re-run with --scrubbed if every hit is a false positive you have read."
+      return 5
+    fi
     if [ "$YES" -ne 1 ]; then
       echo; echo "Not sent: publishing is an outward action. Re-run with --yes to publish,"
       echo "or use '$0 url \"$title\" $body_file' to hand a link to a human instead."
@@ -101,6 +120,7 @@ PY
     echo
     echo "No publishing capability on this machine. NOT opened — here is the link, a human presses it:"
     cmd_url "$title" "$body_file"
+    return 4
   fi
 }
 

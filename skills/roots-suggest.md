@@ -57,6 +57,20 @@ workspace. That belongs in your local canonical (§ *Sync with the canonical ups
 *Specifics scrubbed: roles instead of names, no hosts/ids/paths.*
 ```
 
+## Exit codes — a human reads the sentence, a script reads the code
+Both must reach the same conclusion, which is the whole point of the rule above:
+
+| | |
+|---|---|
+| `0` | published for real (an authenticated CLI or a token did it) |
+| `3` | not sent: it *could* publish, but the explicit confirmation was not given |
+| `4` | **NOT published** — no capability here; a prefilled URL was handed over instead |
+| `5` | refused: the scrub flagged the body and it was not overridden |
+
+⚠️ **Here the scrub BLOCKS, and that is deliberate** — everywhere else in the seed hygiene only warns,
+because a sweep can be re-run. A public issue cannot be unpublished, and a credential is leaked the
+moment it renders. Override only after reading every hit.
+
 ## Verification
 - The body names **an existing section** of the spec (or proposes where a new one goes).
 - `scrub` is clean, and a human read it after the machine did.

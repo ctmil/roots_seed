@@ -1550,8 +1550,16 @@ Two rules that outrank convenience:
   a side effect of drafting. `roots-upstream.sh issue` refuses to send without `--yes`.
 
 **And the scrub is part of the command, not a reminder** — `roots-upstream.sh scrub` runs the
-mechanical pass of § *Public hygiene* (domains, IPs, keys, absolute paths, emails) and **warns
-without blocking**: a gate that blocks gets bypassed, one that warns gets read.
+mechanical pass of § *Public hygiene* (domains, IPs, keys, absolute paths, emails). On its own it
+**warns without blocking** (a gate that blocks gets bypassed, one that warns gets read), **but on the
+publishing path it blocks**: a leaf sweep can be re-run, a public issue cannot be unpublished, and a
+credential is leaked the moment it renders.
+
+**The rule has to hold in the exit code too, not only in the sentence.** A caller that cannot tell
+*"handed you a URL"* from *"published"* re-creates the exact confusion the rule forbids, so the
+command reports `0` published · `3` could publish but was not confirmed · `4` **not published, URL
+handed over** · `5` refused by the scrub. A human reads the sentence, a script reads the code, and
+both must reach the same conclusion.
 
 ### Public hygiene (the upstream is a public repo)
 
