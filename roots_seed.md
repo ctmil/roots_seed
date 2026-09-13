@@ -3021,18 +3021,18 @@ cat > "$BASE_PATH/docs/README.md" << 'EOF'
 
 ## Documents
 
-| File | Description |
-|---------|-------------|
-| [manual.md](./manual.md) | User manual |
-| [documentation.md](./documentation.md) | Technical documentation |
-| [architecture.md](./architecture.md) | System architecture |
+| File | Description | |
+|---------|-------------|---|
+| `manual.md` | User manual | *create when there is one* |
+| `documentation.md` | Technical documentation | *create when there is one* |
+| `architecture.md` | System architecture | *create when there is one* |
+
+> These three are **lazy**: this index names them so you know where they go, and they are created
+> the day they have content. An empty file committed on day one is indistinguishable from a document
+> nobody wrote, and it is the thing that makes a memory look full while it is empty.
 
 ---
 EOF
-
-touch "$BASE_PATH/docs/manual.md"
-touch "$BASE_PATH/docs/documentation.md"
-touch "$BASE_PATH/docs/architecture.md"
 
 cat > "$BASE_PATH/docs/glossary.md" << 'EOF'
 # {MODULE} - Glossary
@@ -3254,13 +3254,18 @@ echo "  - context.md: module briefing"
 echo "  - journal/: changelog, diary, notes"
 echo "  - debug/: errors-log, fixes-log, migrations"
 echo "  - design/: decisions, sketchbook"
-echo "  - docs/: README, manual, documentation, architecture, glossary"
+echo "  - docs/: README (index), glossary"
 echo "  - tasks/: tasks, todo"
 echo "  - skills/: prompts, workflows, patterns"
 echo "  - workbench/: local work surface, NOT tracked — its ignore rule was written too"
 echo "  - workbench/leaves/: where ephemeral session evidence falls"
 echo "  - hooks/: session-start, on-task-start, session-end, on-error, on-fix"
 echo "  - _meta.json: initialization metadata"
+echo ""
+echo "NOT created on purpose (lazy — the base tree is a reference, not a scaffold):"
+echo "  - docs/{manual,documentation,architecture}.md · state/ · folios/ · collective/"
+echo "  Create each the day it has content. Measured on a live Forest, a full scaffold left"
+echo "  ~75% of the folders empty, which makes a memory look full while it is empty."
 ```
 
 ---
