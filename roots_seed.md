@@ -1304,9 +1304,23 @@ on this machine. Putting it inside `.roots/` and ignoring it wholesale is what l
 without ever mixing.
 
 ```gitignore
-# after the `!.roots/**` re-inclusion — order matters, this must come last
-.roots/workbench/
+/*                      # ignore everything by default
+!.gitignore
+!.roots/                # BOTH lines are needed: git does not descend into an
+!.roots/**              # excluded directory, so `**` alone re-includes nothing
+
+# ...and the work surface goes back out, AFTER the re-inclusion or it does nothing.
+# `**/` matches zero or more directories, so this covers `.roots/workbench/` and
+# `.roots/<module>/workbench/` alike:
+.roots/**/workbench/
 ```
+
+> **Verify it, don't trust the line.** `git check-ignore -v <file>` names which rule actually decided,
+> and `git add -A -n` lists exactly what would enter. A `.gitignore` that *looks* right and a
+> `.gitignore` that *works* differ precisely where it costs most — and the first test written for
+> this one was wrong, not the rule: it omitted `!.roots/`, ignored the whole memory, and looked like
+> a bug in the convention.**If your check breaks something already measured as healthy, suspect the
+> check.**
 
 ### What goes on the surface
 
@@ -2680,7 +2694,9 @@ developer who picks up the repo.
      `.roots/` without duplicating logic
 
 6. **Verify workbench/:**
-   - For each `.roots/{module}/` that has no `workbench/` → create it
+   - For each `.roots/{module}/` that has no `workbench/` → create it **together with its ignore
+     rule** — the folder without the rule is how a repo fills up silently; and the rule must come
+     **after** any `!.roots/**` re-inclusion or it does nothing (§ *Workbench*)
    - Don't add content — it is the user's space
 
 7. **Record:**
@@ -2813,9 +2829,19 @@ When starting a session in a project with `.roots/`:
 
 MODULE_NAME=${1:-"module"}
 BASE_PATH=".roots/$MODULE_NAME"
-SEED_VERSION="1.17"
+SEED_VERSION="1.19"
 
 mkdir -p "$BASE_PATH"/{journal,debug,design,docs,tasks,hooks,skills,workbench}
+mkdir -p "$BASE_PATH/workbench/leaves"
+
+# The work surface is created together with the rule that keeps it OUT of the repo.
+# Creating the folder without the rule is how a repository silently fills up with drafts,
+# heavy assets and session evidence — and the prose saying "not tracked" does not stop git.
+# ORDER MATTERS: this must come AFTER any `!.roots/**` re-inclusion, or it is overridden.
+if ! grep -qE '^\.roots/(\*\*/)?workbench/' .gitignore 2>/dev/null; then
+  printf '\n# work surface: raw material, drafts and leaves/ — never tracked (seed >= 1.19)\n.roots/**/workbench/\n' >> .gitignore
+  echo "  + .gitignore: .roots/**/workbench/"
+fi
 
 # Meta — flat layout by default (v1.7). For namespaced (multi-module Source
 # or Client branch) see "Working modes": change layout + add subdir.
@@ -3216,7 +3242,8 @@ echo "  - design/: decisions, sketchbook"
 echo "  - docs/: README, manual, documentation, architecture, glossary"
 echo "  - tasks/: tasks, todo"
 echo "  - skills/: prompts, workflows, patterns"
-echo "  - workbench/: local work surface, not tracked (empty)"
+echo "  - workbench/: local work surface, NOT tracked — its ignore rule was written too"
+echo "  - workbench/leaves/: where ephemeral session evidence falls"
 echo "  - hooks/: session-start, on-task-start, session-end, on-error, on-fix"
 echo "  - _meta.json: initialization metadata"
 ```
