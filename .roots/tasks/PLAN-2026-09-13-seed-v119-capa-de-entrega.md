@@ -171,5 +171,11 @@ reportar. **Nada bloquea esperando la laptop.**
   **Leaf vs Folio** que resuelve la colisión de v1.16 (folio = hoja **guardada**, leaf = hoja
   **soltada**). `scripts/leaf-fall.sh` portado al inglés, generalizado (`FOREST`/`LEAF_KEEP` por env,
   sin rutas del workspace privado) y **probado** con un control positivo.
+- **13-sep ✅ G11 HECHO** — `scripts/roots-upstream.sh` (`check`·`scrub`·`issue`·`url`) con la
+  **escalera de capacidad declarada** y probado con control positivo y negativo del scrub; las 4
+  skills `roots-{suggest,issue,pr,triage}.md`; § *Contributing to the upstream* de la spec ampliada
+  con los comandos, la escalera y las dos reglas (no decir "abierto" si sólo se imprimió una URL ·
+  publicar exige `--yes`); índices de `skills/README.md` y del toolkit al día. Commit `10b2c8c`.
+  **Hallazgo de fondo:** la política existía desde la **v1.4** y quedó en prosa **quince versiones**.
 - **13-sep** — FCA suma **G12** (mejoras al `forest-dashboard`) y fija el **modo loop 15 min**.
   Encolado y aprobado el 1er reporte al grupo (`ob-micielo-seed-v119-20260913-1`, `queued`, sin gate).
