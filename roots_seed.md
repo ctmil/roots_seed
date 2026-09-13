@@ -793,6 +793,9 @@ is **no live IPC between Claude sessions** — the seed defines a **file-based m
 - **Etiquette:**
   - On session start, and **before any push/sync**, READ `state/comms.md`; act on messages addressed
     `to: me | @all` with `status: open`.
+    ⚠️ **This line alone does not work, and that is measured** — a reader existed and nothing obliged
+    anyone to run it, so the bus was written and never read. Deliver the open messages **into** the
+    session instead of asking it to fetch them: § *The delivery layer*.
   - To acknowledge, flip `status` to `ack` (or append a reply block under it); mark `done` when resolved.
   - Keep messages short and **link** to the detail (commit SHAs, files, other `state/` docs) — don't
     inline it. Prune `done` messages older than ~2 weeks to keep the log light.

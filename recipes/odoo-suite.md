@@ -44,6 +44,38 @@ meli/  (Grove · vendor: moldeo-interactive · kind: producto-suite)
 }
 ```
 
+
+## The silent bug of this domain: a version that does not go up
+
+**The framework compares the manifest version field by field as integers, and only upgrades a module
+when the new version is GREATER than the installed one.** So a version that stays equal — or goes
+*down*, which happens constantly when several branches carry their own numbering — means the upgrade
+**does not run**: the code lands in the repo, the module keeps its old data, views and migrations,
+and there is **no error and no log line**. Nothing fails. It just does not happen.
+
+That makes it the most expensive kind of defect a suite can have, because every other signal says
+success: the commit is there, the deploy is green, `git status` is clean.
+
+**Rules that follow, and belong in the suite's `.roots`:**
+
+- **The version goes up on EVERY change that touches data, views or migrations.** A convention that
+  encodes the year plus a build counter (`<odoo>.<year>.<build>`) makes a stale module visible at a
+  glance.
+- ⛔ **Never lower it.** If a branch already overshot, **leave it there** — going back down is the
+  bug itself. Realign when the year rolls over.
+- **The author field decides whose numbering it is.** In a suite that vendors third-party modules,
+  the discriminator is the manifest's `author`, **not** the folder name or the number's shape: a
+  module you did not write keeps its author's numbering and is not touched.
+- **Verify on the installed state, not on the commit.** The question *"did the module actually
+  upgrade?"* is answered by the registry's stored version for that module, never by the git log —
+  the git log only proves the code arrived.
+- **Where the platform triggers upgrades off the manifest version** (some hosted deployments do),
+  this is not a convention but the actual trigger: if the version does not rise, nothing you push
+  will ever take effect, and no `-u` was ever missing.
+- **A written rule is not enough** — this one was measured as followed by 6 modules out of 46. Put
+  the check where the change happens: a pre-commit hook that refuses a lowered version costs less
+  than one silent deploy.
+
 ## Golden rule applied
 
 `meli_oerp_multiple` **is** part of the `meli` Grove (single membership), and **uses** `odoo_connector_api` (a `depends-on` edge). It is NOT tagged as Grove `ocapi` nor nested under it — that would conflate "is part of" with "depends on". The OCAPI platform is a hub depended on by modules of several Groves (Meli, Fulfillment, GeoEcon, Moldeo): that's why the dependency is an **edge**, not membership.

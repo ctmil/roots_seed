@@ -34,13 +34,19 @@
 
 ## What it is
 
-`.roots/` is a **persistent memory** folder you drop into a repo: decisions, error/fix logs, design docs, tasks, reusable skills — written for **AI agents and humans alike**, in a stable format so any tool can read and grow it. The canonical spec is **[`roots_seed.md`](roots_seed.md)** (currently **v1.14**); the navigable front door is **[`manual.md`](manual.md)**.
+`.roots/` is a **persistent memory** folder you drop into a repo: decisions, error/fix logs, design docs, tasks, reusable skills — written for **AI agents and humans alike**, in a stable format so any tool can read and grow it. The canonical spec is **[`roots_seed.md`](roots_seed.md)** (currently **v1.19**); the navigable front door is **[`manual.md`](manual.md)**.
 
 > **Language:** the spec is **canonical in English**; each deployment keeps its own working language. See **[Language & glossary](#language--glossary-i18n)** below.
 
 Not just for code: the same model spans software, design and narrative. See **[`recipes/`](recipes/)** — Odoo suites, a forest of design repos, narrative/game worlds, and a token-economy playbook.
 
 It ships with a small toolkit: **`scripts/`** mount the substrate (bare + worktrees), **`skills/`** are a shared library of well-designed strategies, and **`tools/`** are apps that read the memory — first among them the **`forest-dashboard`**.
+
+> **Since v1.19 it also defines how memory is *delivered*, not only stored.** Three times over, a rule
+> that was written, dated and restated simply did not happen — because **documents are selected by
+> topic, and normative documents do not talk about the topic**, they talk about the form of the work.
+> A rule in a file nobody loads does not happen: the memory must not be searched, it must **arrive**.
+> See § *The delivery layer*.
 
 ## The Forest vocabulary
 
@@ -53,7 +59,8 @@ Memory grows from roots, so the whole model does too. When `.roots/` coordinates
 | 🌳 **Grove** | a **product / suite**: a cluster of Trees | *Meli*, *OCAPI*, *GeoEcon* |
 | 🪵 **Tree** | a **repo** (mounted bare + worktrees) | `meli_oerp`, `geoecon_map` |
 | 🌿 **Branch** | a git branch / worktree of a Tree | `17.0`, `mapdev` |
-| 🍃 **Folio** (`folios/`) | the **leaf**: a document turned outward — published, exposed, seen | a landing page, a manual, a release note |
+| 🍃 **Folio** (`folios/`) | the **leaf kept**: a document turned outward — published, exposed, seen | a landing page, a manual, a release note |
+| 🍂 **Leaf** (`workbench/leaves/`) | the **leaf shed**: an ephemeral session artifact, designed to fall | a DOM snapshot, a verification capture, a raw API dump |
 
 Each Tree carries orthogonal tags — `grove` (what it *is*), `vendor` (who *makes* it), `kind` (its nature), `org` (where it *lives*) — and dependencies between Trees/Groves are **edges in a graph**, never nesting. The golden rule:
 
