@@ -221,8 +221,20 @@ decisión de alcance suya.
 
 ## Decisiones que NO son mías (pendientes de FCA)
 
-- [ ] **`main` está en v1.16**; v1.17 y v1.18 viven sin mergear en `claude/seed-v1.17-…`. ¿v1.19 sale
-      sobre esa rama y después se mergea todo junto a `main`? (el merge/push a `main` se confirma).
+- [x] **✅ RESUELTA 13-sep (FCA, 10:30 de su pantalla): *"Dale perfecto mergea a 1.19"*.**
+      **`main` pasó de v1.16 a v1.19** — fast-forward limpio de **21 commits**, que incluye la v1.17
+      y la v1.18 que nunca habían llegado. Pusheado y verificado contra `origin/main` con un `fetch`
+      cuyo resultado se miró (`origin/main == main`), no con un `ahead/behind` de memoria.
+      **Antes del merge, por ser repo PÚBLICO:** scrub sobre el diff entero (4147 líneas) → 17 hits,
+      **todos el propio upstream público o el regex del script**; y una búsqueda específica de rutas
+      del workspace privado y nombres de clientes → **cero**.
+      ⚠️ **Y ahí salió el mejor hallazgo del día:** el scrub cubría `/home` y `/Users` y **no
+      `/media`**, que es donde vive este workspace. *Un scrub con un agujero justo donde trabajás es
+      peor que ninguno: contesta "limpio" y le creés.* Ampliado (10 raíces) con control positivo y
+      negativo, y la lección escrita en § *Public hygiene*.
+      **PENDIENTE derivado:** la spec manda **redistribuir** las copias de `roots_seed.md` a los
+      `.roots/` al bumpear. Eso toca muchos repos ⇒ **no se hace sin OK explícito** (regla dura: no
+      masificar).
 - [ ] ¿Entra **G10** en v1.19 o queda para una v1.20 de "biblioteca de agentes"?
 
 ## Bitácora (se marca A MEDIDA, no al final)
