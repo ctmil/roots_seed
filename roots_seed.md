@@ -889,8 +889,12 @@ exactly the one that does not get opened while making it.
 
 ### The three invariants of a hook that runs
 
-A "hook" in § *Hooks* is a written protocol — a contract for what to do at a moment. This section is
-about the other half: **making that moment fire by itself**, in whatever harness runs the agent.
+A hook in `hooks/` (see the base structure, and the templates at the end of this document) is a
+**written protocol** — a contract for what to do at a given moment. This section is about the other
+half: **making that moment fire by itself**, in whatever harness runs the agent. The seed already
+said the bridge existed (§ *Integration with CLAUDE.md and Claude Code*: *"the logic lives in
+`.roots/`, the trigger in `.claude/`"*) — what it never said is **which triggers are worth wiring,
+and how they must behave**, which is what the rest of this section is.
 
 1. **INJECT, don't block.** A hook that interrupts the work costs more than the problem it solves and
    ends up bypassed (the same reason leaf-fall hygiene warns instead of rejecting a commit). What it
