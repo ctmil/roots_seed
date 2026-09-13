@@ -1346,6 +1346,13 @@ without ever mixing.
 .roots/**/workbench/
 ```
 
+> ⚠️ **And an idempotence guard that checks ONE marker silently withholds every rule added later.**
+> A bootstrap that appends its `.gitignore` block only when some earlier marker is absent will skip
+> the whole block on any workspace installed before the rule existed — so those workspaces keep
+> versioning the work surface forever, and the installer reports *"already up to date"* while doing
+> it. Check for **the rule you are about to add**, not for the block as a whole, and let the upgrade
+> path add just what is missing.
+
 > **Verify it, don't trust the line.** `git check-ignore -v <file>` names which rule actually decided,
 > and `git add -A -n` lists exactly what would enter. A `.gitignore` that *looks* right and a
 > `.gitignore` that *works* differ precisely where it costs most — and the first test written for

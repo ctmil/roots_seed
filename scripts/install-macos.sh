@@ -288,7 +288,21 @@ fi
 step ".gitignore"
 GI="$WORKSPACE/.gitignore"
 if [ -e "$GI" ] && grep -q 'roots/\*\*/\*.secret' "$GI" 2>/dev/null; then
-  ok "already carries the .roots rules"
+  # It carries the old rules — but an install from before 1.19 has no workbench rule, and the
+  # whole block is skipped, so the workspace would keep versioning the work surface forever.
+  # A guard that checks for ONE marker silently withholds every rule added later.
+  if ! grep -q 'roots/\*\*/workbench/' "$GI" 2>/dev/null; then
+    [ "$DRY" -eq 0 ] && cat >> "$GI" <<'EOF'
+
+# --- work surface: never tracked (seed >= 1.19) ---
+# raw material, drafts and workbench/leaves/ (ephemeral session evidence).
+# If something in there deserves versioning, MOVE it out — do not whitelist it back in.
+.roots/**/workbench/
+EOF
+    ok "added the missing workbench rule"
+  else
+    ok "already carries the .roots rules"
+  fi
 elif [ "$DRY" -eq 0 ]; then
   cat >> "$GI" <<'EOF'
 
@@ -301,6 +315,11 @@ elif [ "$DRY" -eq 0 ]; then
 .roots/**/secrets.local.env
 .roots/**/__pycache__/
 .roots/**/*.pyc
+
+# --- work surface: never tracked (seed >= 1.19) ---
+# raw material, drafts and workbench/leaves/ (ephemeral session evidence).
+# If something in there deserves versioning, MOVE it out — do not whitelist it back in.
+.roots/**/workbench/
 
 # activation layer is local, not shared
 .claude/settings.local.json
