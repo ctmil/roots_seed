@@ -198,6 +198,24 @@ reportar. **Nada bloquea esperando la laptop.**
   `roots-issue` usaba como ejemplo una frase que la spec ya no dice, lo que la hacía parecer vigente.
 - **Diario del propio seed** con la entrada de la v1.19 (lo que costó entender, no la lista de commits).
 
+### Quinta tanda — probar el camino real, y el molde (13-sep)
+
+- **✅ Probado `roots-upstream.sh issue` por el camino que la gente va a usar** (sin `gh`, sin token):
+  dice bien *"NOT opened, acá está el link"* … **y salía con `exit 0`**. Un humano leía la frase y
+  entendía; un script leía el código y **no podía distinguir "te di una URL" de "publiqué"** — la
+  misma confusión que la regla prohíbe, sobreviviendo en el contrato de salida. Ahora `0` publicado ·
+  `3` podría y no se confirmó · `4` **no publicado, URL entregada** · `5` rehusado por el scrub.
+  Los 4 caminos probados.
+- **✅ El scrub ahora BLOQUEA en el camino de publicación** (en el resto del seed la higiene sólo
+  avisa, porque un barrido se repite; **un issue público no se despublica** y una credencial está
+  filtrada apenas se renderiza). Forzable con `--scrubbed`, después de leer cada hit.
+- **✅ `domain-keeper.template.md`**: el molde describía un agente *"dueño declarado"* de su dominio
+  que **no tomaba el claim en ningún lado**. Paso 0 = el semáforo; + declarar el `loop`; + la
+  evidencia a `leaves/`.
+- **✅ `_meta.json` del propio seed**: estaba mal en casi todos los campos (`seed_version` 1.7,
+  descripción citando la v1.8, 4 scripts de 9, 2 skills de 8, y `tools` nombrando *fleet*-dashboard,
+  que ya no se llama así).
+
 **Queda sólo G10** (patrones de agentes: coordinador · manager read-only de tablero), que es una
 decisión de alcance suya.
 
