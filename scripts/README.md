@@ -17,6 +17,9 @@ The `.roots/` memory does not live in thin air: it lives in repos. These scripts
 | `setupbranch.sh` | Adds a worktree for a specific branch in an already-mounted repo (auto-detects: checkout if it exists local/origin, creates it otherwise). `./setupbranch.sh <module>[/<folder>] -b <branch> [<base>]` |
 | `sync-agents-skills.sh` | Moves agents/skills between **base → store → activation**, converting the skill layout (`<name>.md` ↔ `<name>/SKILL.md`). `check` reports drift and exits non-zero |
 | `dashboard.sh` | Brings up `tools/forest-dashboard` pointing at the workspace and opens the browser. `./dashboard.sh` (see flags in the script header) |
+| `work-claim.sh` | **Work semaphore** between sessions (subjects, not files): `check`/`take`/`touch`/`release`/`list`. `check --self` verifies the liveness probe can see its own session — a probe that cannot must never report anyone as dead |
+| `leaf-fall.sh` | **Leaf fall**: `status` (litter on the Forest floor) · `sweep` (into `workbench/leaves/<date>-<front>/`) · `compost [days]`. Warns, never blocks |
+| `roots-upstream.sh` | **Contribute upstream**: `check` (capability ladder) · `scrub` (public-hygiene pass) · `issue` · `url`. Refuses to publish without `--yes` |
 
 ## Bootstrap on macOS
 

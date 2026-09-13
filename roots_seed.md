@@ -7,9 +7,40 @@
 > **distributed copy** and out of date with respect to the canonical (compare the `Version` field /
 > changelog). The seed evolves — do not assume this copy is the latest. See § "Sync with the canonical upstream".
 
-**Version:** 1.18
+**Version:** 1.19
 
 **Changelog:**
+- **1.19** (13 September 2026) — **The delivery layer: a memory that is not delivered does not exist.**
+  Every version so far solved how memory is **stored** and assumed the reader would go and get it.
+  Measured on a live Forest, that assumption is false, and it failed three times the same way: the
+  inter-session bus was written and never read (a reader command existed and **nothing obliged
+  anyone to run it**); a session violated five dated, restated reasoning rules **with the documents
+  open**; and § *Contributing to the upstream* sat as prose for **fifteen versions**, invoked by
+  nothing. The cause is not negligence: **documents are selected by TOPIC, and normative documents
+  do not compete in that selection** — they talk about the form of the work, not its subject, so the
+  document that would have prevented the error is exactly the one that stays closed. ⇒ **a rule in a
+  file nobody loads does not happen**; the memory must not be searched, it must **arrive**. New
+  section *The delivery layer* with the **three invariants of a hook that runs** (inject, don't
+  block — a blocking hook gets bypassed · everything inside try/except, because a hook that breaks
+  is worse than a hook that is missing · the registry is data, not code) and the four deliveries:
+  **inbox** (claims + open bus messages, routed *by claimed scope* so a session can be reached
+  without knowing which tab holds it), **manifest** (the active project's normative document),
+  **minutes** before context compaction (*not a summary, a RECORD*: the compaction summary is
+  written by the agent, which makes it precisely what the human cannot audit — **if the minutes and
+  the agent's account disagree, the minutes win**), and a **context guard** that warns before the
+  context fills instead of after. Second semaphore: **`work-claim.sh`** protects the **work** (two
+  sessions on the same subject) as `sync-lock.sh` protects worktrees, with `session=` making
+  liveness a **verifiable fact** and `loop=` declaring whether a front is revisited by itself —
+  which changes what stale means: **STALE+DEAD** is free to take, **STALE+ALIVE** is someone working
+  without checking in, and **a gap is judged against the front's own cadence, never a global
+  threshold**. § *Workbench* **corrected**: it described the opposite of real use (the agent does
+  write there, and the whole folder is **out of git** — a partial ignore is how a repo silently fills
+  up), and **`leaves/`** joins the vocabulary as the **sixth term**, the one that names what must
+  *go* (measured: 1929 loose files invisible to `git status`), with `leaf-fall.sh` and the
+  **Leaf vs Folio** table. And the community relationship gets its **invocable surface**:
+  `roots-{suggest,issue,pr,triage}` over `scripts/roots-upstream.sh`, with a declared capability
+  ladder (`gh` → token → **prefilled URL, no credentials**) and the rule that **only a real publish
+  counts as published**. Does not change the `.roots/` format.
 - **1.18** (3 August 2026) — **No precision on one case, no scaling.** New hard rule in the AI workflow and the automatic triggers: *if the instrument does not yet get it right on **one** case, do not run it over many* — no batches, no sweeps, no plans that start with "regenerate everything". Born from a real incident: after a full session in which a perception system still failed to identify the main object of **a single image**, the plan proposed regenerating all 17 items and running every instrument over a 25,000-piece corpus. Scaling something that fails **multiplies the error and hides the diagnosis**: seventeen mediocre results are harder to debug than one looked at closely. **A large corpus is for REFUTING what already works small, never for finding out whether it works.** When a batch is warranted, it carries a **declared spend ceiling** and a **stop criterion**. Companion rule, from the same incident: **a silent fallback to a plausible middle value is the worst possible default** — a failed parse must return a value that cannot be mistaken for data (`None`), never the midpoint of the scale. Does not change the `.roots/` format.
 - **1.17** (3 August 2026) — **`on-task-start`: the plan is written before EACH action.** New hook, the twin *before* `on-task-done`: the task is written in `tasks/` **before being executed** (what, why, on which module·version·branch·server, done criterion; a `tasks/PLAN-<date>-<slug>.md` if it is a front with several steps), and progress is marked as it happens, not at the end. Born from a real incident: a corrupted `.git` took a session's commits with it and the work **not written beforehand** had to be reconstructed from memory. Rule: **whatever is not written before being done is not recoverable** — writing first turns a loss of work into a resumption. Confirmed again in practice: after a machine crash mid-work, everything planned was resumed intact and **the only unrecoverable thing was the one script that had never been written down**. The trigger is **each action, not the start of the session**: if the priority changes mid-session, a new plan goes before the first action of the new front; **read-only diagnosis may come first** (it is what allows writing a plan with facts instead of assumptions) and the plan goes before the first **write or run**; and if the diagnosis changes the plan, the plan is rewritten before continuing. ⚠️ **Numbering note:** this hook was first written on 27 July 2026 in a *distributed copy* as "v1.10", colliding with the canonical `1.10` (per-domain recipes, 2 June 2026) — it never reached the canonical, which advanced 1.11 → 1.16 without the rule. Any `.roots/` created from the canonical up to 1.16 is **missing this hook**. Does not change the `.roots/` format.
 - **1.16** (23 July 2026) — **The leaf.** *Folio* is *folium*: the model had roots (memory, inward) and branches (git, the structure that carries) and **no leaf** — nothing that faces outward. New section **Folios — the leaf**, and `folios/` added to the base structure as a **primitive**, not a domain pack: what separates it from `roots/` is **direction**, not material — the same document with an inner and an outer face, so publishing is not a pipeline bolted onto the memory. Three consequences fall out of the metaphor rather than being added to it: **a leaf hangs from a branch** (you publish a *branch* — a version/variant — so a preview and a canonical page are two leaves, not a page and its draft), **a folio is a view and never a second original** (the substance stays in the `.roots/` document named by `of:`; the same dual-truth failure, and the same rule, as store↔activation), and **photosynthesis closes the cycle**: a leaf in the light returns energy, so each folio carries a **`reception.md`** — reception is the only thing that enters a project from outside, and what it teaches is promoted inward (a recurring question → documentation, a recurring misreading → an ADR, a demand → a task). Full cycle: *material in → memory down → structure up → leaf out → reception back down.* Front-matter contract (`of`, `branch`, `state`, `channels`, `layout`, `seo`), `channels.yaml`, state as a **gate** (`draft → preview → published`), lazy creation, and a public-hygiene note (publishing a folio publishes its media and its reception too).
@@ -572,6 +603,8 @@ The `.roots/` structure is **tool-agnostic** and stands on its own, but persiste
 | `setupbranch.sh` | Adds a worktree for a branch (auto-detects existing/new) |
 | `dashboard.sh` | Launches the viewer (`tools/forest-dashboard`) pointing at the workspace |
 | `leaf-fall.sh` | Leaf fall: `status` · `sweep` · `compost` over `workbench/leaves/` (§ *Workbench*). **Warns, never blocks** |
+| `work-claim.sh` | Work semaphore: `check` (`--self` probes the prober) · `take` · `touch` · `release` · `list` |
+| `sync-lock.sh` | Sync semaphore over a Tree's worktrees: `check` · `acquire` · `release` · `list` |
 | `roots-upstream.sh` | Contributions up to the public seed: `check` · `scrub` · `issue` · `url` (§ *Contributing to the upstream*) |
 
 See `scripts/README.md`.
@@ -770,6 +803,138 @@ is **no live IPC between Claude sessions** — the seed defines a **file-based m
   exists; `comms.md` is the durable async default. It is point-to-point (`to: <who>`) **and**
   broadcast (`to: @all`); a hand-off between agents is just a message whose `body` says what was left
   half-done and where.
+
+### Work semaphore — the second lock, and the one that protects the WORK
+
+The sync semaphore above protects **worktrees**: that two sessions do not overwrite each other's
+uncommitted files. It says nothing about the other collision, which is more expensive because it is
+invisible: **two sessions working the same subject**. Nothing in a ticket tracker, a chat or a task
+list says *"someone is already looking at this"* — and the day two sessions answered the same tasks,
+neither found out until after both had posted.
+
+- **One file per scope**, out of git (runtime state, like the `.SYNCING` flags — locks are not
+  commits and must never produce merge conflicts): `<claim_dir>/<scope>.claim`.
+- **Scope** is a flat identifier for the subject: `task-<id>`, `project-<id>`, `domain-<name>`,
+  `module-<name>`, `client-<id>`.
+- **Content**: `LOCKED|by=…|since=…|touched=…|session=…|loop=…|note=…`.
+- **Flow**: before entering a front → `check`. Taken by someone else and fresh → **do not touch**:
+  your contribution goes to the bus, addressed to the owner. Free → `take`, work, `touch` as a
+  heartbeat on long runs, `release` at the end.
+- Reference helper: `scripts/work-claim.sh {check|take|touch|release|list|mine|owner}`.
+
+#### Two fields that change what "stale" means
+
+A claim that has not been touched in a while used to mean *abandoned*, and the tool invited you to
+take it. That is wrong half the time, and the wrong half is the expensive one — it steals work from
+someone mid-task. Two fields fix it:
+
+**`session=<tab>/<pid>/<uuid8>`** — because **`by=` is a ROLE, not a session**: several tabs share
+the same owner name. With the pid, liveness becomes a **verifiable fact** rather than an inference
+from elapsed time: does this session's runtime socket still exist? (More precise than signalling the
+pid — a recycled pid has no such socket.)
+
+| | Meaning |
+|---|---|
+| **ALIVE** | the session is running right now |
+| **DEAD** | the claim belongs to a session that no longer exists |
+| **`?`** | claim written before the field existed — compatible, not a verdict |
+
+⚠️ **A liveness probe must detect ITSELF first.** A guessed socket path once reported **16 of 16
+dead**, including the very session running the check — which reads as "16 abandoned fronts" and
+invites stealing work from people who are working. If the probe cannot see its own session, it
+reports `?`, never DEAD.
+
+**`loop=<name>@<interval>`** — whether that front **gets looked at again by itself**, and how often
+(`review@10m`, `deploy@1h`, `triage@on-demand`). It is **declared, not detected** (nothing in the
+environment reveals a running loop), but it cannot lie for long: if the session is DEAD the value is
+printed with a warning, and **every `touch` rewrites it**, so a loop that stops corrects itself.
+
+> **The rule this changes:** **STALE + DEAD** = take it, no guilt. **STALE + ALIVE** = *someone is
+> working and did not check in* → **do not take it**.
+
+And the two fields answer different questions, so **read both**: `loop` says whether you can trust
+the front to be revisited; **`touched` says whether it actually is being revisited — and what you
+read is the SERIES, not one value**. A front beating every 19–20 minutes that has been silent for 43
+is not "recent": it is **2.9× its own period**. ⇒ **a gap is judged against the front's own cadence,
+never against a global threshold** (an 8-hour staleness limit arrives 24 times too late for a
+15-minute loop).
+
+---
+
+## The delivery layer — a memory that is not delivered does not exist
+
+> **New in 1.19, and it is the reason for the version.** Everything above solves how memory is
+> **stored**: where a decision goes, how a front is claimed, where a message is left. All of it
+> assumes the reader will **go and get it** — and measured on a live Forest, that assumption is
+> false.
+
+Three independent failures, same shape:
+
+| What was written | What happened |
+|---|---|
+| *"On session start, READ `state/comms.md`"* | the bus was written and never read: a reader command existed, and **nothing obliged anyone to run it** |
+| A project's reasoning rules, dated and restated | a whole session violated five of them **with the documents open** |
+| § *Contributing to the upstream* (since 1.4) | fifteen versions as prose, invoked by nothing |
+
+The cause is not negligence, and this is the part worth internalizing: **documents are selected by
+TOPIC, and normative documents do not compete in that selection** — they do not talk about the topic,
+they talk about the *form* of the work. So the document that would have prevented the error is
+exactly the one that does not get opened while making it.
+
+> **A rule in a file nobody loads does not happen.**
+> ⇒ The memory must not be **searched**: it must **ARRIVE**.
+
+### The three invariants of a hook that runs
+
+A "hook" in § *Hooks* is a written protocol — a contract for what to do at a moment. This section is
+about the other half: **making that moment fire by itself**, in whatever harness runs the agent.
+
+1. **INJECT, don't block.** A hook that interrupts the work costs more than the problem it solves and
+   ends up bypassed (the same reason leaf-fall hygiene warns instead of rejecting a commit). What it
+   does is **put the text in front of the agent** at the moment it is needed.
+2. **Everything inside try/except: a hook that breaks is worse than a hook that is missing.** It must
+   fail silently and let the session continue; a coordination layer that can take the session down
+   will be removed after the first bad day.
+3. **The registry is data, not code.** Which project maps to which normative document lives in a
+   small map file; adding one is adding a line, never editing the hook. Four copies of the same
+   credential-reading block once meant a rename fixed one and left its sibling open.
+
+### The four deliveries worth having
+
+| Delivery | Fires on | What it puts in front of the agent |
+|---|---|---|
+| **Inbox** | every prompt | the claims this session holds + the **open** bus messages addressed to it |
+| **Manifest** | every prompt | the normative document of the **active** project — the rules of *form* |
+| **Minutes** | before context compaction | a **record** of the session, written from the transcript |
+| **Context guard** | every prompt | a two-step warning **before** the context fills, not after |
+
+**Inbox — and its routing rule.** A bus entry reaches a session if its `to:` names that session **or
+any scope the session holds a claim on**. That indirection is what makes the bus usable: another
+session can write to `@client-42` **without knowing which tab is handling it**, and it lands on
+whoever holds the claim. Resolved entries are marked closed and stop being delivered.
+
+**Minutes — the one that protects the human.** When the context is compacted, the summary is written
+**by the agent**, which makes it precisely what the human cannot audit: if the agent was wrong, the
+summary inherits the error and becomes the only surviving version of events.
+
+> **The minutes are not a summary, they are a RECORD.** They come from the transcript and list
+> verifiable facts — what was asked, what commands ran, which files changed, which commits went out,
+> which messages were posted and with what id. No narrative. **If the minutes and the agent's account
+> disagree, the minutes win.**
+
+They **append** per session (one compaction does not overwrite the previous one) — the point is the
+whole series.
+
+**Context guard.** Until it existed, the only signal that the context was full was **the compaction,
+already done**: the warning arrived after the damage. Two thresholds (warn / cut), the measurement
+delegated to a script instead of duplicated, and — like everything here — **it does not block**.
+
+### Where this leaves the written hooks
+
+They stay exactly as they are, and this section is what makes them fire. A `session-start` hook that
+nobody triggers is documentation; the same hook delivered by the harness is behaviour. **Write the
+protocol in `hooks/` · wire the moment in the harness · never let the wiring hold the rules** (the
+harness changes, the memory should not).
 
 ---
 
