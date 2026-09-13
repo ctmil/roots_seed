@@ -164,6 +164,25 @@ reportar. **Nada bloquea esperando la laptop.**
   el hecho queda anotado: **el repo del seed no se estaba aplicando el seed**. Commit `052ae92`.
 - **Branch pusheado** a `origin/claude/seed-v1.19-capa-de-entrega` (respaldo; el merge a `main` NO).
 
+### Control de coherencia (13-sep, tercera tanda — no estaba en la lista, salió de verificar)
+
+- **✅ `manual.md`** (la puerta navegable) estaba sin el 6º término, sin los scripts de coordinación,
+  sin la familia de comunidad y **sin `on-task-start`**, que existe desde la 1.17. Si la puerta no lo
+  nombra, nadie llega a la sección.
+- **✅ Referencia interna rota, y era mía**: la § nueva apuntaba a un `§ *Hooks*` inexistente.
+  Control: barrer las referencias `§ *…*` contra los H2/H3 reales — **7 de 8** estaban bien.
+- **✅ `sync-lock.sh` se referenciaba en la spec y NO existía en el repo** (referencia rota
+  preexistente, que yo amplifiqué al listarlo en el toolkit). Portado y probado (exclusión mutua
+  entre dos sesiones). Control: barrer **todos** los `.sh` que los docs nombran — **8 de 9** estaban.
+- **✅ El bootstrap deshacía el arreglo de G1**: `init_roots.sh` creaba `workbench/` y **nunca
+  escribía su ignore** (y el `echo` final decía *"not tracked"*). Ahora crea carpeta + `leaves/` +
+  la regla, idempotente, y declara 1.19 en vez de 1.17.
+  ⚠️ **Y mi primer control estaba mal**: dio que git ignoraba **todo** y parecía un patrón roto en la
+  spec; le faltaba `!.roots/` (git no desciende en un directorio excluido, así que `**` solo no
+  re-incluye nada). *Si tu barrido rompe algo ya medido como sano, el roto es el barrido.* El
+  snippet de la spec ahora muestra el bloque completo y usa `.roots/**/workbench/`, verificado con
+  `git check-ignore -v` y `git add -A -n`: entra el `changelog`, no entran ni el borrador ni la hoja.
+
 **Queda sólo G10** (patrones de agentes: coordinador · manager read-only de tablero), que es una
 decisión de alcance suya.
 
