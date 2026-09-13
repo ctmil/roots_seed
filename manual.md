@@ -26,9 +26,13 @@ When `.roots` coordinates **many repos** (working_mode `workspace`):
 | 🌳 **Grove** | a product / suite (cluster of Trees) |
 | 🪵 **Tree** | a repo |
 | 🌿 **Branch** | a git branch / worktree |
-| 🍃 **Folio** (`folios/`) | the **leaf**: a document turned outward — published, exposed, seen |
+| 🍃 **Folio** (`folios/`) | the **leaf kept**: a document turned outward — published, exposed, seen |
+| 🍂 **Leaf** (`workbench/leaves/`) | the **leaf shed**: an ephemeral session artifact, hanging from a task, *designed to fall* |
 
 > Roots absorb (inward, private), branches carry, **folios face the light** (outward, published).
+> The sixth term is the one that names what must **go**: a leaf is evidence a session brought back
+> from the outside, and an artifact with no place in the ontology ends up on the ground. Before it
+> falls, what it taught must already be in `.roots/`. See § *Workbench*.
 > A folio is a *view* of a `.roots/` document, hanging from a branch; its reception (`reception.md`)
 > is the only thing that enters a project from outside. See `roots_seed.md` § *Folios — the leaf*.
 
@@ -96,8 +100,8 @@ Read **by layers, not everything**: L0 index → L1 active slice → L2 domain d
 ## 8. Toolkit (`scripts/` · `skills/` · `tools/`)
 
 The `.roots` lives on top of a substrate of repos; the seed ships with tools that mount and visualize it:
-- **`scripts/`** — `setup-module.sh`, `setupbranch.sh`, `dashboard.sh` (the **bare + worktrees** pattern: one `.bare` per Tree, one worktree per Branch).
-- **`skills/`** — **shared** library of strategies (Odoo module merging, md→PDF reporting).
+- **`scripts/`** — `setup-module.sh`, `setupbranch.sh`, `dashboard.sh` (the **bare + worktrees** pattern: one `.bare` per Tree, one worktree per Branch), plus the coordination trio: `sync-lock.sh` (worktrees), **`work-claim.sh`** (the work), `leaf-fall.sh` (litter), and `roots-upstream.sh` (contributions).
+- **`skills/`** — **shared** library of strategies (Odoo module merging, md→PDF reporting) and the **community family**: `roots-suggest` · `roots-issue` · `roots-pr` · `roots-triage`.
 - **`tools/forest-dashboard/`** — navigable viewer that reads the `.roots` and maps them to an Odoo backend.
 
 The `.roots/` format **does not depend** on the toolkit: any single repo uses it without it.
@@ -108,7 +112,13 @@ The `.roots/` format **does not depend** on the toolkit: any single repo uses it
 - **`on-task-done`** — when closing each task, update `tasks/` + `docs/commits.md` (+ logs if applicable).
 - **`on-topic-shift`** — when changing focus, re-scan `docs/` before asking for clarification (move up a layer).
 - **`on-error` / `on-fix`** — record in `debug/`.
+- **`on-task-start`** — **before each action** (not once per session), the task is written in `tasks/`: what, why, on which module·version·branch, and the done criterion. Whatever is not written before being done is not recoverable.
 - **`on-seed-update` / `on-seed-process`** — when bumping the seed, re-distribute the local copy; when processing for the first time, detect the mode.
+
+> **And a written hook only happens if something fires it.** Since v1.19 the seed separates the
+> *protocol* (these files) from the *delivery* (what puts them in front of the agent at the right
+> moment): inbox, manifest, pre-compaction minutes, context guard. A rule in a file nobody loads does
+> not happen — see `roots_seed.md` § *The delivery layer*.
 
 ## 10. Seed distribution and sync
 
