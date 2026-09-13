@@ -149,6 +149,24 @@ reportar. **Nada bloquea esperando la laptop.**
 **Elegido originalmente: AVANZAR.** Las preguntas no bloquean la tanda — se juntan y salen por WhatsApp al grupo
 **Moldeo Micielo** (`--to "Moldeo Micielo" --account 0`, interno) al cerrar el bloque, con el avance.
 
+## Avance del 13-sep (segunda tanda)
+
+- **✅ G12** — `tools/forest-dashboard/PROPOSAL-pulse-layer.md` (propuesta, **nada implementado**),
+  enlazada desde el README del tool y anotada en `todo.md`. Medida contra el colector real (599
+  líneas), no de memoria. Núcleo: **listar "lo más reciente primero" muestra ACTIVIDAD, no ANOMALÍA**
+  — un frente que latía cada 20 min y lleva 60 callado se ve igual que uno que nunca estuvo activo.
+  Contrato **aditivo** (`pulse`) para no romper el porte a Odoo. Commit `916c2a4`.
+- **✅ G3 + G4 + G5 + G6 + G7** — § *The delivery layer* + § *Work semaphore*, y `work-claim.sh`
+  portado y **probado con 4 controles** (incluido el self-check del detector de vivos y la trampa
+  del `touch` que borraba el `loop` declarado). Bump a **1.19** con su changelog. Commit `b12b7ff`.
+- **✅ G8** — `recipes/odoo-suite.md`: el bug mudo de la versión que no sube. Commit `052ae92`.
+- **✅ G9** — README (decía v1.14) y `context.md` (decía **v1.7**, doce versiones atrás) corregidos, y
+  el hecho queda anotado: **el repo del seed no se estaba aplicando el seed**. Commit `052ae92`.
+- **Branch pusheado** a `origin/claude/seed-v1.19-capa-de-entrega` (respaldo; el merge a `main` NO).
+
+**Queda sólo G10** (patrones de agentes: coordinador · manager read-only de tablero), que es una
+decisión de alcance suya.
+
 ## Decisiones que NO son mías (pendientes de FCA)
 
 - [ ] **`main` está en v1.16**; v1.17 y v1.18 viven sin mergear en `claude/seed-v1.17-…`. ¿v1.19 sale
