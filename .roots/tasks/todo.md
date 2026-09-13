@@ -8,6 +8,10 @@
 
 - [ ] Portar a Odoo: `odoo_moldeo_sync` emite `state.json` desde modelos; `odoo_moldeo_htree` renderiza la jerarquía.
 - [ ] Evaluar correr `collect.py` como servicio/cron que alimente los modelos Odoo.
+- [ ] **Capa de PULSO** — ver `tools/forest-dashboard/PROPOSAL-pulse-layer.md` (13-sep-2026):
+      `pulse` aditivo en `state.json` con claims + vivo/muerto + loops + bus + hojarasca + planes.
+      La idea central: **el hueco se juzga contra la cadencia propia del frente, no contra un umbral**.
+      Pendiente: decidir si va en `collect.py` o en un colector hermano (TTL distinto).
 - [ ] Cachear `du -sh` de los `.bare` grandes (moldeomint ~862M) si el scan se siente lento.
 
 ## Seed

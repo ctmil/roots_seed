@@ -98,6 +98,15 @@ The `state.json` is the bridge. Each part of the view has its Odoo equivalent:
 
 To port: `odoo_moldeo_sync` produces the same JSON from its models (an endpoint/controller), and the OWL/QWeb view consumes the identical contract. The scraping part (`collect.py`) can live as a service/cron feeding those models.
 
+## Proposed next step
+
+**[PROPOSAL-pulse-layer.md](./PROPOSAL-pulse-layer.md)** — the dashboard sees the **memory** (files on
+disk) and not the **life** (who owns which front, which session is alive, which loops run, how much
+undigested evidence is on the floor). The proposal adds an additive top-level `pulse` key to
+`state.json` — so the Odoo port keeps working — and its core idea is that **a gap is judged against
+each front's own cadence, never against a global threshold**: today a front that stopped beating
+looks exactly like one that was never busy.
+
 ## Requirements
 
 - Python 3.8+ (stdlib only)
