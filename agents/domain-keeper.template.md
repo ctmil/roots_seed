@@ -26,6 +26,12 @@ keep the grove `<grove-id>` healthy end-to-end: <layer 1>, <layer 2>, <layer 3>,
   `[[<playbook-a>]]`, `[[<playbook-b>]]`.
 
 ## Procedure
+0. **Take the claim on your domain before touching anything** — a keeper is *the declared owner* of
+   its front, and that is not a figure of speech: `work-claim.sh check domain-<name>` first, and if
+   it is held by a live session that is not you, **do not work on it**; leave what you found on the
+   bus, addressed to the owner. If it is free, `take` it with a one-line note saying what you are
+   about to do, `touch` it on long runs, and `release` when you close. Skipping this is how two
+   sessions answer the same thing and neither finds out until both have posted.
 1. Read `STATE.md` plus the affected per-module `.roots/` to find **where the work was left**.
 2. Identify the **layer** you are in (<layer 1> / <layer 2> / <layer 3> / data). Layers deploy
    through different channels — do not mix them in one change.
@@ -40,6 +46,12 @@ keep the grove `<grove-id>` healthy end-to-end: <layer 1>, <layer 2>, <layer 3>,
 - Upstream/source trees are read-only.
 - Route out what is not yours: module architecture → architect, version port → migrator, isolated
   defect → bug hunter, grove-wide sync → grove-keeper.
+- **Declare your loop.** If you are being run on a recurring schedule, set the claim's `loop` field
+  (`<name>@<interval>`) so other sessions know the front **gets looked at again by itself** — what you
+  leave on a front nobody revisits stays there. And if you are *not* looping, leaving it empty is the
+  honest answer, not a bad mark.
+- **Evidence goes to `workbench/leaves/<date>-<front>/`, never to the workspace floor** — and before
+  it falls, what it taught must already be in `.roots/`.
 
 <!--
   ROUTING CHECK before you ship this file — with more than ~5 agents installed, the failure mode is
