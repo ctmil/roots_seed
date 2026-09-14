@@ -2,7 +2,7 @@
 
 > Usage manual for the `.roots` system / **Forest model**. It is the **front door**: it explains the why, the vocabulary, the modes, the registry and the recipes, and links to the spec ([`roots_seed.md`](roots_seed.md)) and the recipes ([`recipes/`](recipes/)) instead of duplicating them.
 
-**Seed version:** 1.14 · **Vocabulary:** Roots → Forest → Grove → Tree → Branch · **Language:** English canonical, per-deployment `lang` (see §12)
+**Seed version:** 1.19 · **Vocabulary:** Roots → Forest → Grove → Tree → Branch · **Language:** English canonical, per-deployment `lang` (see §12)
 
 ---
 
@@ -59,9 +59,16 @@ And **three primitives reused across every domain** (see `recipes/`):
 ├── folios/           the leaf: what faces outward (published) + reception.md
 ├── hooks/            session-start/end · on-error/fix/task-done/topic-shift · on-seed-*
 ├── skills/           prompts · workflows · patterns (+ AI techniques, character skills)
-└── workbench/        user reference material
+├── agents/           subagents this repo carries (the **store** — see §8)
+└── workbench/        the LOCAL work surface — entirely outside git (+ `leaves/`)
 ```
 > Folders are created **lazily** — bootstrap writes only `_meta.json`, `context.md`, `roots_seed.md`.
+> **Two layers with opposite contracts:** everything above `workbench/` is **versioned memory** (what
+> another session, another machine or a fresh clone needs); **`workbench/` is a local bench** — raw
+> material, drafts, heavy assets, and `leaves/` for the ephemeral. It lives *inside* `.roots/`
+> precisely so it does not mix with the versioned part, and it is entirely gitignored.
+> **Corollary:** if something on the bench deserves versioning, you do **not** carve an exception in
+> the ignore — you **move it out**.
 Detail of each file and the populating standards: [`roots_seed.md`](roots_seed.md).
 
 ## 4. Working modes
@@ -102,6 +109,7 @@ Read **by layers, not everything**: L0 index → L1 active slice → L2 domain d
 The `.roots` lives on top of a substrate of repos; the seed ships with tools that mount and visualize it:
 - **`scripts/`** — `setup-module.sh`, `setupbranch.sh`, `dashboard.sh` (the **bare + worktrees** pattern: one `.bare` per Tree, one worktree per Branch), plus the coordination trio: `sync-lock.sh` (worktrees), **`work-claim.sh`** (the work), `leaf-fall.sh` (litter), and `roots-upstream.sh` (contributions).
 - **`skills/`** — **shared** library of strategies (Odoo module merging, md→PDF reporting) and the **community family**: `roots-suggest` · `roots-issue` · `roots-pr` · `roots-triage`.
+- **`agents/`** — **base library** of subagents generic enough to carry across projects. Three layers: **store** (`<repo>/.roots/agents/`, versioned) → **activation** (`<repo>/.claude/agents/`, local) → **base** (here). Nothing is preloaded: you import on demand. Anything promoted here is scrubbed — the seed is a public repo.
 - **`tools/forest-dashboard/`** — navigable viewer that reads the `.roots` and maps them to an Odoo backend.
 
 The `.roots/` format **does not depend** on the toolkit: any single repo uses it without it.
@@ -109,11 +117,20 @@ The `.roots/` format **does not depend** on the toolkit: any single repo uses it
 ## 9. Lifecycle (hooks)
 
 - **`session-start`** — read `context.md` → `forest.md`/registry → `tasks/` → `journal/`; check the seed version and git state.
+- **`session-end`** — before closing, bring `.roots/` up to date (`tasks/`, `journal/`, `state/`). **Mandatory:** what a session learned and did not write down does not survive it.
 - **`on-task-done`** — when closing each task, update `tasks/` + `docs/commits.md` (+ logs if applicable).
 - **`on-topic-shift`** — when changing focus, re-scan `docs/` before asking for clarification (move up a layer).
 - **`on-error` / `on-fix`** — record in `debug/`.
 - **`on-task-start`** — **before each action** (not once per session), the task is written in `tasks/`: what, why, on which module·version·branch, and the done criterion. Whatever is not written before being done is not recoverable.
 - **`on-seed-update` / `on-seed-process`** — when bumping the seed, re-distribute the local copy; when processing for the first time, detect the mode.
+
+**And one rule that fires on its own, with no hook** — *about to run something over MANY items
+(a batch, a sweep, a whole corpus)?* **Stop: is it demonstrated on ONE case?** If it is not, the task
+**is** that single case. Scaling an instrument that still fails multiplies the error, multiplies the
+spend, and **hides the diagnosis** — seventeen mediocre results are harder to debug than one looked
+at closely. A large corpus is for **refuting** what already works small, never for finding out
+whether it works. When the batch *is* warranted, it carries a **declared spend ceiling** and a
+**stop criterion**. See `roots_seed.md` § *AI workflow · automatic triggers*.
 
 > **And a written hook only happens if something fires it.** Since v1.19 the seed separates the
 > *protocol* (these files) from the *delivery* (what puts them in front of the agent at the right

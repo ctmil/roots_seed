@@ -4,6 +4,34 @@
 
 ---
 
+**14 Septiembre** - La puerta de entrada decía 1.14, y el número era lo de menos.
+
+Vine a cerrar las tres que la v1.19 dejó abiertas y arranqué mal: reporté que `manual.md` estaba
+atrasado nueve versiones porque la línea 5 decía 1.14. Medido, era al revés — el manual **se había
+tocado ayer mismo** (`b121b90`) y ya traía el sexto término del vocabulario. El contenido había
+viajado y el número no. Si me quedaba en el número, bumpeaba la línea a 1.19 y ponía la etiqueta
+fuerte encima de algo que no había mirado.
+
+Leyendo las secciones aparecieron cuatro huecos de verdad, y el cuarto es el que vale: la línea 30
+del manual ya usa el contrato NUEVO del `workbench/` (la mesa local, la hoja que se suelta) y la
+línea 62, **treinta y dos líneas más abajo**, seguía con el viejo — *"user reference material"*. El
+mismo archivo contradiciéndose a sí mismo, en la puerta de entrada, que es justo lo que lee el que
+llega de afuera y no tiene con qué desempatar. Es la tesis de ayer otra vez, y más apretada: casi
+nada era una ausencia, era **el arreglo hecho en un lado y el contrato viejo vivo en otro**. Ayer
+eso pasó entre documentos; hoy pasó adentro de uno.
+
+Los otros tres eran deudas de versiones que nunca bajaron al manual: la regla dura de la v1.18 (sin
+precisión en un caso no se masifica), la biblioteca de agentes de la v1.15 — el repo **tiene**
+`agents/` con seis archivos y un README de tres capas, y ni §3 ni §8 lo nombraban — y el hook
+`session-end`, que la spec define en siete lugares y el manual no tenía en ninguno. Recién con los
+cuatro tapados el número se movió a 1.19.
+
+Queda una cosa dicha y no hecha, a propósito: la redistribución. Este workspace todavía corre con la
+copia en **v1.10**, nueve atrás, y la flota está desparramada entre 1.1 y 1.13. El seed sigue sin
+aplicarse a sí mismo, y eso no se arregla con un barrido: se arregla con uno.
+
+---
+
 **13 Septiembre** - v1.19: el seed sabía guardar la memoria y no sabía entregarla.
 
 Seis semanas de uso separaron la spec de la práctica, y el diagnóstico no fue "faltan features":
