@@ -29,7 +29,9 @@ description: Report that the seed's own text is wrong, ambiguous or silently har
    the fix. Send both, labelled. (A real one, fixed in 1.19: the spec said light workbench files could
    be committed, while real use had converged on ignoring the folder wholesale — the section described
    the opposite of the practice, and anyone following it committed their work surface.)
-3. **Scrub** — `scripts/roots-upstream.sh scrub <draft.md>`.
+3. **Scrub** — `scripts/roots-upstream.sh scrub <draft.md>`. On the publishing path it **refuses**
+   if it flags anything, on all three rungs: a flagged body prints no URL either, because the
+   prefilled URL *is* the body.
 4. **Check the ladder and send** — `scripts/roots-upstream.sh issue "<title>" <body.md> bug --yes`,
    with the same rule: only a real publish counts as published.
 

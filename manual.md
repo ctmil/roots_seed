@@ -2,7 +2,7 @@
 
 > Usage manual for the `.roots` system / **Forest model**. It is the **front door**: it explains the why, the vocabulary, the modes, the registry and the recipes, and links to the spec ([`roots_seed.md`](roots_seed.md)) and the recipes ([`recipes/`](recipes/)) instead of duplicating them.
 
-**Seed version:** 1.19 · **Vocabulary:** Roots → Forest → Grove → Tree → Branch · **Language:** English canonical, per-deployment `lang` (see §12)
+**Seed version:** 1.20 · **Vocabulary:** Roots → Forest → Grove → Tree → Branch · **Language:** English canonical, per-deployment `lang` (see §12)
 
 ---
 

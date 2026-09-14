@@ -7,7 +7,9 @@
 #   roots-upstream.sh check                      # what can this machine actually do?
 #   roots-upstream.sh scrub <file>               # mechanical secret/specifics check (warns, never blocks)
 #   roots-upstream.sh issue <title> <body.md> [label]   # open an issue, degrading gracefully
-#   roots-upstream.sh url   <title> <body.md>    # only print the prefilled URL (never publishes)
+#   roots-upstream.sh url   <title> <body.md>    # print the prefilled URL (never publishes — but DOES scrub:
+#                                                #   the body travels in the query string, so handing the
+#                                                #   link over is already rendering it outward)
 #
 # THE CAPABILITY LADDER — always in this order, and always DECLARED in the output:
 #   1. `gh` CLI            → publishes directly
@@ -22,7 +24,7 @@
 #   0  published for real (rung 1 or 2)
 #   3  not sent: it can publish, but --yes was not given
 #   4  NOT PUBLISHED: no capability — a prefilled URL was handed over instead
-#   5  refused: the scrub flagged the body and --scrubbed was not given
+#   5  refused: the scrub flagged the body and --scrubbed was not given (ALL three rungs, url included)
 # A human reads the sentence; a script reads the code. Both must reach the same conclusion.
 set -uo pipefail
 
@@ -74,8 +76,26 @@ cmd_scrub() {
   echo "  clean (mechanically — a human still reads it)"
 }
 
+# The gate, in ONE place. It used to live inside the branch that can publish, so a machine with
+# neither `gh` nor a token — the DEFAULT state of anyone who clones this — got handed a prefilled
+# URL with the client name, the host, the IP and the credential file inside the query string, and
+# that URL was the last line printed: the one you copy. Rung 3 IS a publishing path; it is the one
+# everybody actually uses. The gate guarded the door almost nobody walks through.
+gate_scrub() {
+  local f="${1:?file}"
+  cmd_scrub "$f" && return 0
+  [ "$SCRUBBED" -eq 1 ] && { echo; echo "(--scrubbed given: hits above accepted as false positives)"; return 0; }
+  echo
+  echo "REFUSED: the scrub flagged the body above, so nothing was printed — no URL either."
+  echo "A prefilled URL carries the body in the query string: handing it over IS publishing it."
+  echo "Fix the text, or re-run with --scrubbed if every hit is a false positive you have read."
+  return 5
+}
+
 cmd_url() {
   local title="${1:?title}" body_file="${2:?body.md}" body enc_t enc_b
+  # SCRUB_DONE=1 when called from cmd_issue, which already gated.
+  [ "${SCRUB_DONE:-0}" -eq 1 ] || gate_scrub "$body_file" || return 5
   body="$(cat "$body_file")"
   enc_t="$(printf '%s' "$title" | urlencode)"
   enc_b="$(printf '%s' "$body"  | urlencode)"
@@ -87,18 +107,14 @@ cmd_url() {
 }
 
 cmd_issue() {
-  local title="${1:?title}" body_file="${2:?body.md}" label="${3:-}" dirty=0
-  cmd_scrub "$body_file" || dirty=1
+  local title="${1:?title}" body_file="${2:?body.md}" label="${3:-}"
+  # Hygiene WARNS elsewhere; on ANY path that renders the body outward it BLOCKS — and that
+  # includes rung 3. Leaf-fall can be re-run; a public issue cannot be unpublished, and a
+  # credential is leaked the moment it renders, URL bar included.
+  gate_scrub "$body_file" || return 5
   echo
   echo "--- about to send to $UPSTREAM ---"; echo "TITLE: $title"; sed 's/^/  /' "$body_file"; echo "---"
   if have_gh || have_token; then
-    # Hygiene WARNS elsewhere; here it BLOCKS. Leaf-fall can be re-run — a public issue cannot be
-    # unpublished, and a leaked credential is leaked the moment it renders.
-    if [ "$dirty" -eq 1 ] && [ "$SCRUBBED" -ne 1 ]; then
-      echo; echo "REFUSED: the scrub flagged the body above and this would publish it."
-      echo "Fix it, or re-run with --scrubbed if every hit is a false positive you have read."
-      return 5
-    fi
     if [ "$YES" -ne 1 ]; then
       echo; echo "Not sent: publishing is an outward action. Re-run with --yes to publish,"
       echo "or use '$0 url \"$title\" $body_file' to hand a link to a human instead."
@@ -123,7 +139,7 @@ PY
   else
     echo
     echo "No publishing capability on this machine. NOT opened — here is the link, a human presses it:"
-    cmd_url "$title" "$body_file"
+    SCRUB_DONE=1 cmd_url "$title" "$body_file"
     return 4
   fi
 }

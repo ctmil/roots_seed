@@ -7,9 +7,10 @@
 > **distributed copy** and out of date with respect to the canonical (compare the `Version` field /
 > changelog). The seed evolves — do not assume this copy is the latest. See § "Sync with the canonical upstream".
 
-**Version:** 1.19
+**Version:** 1.20
 
 **Changelog:**
+- **1.20** (14 September 2026) — **The hygiene gate moves to where the body actually leaves.** Fix to the 1.19 contribution path: `roots-upstream.sh` only blocked a flagged body inside the branch that can publish (`gh` or `$GITHUB_TOKEN`), so on rung 3 — **the default state of anyone who clones the seed** — a flagged body was still rendered into the prefilled issue URL and printed as the last line of the output. Measured with a positive control: client name, production host, IP, an employee's email and the credential file, all inside the query string. **A prefilled URL is not a pointer to the body, it *is* the body.** The gate is now single, runs before the ladder branches, covers `url` as well as `issue`, and refuses with `5` on all three rungs (`--scrubbed` remains the explicit override). Verified with positive and negative controls, and the control that closes is **that no URL is printed**, not the exit code. Companion: two new **automatic triggers** — finding that the seed's own text is wrong ⇒ offer `roots-issue`; real use teaching what the spec does not say ⇒ offer `roots-suggest`. The 1.19 commands existed and nothing fired them, which is the same failure mode 1.19 was written to fix, one level up. And the spec was describing a block the code did not perform: **a doc that overstates a guard is worse than no doc — it gets trusted.** Does not change the `.roots/` format.
 - **1.19** (13 September 2026) — **The delivery layer: a memory that is not delivered does not exist.**
   Every version so far solved how memory is **stored** and assumed the reader would go and get it.
   Measured on a live Forest, that assumption is false, and it failed three times the same way: the
@@ -1588,10 +1589,19 @@ Two rules that outrank convenience:
   a side effect of drafting. `roots-upstream.sh issue` refuses to send without `--yes`.
 
 **And the scrub is part of the command, not a reminder** — `roots-upstream.sh scrub` runs the
-mechanical pass of § *Public hygiene* (domains, IPs, keys, absolute paths, emails). On its own it
-**warns without blocking** (a gate that blocks gets bypassed, one that warns gets read), **but on the
-publishing path it blocks**: a leaf sweep can be re-run, a public issue cannot be unpublished, and a
-credential is leaked the moment it renders.
+mechanical pass of § *Public hygiene* (domains, IPs, keys, absolute paths, emails). Invoked on its own
+it **warns without blocking** (a gate that blocks gets bypassed, one that warns gets read), **but on
+every path that renders the body outward it blocks**: a leaf sweep can be re-run, a public issue
+cannot be unpublished, and a credential is leaked the moment it renders.
+
+> ⚠️ **And "outward" includes rung 3.** Until 1.20 the block lived *inside* the branch that can
+> publish, so a machine with neither `gh` nor a token — **the default state of anyone who clones
+> this** — was handed the prefilled URL anyway, with the client name, the host, the IP and the
+> credential file inside the query string, as the **last line printed**: the one you copy. The gate
+> guarded the door almost nobody walks through and left open the one everybody uses. A prefilled URL
+> **is** the body; handing over the link is rendering it. Since 1.20 the gate is one, it runs before
+> the ladder branches, and `url` passes through it too. `--scrubbed` stays as the deliberate
+> override for hits a human has actually read.
 
 **The rule has to hold in the exit code too, not only in the sentence.** A caller that cannot tell
 *"handed you a URL"* from *"published"* re-creates the exact confusion the rule forbids, so the
@@ -2863,6 +2873,8 @@ When starting a session in a project with `.roots/`:
 | Task completed, about to report it | → Run hooks/on-task-done.md |
 | Exception in code | → Run hooks/on-error.md → errors-log.md |
 | Commit with a fix | → Run hooks/on-fix.md → fixes-log.md |
+| **The seed's own text is wrong, contradicts itself, or does damage if followed literally** | → **Offer `roots-issue`** — quote the line, scrub it, hand it up. Do not wait to be asked: a defect found and not reported dies with the session that found it |
+| **Real use taught something the spec does not say — or says the opposite of** | → **Offer `roots-suggest`**, carrying the *measurement*. Offer, never publish as a side effect |
 | User says "version X.Y ready" | → Propose updating changelog.md |
 | Code pattern repeated 3+ times | → Propose documenting in patterns.md |
 | Complex explanation given | → Propose saving in documentation.md |

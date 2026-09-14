@@ -76,6 +76,10 @@ Both must reach the same conclusion, which is the whole point of the rule above:
 because a sweep can be re-run. A public issue cannot be unpublished, and a credential is leaked the
 moment it renders. Override only after reading every hit.
 
+⚠️ **And it blocks on rung 3 too** — the prefilled URL carries the body in its query string, so
+handing over the link *is* rendering it outward. A flagged body prints **no URL at all**. (Until
+1.20 it did: the block sat inside the branch that can publish, which is the rung almost nobody has.)
+
 ## Verification
 - The body names **an existing section** of the spec (or proposes where a new one goes).
 - `scrub` is clean, and a human read it after the machine did.
