@@ -84,3 +84,5 @@ la mitad. La tesis de la v1.19 es justamente esa: **protocolo ≠ entrega**. Fal
 - **14-sep ✅ B5 HECHO** — changelog **v1.20**, y corregida la frase de § *Contributing* que
   describía un bloqueo que el código no hacía. Las dos skills dicen ahora lo mismo que el código.
 - **14-sep ✅ B6** — redistribución **sigue frenada**. El bump a 1.20 no la dispara.
+- **15-sep** — **FCA autoriza el merge a `main`** ("go"). Va por fast-forward si `main` no se movió;
+  si se movió, rebase sobre `origin/main`, nunca `--force`. La redistribución **sigue frenada**.
