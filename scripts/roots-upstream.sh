@@ -66,8 +66,14 @@ cmd_scrub() {
   # contribution unpublishable. A hygiene check that cries wolf on healthy input is not strict,
   # it is broken: it gets overridden with --scrubbed by reflex, which is exactly the hole.
   local pat='([a-z0-9-]{2,}\.)+(com|net|org|ar|mx|io)\b|[0-9]{1,3}(\.[0-9]{1,3}){3}|BEGIN [A-Z ]*PRIVATE KEY|secret_key|api[_-]?key|passw|/(home|Users|media|mnt|srv|opt|data|workspace|repos|projects)/[A-Za-z0-9_.-]|@[a-z0-9.-]+\.[a-z]{2,}'
+  # The seed's OWN upstream is not a leak, and neither are placeholders. Without this exemption
+  # every document of the seed that names where the seed lives came out dirty forever -- which,
+  # with the gate this script puts on the publishing path, made contributing to the seed ITSELF
+  # refuse every time. A check that is always red trains the reflex of overriding it, and that
+  # reflex is the exact hole the gate was built to close.
+  local up_host="${UPSTREAM//\//\\/}"
   echo "scrub: $f"
-  if grep -nEi "$pat" "$f"; then
+  if sed -E "s/(raw\.githubusercontent\.com|github\.com)[\/:]$up_host/<upstream>/g; s/git@github\.com:[a-z_-]*org[a-z_-]*\//<git-remote>\//g; s/(github|gitlab)\.com[\/:](your|my|example|acme)[a-z0-9_-]*\//<placeholder>\//g; s/<your-domain>|<client-names>|example\.(com|org|net)/<placeholder>/g" "$f"      | grep -nEi "$pat"; then
     echo
     echo "^ REVIEW before publishing. Replace with the role, not the name:"
     echo "  client/employer -> 'the client' · host/domain/IP -> 'the production host'"

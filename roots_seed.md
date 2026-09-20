@@ -229,7 +229,7 @@ Each client branch maintains a `_sources.json` file that registers its sources:
       "source_version": "1.6",
       "linked_at": "2026-05-10",
       "linked_by": "claude",
-      "upstream_url": "github.com/ctmil/meli_oerp",
+      "upstream_url": "github.com/your-org/your_suite",
       "roots_path": "sources/meli_oerp/",
       "sync_include": ["docs/", "debug/", "journal/", "tasks/", "skills/", "design/"],
       "sync_exclude": ["workbench/"],
@@ -240,7 +240,7 @@ Each client branch maintains a `_sources.json` file that registers its sources:
       "source_version": "1.6",
       "linked_at": "2026-05-08",
       "linked_by": "claude",
-      "upstream_url": "github.com/ctmil/odoo_moldeo_sync",
+      "upstream_url": "github.com/your-org/your_tooling",
       "roots_path": "sources/odoo_moldeo_sync/",
       "sync_include": ["docs/", "debug/", "skills/"],
       "sync_exclude": ["workbench/", "journal/"],
@@ -1638,12 +1638,19 @@ specifics leaves nothing behind, the piece was never generic and belongs in the 
 > alternation to every root you plausibly work under, and **test it with a positive control**: feed
 > it a line that *should* trip it and confirm it does.
 
-**Mechanical check before pushing** (adjust the terms to your environment):
+**Mechanical check before pushing** — it lives in the script, not here:
 
 ```bash
-git diff --cached | grep -nEi '<your-domain>|<client-names>|[0-9]{1,3}(\.[0-9]{1,3}){3}|BEGIN [A-Z ]*PRIVATE KEY|secret_key|api[_-]?key|passw' \
-  && echo "REVIEW BEFORE PUSHING" || echo "clean"
+scripts/roots-upstream.sh scrub <file>        # or pipe a diff through it
 ```
+
+> Two reasons it is a pointer and not a copy, and the second one is the interesting one. First, the
+> seed's own rule: canonical content lives in one place and everything else references it — an
+> inlined pattern drifts from the one that actually runs. Second, **a document that spells out the
+> forbidden terms trips its own check**: while the pattern was written out here, every scrub of this
+> very file came back dirty, so `roots-pr` on the spec refused every time and the only way through
+> was the override. **A check that is always red teaches the reflex of overriding it** — which is
+> precisely the hole the publishing gate exists to close.
 
 Same rule for any `.roots/` that becomes public: it is tracked wholesale, so **making a repo public
 publishes its memory** — `state/`, `journal/` and `workbench/` included.
