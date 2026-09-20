@@ -86,7 +86,7 @@ ok "macOS $OSV ($ARCH)"
 if [ "$OSMAJOR" != "?" ] && [ "$OSMAJOR" -lt 13 ] 2>/dev/null; then
   warn "Claude Code requires macOS 13.0+. The toolchain will still install."
 fi
-[ "$ARCH" = "arm64" ] && BREW_PREFIX="/opt/homebrew" || BREW_PREFIX="/usr/local"
+[ "$ARCH" = "arm64" ] && BREW_PREFIX="/opt/homebrew" || BREW_PREFIX="/usr/local"  # scrub-ok: Homebrew's real prefixes
 
 # ---------- check mode ----------
 if [ "$CHECK_ONLY" -eq 1 ]; then
@@ -120,8 +120,8 @@ if have brew; then
   ok "$(brew --version | head -1)"
 else
   warn "not installed"
-  if ask "Install Homebrew now? (it will ask for your password)"; then
-    run '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'
+  if ask "Install Homebrew now? (it will ask for your password)"; then  # scrub-ok: a prompt that says the word, not a credential
+    run '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'  # scrub-ok: official installer URL
   else
     die "Homebrew is required for the native toolchain. Re-run when ready."
   fi
@@ -161,9 +161,9 @@ info "• /bin/bash is 3.2 (2007). Scripts using \${var,,}, associative arrays o
 info "  need the brew bash: put #!/usr/bin/env bash and make sure $BREW_PREFIX/bin is first in PATH."
 info "• BSD sed/date/awk differ from GNU: 'sed -i' REQUIRES an argument on macOS ('sed -i \"\" …')."
 info "  Portable fix: write the script for GNU and use gsed/gdate/gawk, or opt into the gnubin PATH:"
-info "    export PATH=\"$BREW_PREFIX/opt/coreutils/libexec/gnubin:$BREW_PREFIX/opt/gnu-sed/libexec/gnubin:\$PATH\""
+info "    export PATH=\"$BREW_PREFIX/opt/coreutils/libexec/gnubin:$BREW_PREFIX/opt/gnu-sed/libexec/gnubin:\$PATH\""  # scrub-ok: Homebrew paths
 if ask "Add that gnubin PATH line to ~/.zprofile? (makes GNU tools the default in your shell)"; then
-  run "printf '\nexport PATH=\"%s/opt/coreutils/libexec/gnubin:%s/opt/gnu-sed/libexec/gnubin:\$PATH\"\n' '$BREW_PREFIX' '$BREW_PREFIX' >> '$HOME/.zprofile'"
+  run "printf '\nexport PATH=\"%s/opt/coreutils/libexec/gnubin:%s/opt/gnu-sed/libexec/gnubin:\$PATH\"\n' '$BREW_PREFIX' '$BREW_PREFIX' >> '$HOME/.zprofile'"  # scrub-ok: Homebrew paths
   ok "added — it applies to new terminals"
 else
   info "skipped: keep using gsed/gdate/gawk explicitly in scripts"
@@ -197,8 +197,8 @@ if [ "$DO_DESKTOP" -eq 1 ]; then
   elif brew info --cask claude >/dev/null 2>&1; then
     run "brew install --cask claude"
   else
-    warn "no cask available — download it from https://claude.com/download"
-    run "open 'https://claude.com/download' || true"
+    warn "no cask available — download it from https://claude.com/download"  # scrub-ok: public vendor URL
+    run "open 'https://claude.com/download' || true"  # scrub-ok: public vendor URL
   fi
 fi
 

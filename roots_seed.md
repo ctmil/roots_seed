@@ -1607,6 +1607,17 @@ cannot be unpublished, and a credential is leaked the moment it renders.
 > the ladder branches, and `url` passes through it too. `--scrubbed` stays as the deliberate
 > override for hits a human has actually read.
 
+**And the file that implements a check cannot always pass it.** The scrub's own pattern line
+*contains* the forbidden terms; an installer has to name the package manager's real prefix; a prompt
+may legitimately contain the word *password*. <!-- scrub-ok: names the term on purpose -->
+The answer is **not** to widen the pattern — every
+widening silently drops a whole class of real hits. It is a per-line marker, `scrub-ok`, with one
+rule attached: **every exemption is printed, with its line, every run.** A silent override is
+indistinguishable from a miss, and the marker verifies nothing by itself — it only records that a
+human decided. (An exemption is counted only when the line *would* have flagged: counting every
+mention of the marker inflated the number with the tool's own machinery, and an audit figure nobody
+believes is an audit figure nobody reads.)
+
 **The rule has to hold in the exit code too, not only in the sentence.** A caller that cannot tell
 *"handed you a URL"* from *"published"* re-creates the exact confusion the rule forbids, so the
 command reports `0` published · `3` could publish but was not confirmed · `4` **not published, URL

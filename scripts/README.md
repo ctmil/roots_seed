@@ -44,7 +44,7 @@ These templates assume being **at the workspace root** (the folder that contains
 
 ```bash
 cp roots_seed/main/scripts/*.sh .        # bring the tools to the root
-./setup-module.sh meli_oerp git@github.com:ctmil/meli_oerp.git 17.0 19.0
+./setup-module.sh your_module git@github.com:your-org/your_module.git 17.0 19.0
 ./setupbranch.sh meli_oerp/feat -b claude/my-feature
 ./dashboard.sh                            # Forest viewer
 ```

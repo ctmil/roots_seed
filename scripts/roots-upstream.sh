@@ -65,15 +65,21 @@ cmd_scrub() {
   # and since the gate now blocks on the publishing path, that silently made every code
   # contribution unpublishable. A hygiene check that cries wolf on healthy input is not strict,
   # it is broken: it gets overridden with --scrubbed by reflex, which is exactly the hole.
-  local pat='([a-z0-9-]{2,}\.)+(com|net|org|ar|mx|io)\b|[0-9]{1,3}(\.[0-9]{1,3}){3}|BEGIN [A-Z ]*PRIVATE KEY|secret_key|api[_-]?key|passw|/(home|Users|media|mnt|srv|opt|data|workspace|repos|projects)/[A-Za-z0-9_.-]|@[a-z0-9.-]+\.[a-z]{2,}'
+  # scrub-ok: this IS the pattern; the file that defines the forbidden terms contains them.
+  local pat='([a-z0-9-]{2,}\.)+(com|net|org|ar|mx|io)\b|[0-9]{1,3}(\.[0-9]{1,3}){3}|BEGIN [A-Z ]*PRIVATE KEY|secret_key|api[_-]?key|passw|/(home|Users|media|mnt|srv|opt|data|workspace|repos|projects)/[A-Za-z0-9_.-]|@[a-z0-9.-]+\.[a-z]{2,}'  # scrub-ok: this line IS the pattern
   # The seed's OWN upstream is not a leak, and neither are placeholders. Without this exemption
   # every document of the seed that names where the seed lives came out dirty forever -- which,
   # with the gate this script puts on the publishing path, made contributing to the seed ITSELF
   # refuse every time. A check that is always red trains the reflex of overriding it, and that
   # reflex is the exact hole the gate was built to close.
   local up_host="${UPSTREAM//\//\\/}"
+  # One definition of the scan, used twice: once filtered (the verdict) and once unfiltered
+  # (to find what the markers actually silenced). Two copies of a sed this long WILL drift.
+  scrub_scan() {
+    sed -E "s/(raw\.githubusercontent\.com|github\.com)[\/:]$up_host/<upstream>/g; s/git@github\.com:[a-z_-]*org[a-z_-]*\//<git-remote>\//g; s/(github|gitlab)\.com[\/:](your|my|example|acme)[a-z0-9_-]*\//<placeholder>\//g; s/<your-domain>|<client-names>|example\.(com|org|net)/<placeholder>/g" "$1" | grep -nEi "$pat"
+  }
   echo "scrub: $f"
-  if sed -E "s/(raw\.githubusercontent\.com|github\.com)[\/:]$up_host/<upstream>/g; s/git@github\.com:[a-z_-]*org[a-z_-]*\//<git-remote>\//g; s/(github|gitlab)\.com[\/:](your|my|example|acme)[a-z0-9_-]*\//<placeholder>\//g; s/<your-domain>|<client-names>|example\.(com|org|net)/<placeholder>/g" "$f"      | grep -nEi "$pat"; then
+  if scrub_scan "$f" | grep -v 'scrub-ok'; then
     echo
     echo "^ REVIEW before publishing. Replace with the role, not the name:"
     echo "  client/employer -> 'the client' · host/domain/IP -> 'the production host'"
@@ -84,7 +90,22 @@ cmd_scrub() {
     echo "the piece was never generic and belongs in your local canonical."
     return 1
   fi
-  echo "  clean (mechanically — a human still reads it)"
+    # An exemption is a line that WOULD have flagged and did not -- not any line that happens to
+    # mention the marker. Counting the latter inflated the number with this script's own machinery
+    # (8 where there were 3), and an audit number nobody believes is an audit number nobody reads.
+    local exl; exl=$(scrub_scan "$f" | grep 'scrub-ok' || true)
+    local ex; ex=$(printf '%s' "$exl" | grep -c . || true)
+    if [ "${ex:-0}" -gt 0 ]; then
+      # Exemptions are PRINTED, always. A per-line override is legitimate -- the file that
+      # implements this check cannot pass it, and an installer has to name the package manager's
+      # real prefix -- but an override nobody sees is indistinguishable from a miss. Widening the
+      # pattern instead would be worse: every widening silently drops a whole class.
+      echo "  clean (mechanically) — with $ex line(s) exempted by an explicit scrub-ok marker:"
+      printf '%s\n' "$exl" | cut -c1-114 | sed 's/^/      /'
+      echo "      ^ a human decided these. Re-read them: the marker verifies nothing."
+    else
+      echo "  clean (mechanically — a human still reads it)"
+    fi
 }
 
 # The gate, in ONE place. It used to live inside the branch that can publish, so a machine with
@@ -114,7 +135,7 @@ cmd_url() {
     echo "WARNING: the body is long (${#enc_b} encoded chars). Browsers/GitHub truncate long URLs." >&2
     echo "         Open the URL, then PASTE the body from $body_file instead of trusting the prefill." >&2
   fi
-  echo "https://github.com/$UPSTREAM/issues/new?title=$enc_t&body=$enc_b"
+  echo "https://github.com/$UPSTREAM/issues/new?title=$enc_t&body=$enc_b"   # scrub-ok: the tool's own endpoint
 }
 
 cmd_issue() {
@@ -140,7 +161,7 @@ import json,os,sys,urllib.request
 repo,title,bf,label=sys.argv[1:5]
 data={"title":title,"body":open(bf,encoding="utf-8").read()}
 if label: data["labels"]=[label]
-req=urllib.request.Request(f"https://api.github.com/repos/{repo}/issues",
+req=urllib.request.Request(f"https://api.github.com/repos/{repo}/issues",  # scrub-ok: public API endpoint
     data=json.dumps(data).encode(),
     headers={"Authorization":"Bearer "+(os.environ.get("GITHUB_TOKEN") or os.environ["GH_TOKEN"]),
              "Accept":"application/vnd.github+json","User-Agent":"roots-upstream"})
