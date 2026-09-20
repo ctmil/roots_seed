@@ -86,8 +86,18 @@ def worktrees(repo):
 
 def scan(name, repo, override):
     dep = deploy_branch(repo, override)
+    has_remote = bool(git(repo, "remote").strip())
     rows = []
-    for path, br in worktrees(repo):
+    wts = [(p, b) for p, b in worktrees(repo) if b]
+    # Branches with NO worktree still hold commits. In the bare+worktrees layout every branch has
+    # one, so this looked complete; in an ORDINARY repo `worktree list` returns exactly one, so the
+    # tool silently reported a single branch per Tree while claiming to show "every Tree x Branch".
+    # A branch with no worktree cannot be dirty -- there is nothing checked out -- so it is scanned
+    # for divergence only, and marked so the reader knows why its dirty columns are empty.
+    checked = {b for _, b in wts}
+    for b in git(repo, "for-each-ref", "--format=%(refname:short)", "refs/heads").splitlines():
+        if b and b not in checked: wts.append((None, b))
+    for path, br in wts:
         if not br: continue
         ahead = behind = 0
         if dep and br != dep:
@@ -110,7 +120,7 @@ def scan(name, repo, override):
         # memory files" and 43 of those 45 files were bench. The real exposure was TWO files. A
         # ranking is only worth acting on if its #1 is really #1.
         rd = cd = bd = 0
-        for l in git(path, "status", "--porcelain").splitlines():
+        for l in (git(path, "status", "--porcelain").splitlines() if path else []):
             f = l[3:].strip('"')
             in_roots = f.startswith(".roots/") or "/.roots/" in f
             if in_roots and ("/workbench/" in f or f.startswith(".roots/workbench/")): bd += 1
@@ -119,22 +129,38 @@ def scan(name, repo, override):
         # Bench files that are TRACKED are a different finding: that is the pre-1.19 contract still
         # live. Not urgent, but it is exactly what breaks silently when the seed is updated, because
         # the new spec says this folder is not versioned and nothing raises an error.
-        bt = len([x for x in git(path, "ls-files", "--", ".roots/workbench").splitlines() if x])
-        score = (W["roots_dirty"]*rd + W["unpushed"]*min(unpushed,20) + W["code_dirty"]*min(cd,20)
-                 + W["ahead"]*min(ahead,30) + W["stale_day"]*min(stale,365) + W["behind"]*min(behind,500)
-                 + W["bench_dirty"]*bd + W["bench_tracked"]*min(bt,40))
+        bt = len([x for x in git(path, "ls-files", "--", ".roots/workbench").splitlines() if x]) if path else 0
+        # TWO numbers, and they are not comparable -- which is why they are never summed.
+        #   LOSS     = can this disappear? (uncommitted work, commits on no remote)
+        #   FRICTION = is this getting more expensive? (divergence, age)
+        # Summed into one score, friction won: six branches whose tips were 6-9 YEARS old, all
+        # committed and all on a remote -- so with zero risk of loss -- outranked a row holding an
+        # uncommitted memory file. An old landed branch cannot be lost; it only costs more to merge.
+        # Ranking is lexicographic: anything that can be LOST outranks everything that merely costs.
+        loss = (W["roots_dirty"]*rd + W["unpushed"]*min(unpushed,20) + W["code_dirty"]*min(cd,20)
+                + W["bench_dirty"]*bd)
+        fric = (W["ahead"]*min(ahead,30) + W["stale_day"]*min(stale,365) + W["behind"]*min(behind,500)
+                + W["bench_tracked"]*min(bt,40))
         why = []
         if rd:       why.append(f"{rd} MEMORIA .roots sin commitear")
         if bt:       why.append(f"{bt} archivos de workbench VERSIONADOS (contrato pre-1.19)")
-        if unpushed: why.append(f"{unpushed} en NINGUN remoto" + ("" if up else " (rama sin upstream)"))
+        if unpushed:
+            # "Push these" is not advice you can follow when the repo has no remote at all. That case
+            # is the HIGHER risk (nothing is backed up anywhere) but it needs a different sentence,
+            # or the recommended order fills with actions that cannot be taken -- and on a local-only
+            # forest the whole "land it" block came out empty for that reason alone.
+            why.append(f"{unpushed} commits SIN REMOTO CONFIGURADO (no hay donde pushear)" if not has_remote
+                       else f"{unpushed} en NINGUN remoto" + ("" if up else " (rama sin upstream)"))
+        if not path: why.append("rama sin worktree (solo divergencia)")
         if cd:       why.append(f"{cd} archivos sucios")
         if ahead:    why.append(f"{ahead} ahead de {dep}")
         if behind:   why.append(f"{behind} behind")
         if stale > 30: why.append(f"tip de hace {stale}d")
         rows.append({"repo":name,"branch":br,"deploy":dep,"ahead":ahead,"behind":behind,
                      "unpushed":unpushed,"roots_dirty":rd,"code_dirty":cd,"stale":stale,
-                     "bench_dirty":bd,"bench_tracked":bt,
-                     "score":round(score,1),"why":"; ".join(why) or "al dia","path":path})
+                     "bench_dirty":bd,"bench_tracked":bt,"has_remote":has_remote,"checked_out":bool(path),
+                     "loss":round(loss,1),"fric":round(fric,1),
+                     "why":"; ".join(why) or "al dia","path":path})
     return rows
 
 def main():
@@ -151,25 +177,29 @@ def main():
     for name, repo in find_repos(forest):
         if a.repo and name not in a.repo: continue
         rows += scan(name, repo, a.deploy)
-    rows.sort(key=lambda r: -r["score"])
+    rows.sort(key=lambda r: (-r["loss"], -r["fric"]))
     if a.json: print(json.dumps(rows, indent=2, ensure_ascii=False)); return 0
 
     print("# weights: " + " ".join(f"{k}={v}" for k, v in W.items()))
+    print("# LOSS = can disappear (uncommitted, or on no remote). fric = getting costlier (divergence,"
+          " age). Sorted by LOSS first: they are not comparable, so they are never summed.")
     print(f"# {len({r['repo'] for r in rows})} trees, {len(rows)} branches. "
           "`behind` is vs the LOCAL deploy branch: fetch first if it matters.\n")
-    hdr = (f"{'score':>6}  {'TREE':<20}{'BRANCH':<30}{'a/b':>10}{'push':>6}{'.roots':>7}"
+    hdr = (f"{'LOSS':>6}{'fric':>7}  {'TREE':<20}{'BRANCH':<28}{'a/b':>10}{'push':>6}{'.roots':>7}"
            f"{'bench':>6}{'code':>6}  why")
     print(hdr); print("-"*min(len(hdr)+40, 150))
     shown = rows[:a.top] if a.top else rows
     for r in shown:
-        if r["score"] == 0 and a.top: continue
-        print(f"{r['score']:>6.1f}  {r['repo'][:19]:<20}{r['branch'][:29]:<30}"
+        if r["loss"] == 0 and r["fric"] == 0 and a.top: continue
+        print(f"{r['loss']:>6.1f}{r['fric']:>7.1f}  {r['repo'][:19]:<20}{r['branch'][:27]:<28}"
               f"{str(r['ahead'])+'/'+str(r['behind']):>10}{r['unpushed']:>6}{r['roots_dirty']:>7}"
               f"{r['bench_dirty']:>6}{r['code_dirty']:>6}  {r['why']}")
 
     mem  = [r for r in rows if r["roots_dirty"]]
-    push = [r for r in rows if r["unpushed"] and not r["roots_dirty"]]
-    land = [r for r in rows if r["ahead"] and not r["unpushed"] and not r["roots_dirty"]]
+    push = [r for r in rows if r["unpushed"] and r["has_remote"] and not r["roots_dirty"]]
+    noremote = [r for r in rows if r["unpushed"] and not r["has_remote"]]
+    land = [r for r in rows if r["ahead"] and not r["roots_dirty"]
+            and not (r["unpushed"] and r["has_remote"])]
     print("\n# ORDEN RECOMENDADO — de lo que se pierde primero a lo que sólo se encarece")
     def block(n, title, items, fmt):
         print(f"\n{n}. {title}" + (" — nada" if not items else ""))
@@ -179,6 +209,8 @@ def main():
           lambda r: f"{r['repo']}/{r['branch']}: {r['roots_dirty']} archivos en .roots/")
     block(2, "PUSHEAR (existe sólo en esta máquina)", push,
           lambda r: f"{r['repo']}/{r['branch']}: {r['unpushed']} commits")
+    block("2b", "SIN REMOTO: no hay dónde pushear — crear uno, o aceptar que vive en un solo disco",
+          noremote, lambda r: f"{r['repo']}/{r['branch']}: {r['unpushed']} commits, cero remotos")
     block(3, f"LANDEAR a su rama de deploy (cada día que pasa el merge cuesta más)", land,
           lambda r: f"{r['repo']}/{r['branch']}: {r['ahead']} ahead de {r['deploy']}"
                     + (f", tip de hace {r['stale']}d" if r['stale'] > 30 else ""))

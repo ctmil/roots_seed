@@ -35,9 +35,24 @@ A dirty worktree is not one fact but three, and the seed's own contracts are wha
 > pre-1.19 contract still live, and it is precisely what breaks in silence when the seed is updated —
 > the new spec says the folder is not versioned, and nothing raises an error when it is.
 
+## Two numbers, never one
+
+`LOSS` and `fric` are **not comparable, so they are never summed** — and the ranking is lexicographic:
+anything that can be **lost** outranks everything that merely gets **more expensive**.
+
+| | is | examples |
+|---|---|---|
+| **LOSS** | can this disappear? | uncommitted work · commits that are on no remote |
+| **fric** | is this getting costlier? | divergence from deploy · age of the tip · `workbench/` still versioned |
+
+> Summed into a single score, friction won: six branches whose tips were **6 to 9 years old**, all
+> committed and all pushed — therefore at zero risk of loss — outranked a row holding an uncommitted
+> memory file. **An old landed branch cannot be lost; it only costs more to merge.** Two numbers keep
+> that distinction visible instead of averaging it away.
+
 ## How to read the ranking
 
-The score is **relative** — it orders *this* forest today, it is not a grade. So:
+Both numbers are **relative** — they order *this* forest today, they are not grades. So:
 
 - **Every row shows WHY it scored**, and **every row is listed**, not only the top one. A ranking
   whose reasoning is hidden gets argued with; one that shows its terms gets corrected.
@@ -46,6 +61,22 @@ The score is **relative** — it orders *this* forest today, it is not a grade. 
 - `behind` is computed against the **local** deploy branch, because fetching is a network action and
   this tool takes none. A stale local deploy branch makes `behind` **optimistic**. If that number is
   going to drive a decision, fetch first, and look at the fetch's exit code before believing it.
+
+## It works on an ordinary repo too, and that took fixing
+Simulated on a throwaway forest of plain `git init` repos — which is what most installs look like —
+three assumptions broke, all of them silently:
+
+- **`git worktree list` returns exactly one entry** in an ordinary repo, so the tool showed **one
+  branch per Tree** while claiming to show every Tree x Branch. Branches with no worktree are now
+  scanned for divergence and marked *"rama sin worktree"* (they cannot be dirty — nothing is checked
+  out). On the real forest this took the count from **626 to 1109**: nearly half the branches were
+  invisible.
+- **A repo with no remote at all** counted every commit as "unpushed", so the whole *land it* block
+  came out empty and the advice was *push these* — which you cannot do. That case is the **higher**
+  risk (nothing is backed up anywhere) and now says so in its own words.
+- Run it from **inside a standalone clone of the seed** and the companion audit reported *"0 copies,
+  0% need a human"*, because the canonical and the forest were the same directory. A confident empty
+  answer reads as good news; it now says the empty result **is a finding**.
 
 ## Verification
 - The Tree count and branch count match what you expect; a Tree with zero branches listed means it

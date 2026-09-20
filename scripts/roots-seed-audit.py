@@ -93,7 +93,14 @@ def main():
         print(f"{canon}: no history for roots_seed.md — is this the seed repo?", file=sys.stderr)
         return 2
 
-    skip = [".git", os.path.relpath(canon, forest)] + a.exclude
+    # The canonical's own masters are not distributed copies. But WHERE to exclude depends on the
+    # layout, and getting it wrong is silent: when the canonical IS the forest (the likeliest case of
+    # all -- a user clones the seed and runs this inside it), excluding the canonical *directory*
+    # excluded the root, the walk skipped everything, and the tool reported "0 copies, 0% need a
+    # human". A confident empty answer reads as good news.
+    canon_rel = os.path.relpath(canon, forest)
+    skip = [".git"] + ([] if canon_rel in (".", "") else [canon_rel]) + a.exclude
+    master = os.path.realpath(os.path.join(canon, "roots_seed.md"))
     copies = []
     for root, dirs, files in os.walk(forest):
         rel = os.path.relpath(root, forest)
@@ -101,7 +108,9 @@ def main():
         if any(s and (rel == s or rel.startswith(s.rstrip(os.sep) + os.sep)) for s in skip):
             dirs[:] = []; continue
         if "roots_seed.md" in files:
-            copies.append(os.path.join(root, "roots_seed.md"))
+            f = os.path.join(root, "roots_seed.md")
+            if os.path.realpath(f) == master: continue   # the master itself, not a copy
+            copies.append(f)
 
     per = defaultdict(lambda: {"n":0,"fiel":0,"banner":0,"div":0,"orphan":0,"lines":0,
                                "vers":set(),"worst":("",0),"files":[]})
@@ -153,6 +162,12 @@ def main():
     print("-" * len(hdr))
     print(f"{'TOTAL':<24}{tot['n']:>7}{tot['fiel']:>6}{tot['banner']:>8}{tot['div']:>9}"
           f"{tot['orphan']:>8}{tot['lines']:>9}")
+    if tot["n"] == 0:
+        print("\nNO distributed copies found under this forest.\n"
+              "That is a finding, not a clean bill: either nothing has the seed deployed\n"
+              "yet, or --forest points somewhere that does not contain the deployments.\n"
+              "Check the path before reading this as good news.")
+        return 0
     mech = tot['fiel'] + tot['banner']
     print(f"\n{mech} of {tot['n']} copies ({100*mech//max(tot['n'],1)}%) update mechanically. "
           f"{tot['div']+tot['orphan']} need a human FIRST.")
