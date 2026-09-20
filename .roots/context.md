@@ -14,7 +14,7 @@
 
 ## Estado actual
 
-Spec en **v1.20** — *la capa de entrega*. El seed dejó de ser sólo un formato de memoria: además de
+Spec en **v1.21** — *la capa de entrega*. El seed dejó de ser sólo un formato de memoria: además de
 cómo se GUARDA, ahora define cómo se ENTREGA (inbox, manifiesto, acta de pre-compactación, guard de
 contexto) y trae los dos semáforos (`sync-lock` sobre worktrees, `work-claim` sobre el trabajo).
 

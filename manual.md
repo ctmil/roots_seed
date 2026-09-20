@@ -2,7 +2,7 @@
 
 > Usage manual for the `.roots` system / **Forest model**. It is the **front door**: it explains the why, the vocabulary, the modes, the registry and the recipes, and links to the spec ([`roots_seed.md`](roots_seed.md)) and the recipes ([`recipes/`](recipes/)) instead of duplicating them.
 
-**Seed version:** 1.20 · **Vocabulary:** Roots → Forest → Grove → Tree → Branch · **Language:** English canonical, per-deployment `lang` (see §12)
+**Seed version:** 1.21 · **Vocabulary:** Roots → Forest → Grove → Tree → Branch · **Language:** English canonical, per-deployment `lang` (see §12)
 
 ---
 
@@ -107,8 +107,8 @@ Read **by layers, not everything**: L0 index → L1 active slice → L2 domain d
 ## 8. Toolkit (`scripts/` · `skills/` · `tools/`)
 
 The `.roots` lives on top of a substrate of repos; the seed ships with tools that mount and visualize it:
-- **`scripts/`** — `setup-module.sh`, `setupbranch.sh`, `dashboard.sh` (the **bare + worktrees** pattern: one `.bare` per Tree, one worktree per Branch), plus the coordination trio: `sync-lock.sh` (worktrees), **`work-claim.sh`** (the work), `leaf-fall.sh` (litter), and `roots-upstream.sh` (contributions).
-- **`skills/`** — **shared** library of strategies (Odoo module merging, md→PDF reporting) and the **community family**: `roots-suggest` · `roots-issue` · `roots-pr` · `roots-triage`.
+- **`scripts/`** — `setup-module.sh`, `setupbranch.sh`, `dashboard.sh` (the **bare + worktrees** pattern: one `.bare` per Tree, one worktree per Branch), plus the coordination trio: `sync-lock.sh` (worktrees), **`work-claim.sh`** (the work), `leaf-fall.sh` (litter), and `roots-upstream.sh` (contributions); plus the two that read the **whole** forest: **`roots-report.py`** (every Tree x Branch, ranked by what can still be lost) and **`roots-seed-audit.py`** (which distributed copies are forks, not merely stale).
+- **`skills/`** — **shared** library of strategies (Odoo module merging, md→PDF reporting) and the **community family**: `roots-suggest` · `roots-issue` · `roots-pr` · `roots-triage`, plus the **forest pair**: `roots-report` · `roots-seed-audit`.
 - **`agents/`** — **base library** of subagents generic enough to carry across projects. Three layers: **store** (`<repo>/.roots/agents/`, versioned) → **activation** (`<repo>/.claude/agents/`, local) → **base** (here). Nothing is preloaded: you import on demand. Anything promoted here is scrubbed — the seed is a public repo.
 - **`tools/forest-dashboard/`** — navigable viewer that reads the `.roots` and maps them to an Odoo backend.
 
