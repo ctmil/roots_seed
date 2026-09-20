@@ -221,10 +221,22 @@ if [ ! -d "$WORKSPACE/.git" ]; then
   ok "workspace initialized as a git repo (the coordination layer is versioned too)"
 fi
 
+# Every script here operates on the WORKSPACE, so it belongs at the workspace root where you will
+# actually type it. They all live in $SEED_DIR/scripts/ either way -- the point of copying is that a
+# tool nobody knows the path of is a tool nobody runs. The list was five for a while and the four
+# semaphore/hygiene/contribution scripts plus the two forest commands were reachable but unnamed,
+# which is the same failure as shipping a skill with no front-matter: present, and not a command.
 step "Fleet scripts at the workspace root"
-for s in setup-module.sh setupbranch.sh dashboard.sh pull-all.sh sync-agents-skills.sh; do
+for s in setup-module.sh setupbranch.sh dashboard.sh pull-all.sh sync-agents-skills.sh \
+         work-claim.sh sync-lock.sh leaf-fall.sh roots-upstream.sh \
+         roots-report.py roots-seed-audit.py; do
   if [ -e "$WORKSPACE/$s" ]; then ok "$s (kept — not overwritten)"
   elif [ -e "$SEED_DIR/scripts/$s" ]; then run "cp '$SEED_DIR/scripts/$s' '$WORKSPACE/$s'"; run "chmod +x '$WORKSPACE/$s'"; ok "$s"
+  else
+    # Say it. A name in this list that does not exist in the seed used to be skipped in SILENCE,
+    # so a typo here -- or a script renamed upstream -- produced an install that looked complete
+    # and was missing a tool. The installer's own output is the only place that error can surface.
+    warn "$s — not found in $SEED_DIR/scripts/ (renamed upstream, or a typo in this list)"
   fi
 done
 
@@ -338,8 +350,18 @@ fi
 step "Activation layer (.claude/)"
 run "mkdir -p '$WORKSPACE/.claude/agents' '$WORKSPACE/.claude/skills'"
 if [ -d "$SEED_DIR/agents" ]; then
-  info "base library available at $SEED_DIR/agents — import on demand, do not preload:"
+  info "base library at $SEED_DIR/agents — import on demand, do not preload:"
   info "  ./sync-agents-skills.sh import bug-hunter grove-keeper --seed '$SEED_DIR'"
+  info "  ./sync-agents-skills.sh activate"
+fi
+if [ -d "$SEED_DIR/skills" ]; then
+  # These are not domain skills: they are the seed's OWN commands, and they are the ones every
+  # deployment wants. Still NOT preloaded -- "import on demand" is the rule -- but named here,
+  # because the previous hint listed two domain agents and left the seed's own family unmentioned,
+  # so an install ended with the commands present and the human unaware they existed.
+  info "the seed's own commands (report/audit the forest, and contribute back) — copy/paste:"
+  info "  ./sync-agents-skills.sh import roots-report roots-seed-audit \\"
+  info "      roots-suggest roots-issue roots-pr roots-triage --seed '$SEED_DIR'"
   info "  ./sync-agents-skills.sh activate"
 fi
 
