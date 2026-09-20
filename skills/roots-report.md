@@ -21,15 +21,19 @@ scripts/roots-report.py --json                # for another tool
 
 Read-only: only `git` queries, no fetch, no commit, no merge, no push.
 
-## The two planes, and why they are not equally urgent
+## The three buckets, and why they are not equally urgent
 
-A dirty worktree is really two different facts, and the seed's premise (memory lives beside the code)
-is what separates them:
+A dirty worktree is not one fact but three, and the seed's own contracts are what separate them:
 
-| plane | what it is | why it ranks where it does |
+| bucket | what it is | why it ranks where it does |
 |---|---|---|
-| **`.roots/` uncommitted** | **memory** at risk | The rule the whole seed rests on: *what is not written down before being done is not recoverable.* Memory that exists on one disk is one disk away from being re-derived from nobody's recollection. **Ranks first, always.** |
+| **`.roots/` uncommitted** (excluding `workbench/`) | **memory** at risk | The rule the whole seed rests on: *what is not written down before being done is not recoverable.* Memory that exists on one disk is one disk away from being re-derived from nobody's recollection. **Ranks first, always.** |
 | **code/docs uncommitted** | work at risk | Usually reproducible by the same head that wrote it. Real, but recoverable. |
+| **`.roots/workbench/` uncommitted** | the **local bench** | Weight **zero**. The spec puts this folder entirely outside git, `leaves/` included — it is *designed* to be thrown away. Counting it as memory is not a rounding error: on the first forest this ran against, the #1 row scored 507 on "42 uncommitted memory files" and **43 of those 45 were bench**. The real exposure was **two files**. A ranking is only worth acting on if its #1 is really #1. |
+
+> And a **separate** finding, listed on its own: `workbench/` files that are **tracked**. That is the
+> pre-1.19 contract still live, and it is precisely what breaks in silence when the seed is updated —
+> the new spec says the folder is not versioned, and nothing raises an error when it is.
 
 ## How to read the ranking
 

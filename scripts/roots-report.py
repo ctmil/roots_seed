@@ -28,7 +28,8 @@ run your fetch first if the number matters.
 import argparse, json, os, subprocess, sys, time
 from collections import defaultdict
 
-W = {"roots_dirty": 12, "unpushed": 6, "code_dirty": 3, "ahead": 2, "stale_day": 0.10, "behind": 0.05}
+W = {"roots_dirty": 12, "unpushed": 6, "code_dirty": 3, "ahead": 2, "stale_day": 0.10,
+     "behind": 0.05, "bench_dirty": 0.0, "bench_tracked": 0.5}
 
 def git(repo, *a):
     r = subprocess.run(("git","-C",repo)+a, capture_output=True, text=True)
@@ -92,26 +93,47 @@ def scan(name, repo, override):
         if dep and br != dep:
             lr = git(repo, "rev-list", "--left-right", "--count", f"{dep}...{br}")
             if lr and len(lr.split()) == 2: behind, ahead = (int(x) for x in lr.split())
+        # "Exists only on this disk" is `--not --remotes`: commits unreachable from ANY remote ref.
+        # Falling back to `ahead of deploy` when a branch has no upstream OVERSTATES it -- those are
+        # two different facts, and the commits may well be reachable from another pushed ref. On one
+        # forest that fallback reported 1498 "unpushed" for a branch whose commits were all on a
+        # remote under another name. Overstating risk burns the reader's trust just as fast as
+        # understating it.
         up = git(repo, "rev-parse", "--abbrev-ref", "--quiet", f"{br}@{{upstream}}")
-        unpushed = int(git(repo, "rev-list", "--count", f"{up}..{br}") or 0) if up else ahead
+        unpushed = int(git(repo, "rev-list", "--count", br, "--not", "--remotes") or 0)
         ts = git(repo, "log", "-1", "--format=%ct", br)
         stale = int((time.time() - int(ts)) / 86400) if ts else 0
-        rd = cd = 0
+        # THREE buckets, not two. Everything under `.roots/` is NOT memory: `.roots/workbench/` is
+        # the LOCAL BENCH and the spec puts it entirely outside git, `leaves/` included -- it is
+        # designed to be thrown away. Counting it as memory-at-risk is not a rounding error: on the
+        # first forest this ran against, the top row of the ranking scored 507 on "42 uncommitted
+        # memory files" and 43 of those 45 files were bench. The real exposure was TWO files. A
+        # ranking is only worth acting on if its #1 is really #1.
+        rd = cd = bd = 0
         for l in git(path, "status", "--porcelain").splitlines():
             f = l[3:].strip('"')
-            if f.startswith(".roots/") or "/.roots/" in f: rd += 1
+            in_roots = f.startswith(".roots/") or "/.roots/" in f
+            if in_roots and ("/workbench/" in f or f.startswith(".roots/workbench/")): bd += 1
+            elif in_roots: rd += 1
             else: cd += 1
+        # Bench files that are TRACKED are a different finding: that is the pre-1.19 contract still
+        # live. Not urgent, but it is exactly what breaks silently when the seed is updated, because
+        # the new spec says this folder is not versioned and nothing raises an error.
+        bt = len([x for x in git(path, "ls-files", "--", ".roots/workbench").splitlines() if x])
         score = (W["roots_dirty"]*rd + W["unpushed"]*min(unpushed,20) + W["code_dirty"]*min(cd,20)
-                 + W["ahead"]*min(ahead,30) + W["stale_day"]*min(stale,365) + W["behind"]*min(behind,500))
+                 + W["ahead"]*min(ahead,30) + W["stale_day"]*min(stale,365) + W["behind"]*min(behind,500)
+                 + W["bench_dirty"]*bd + W["bench_tracked"]*min(bt,40))
         why = []
         if rd:       why.append(f"{rd} MEMORIA .roots sin commitear")
-        if unpushed: why.append(f"{unpushed} sin pushear" + ("" if up else " (sin upstream)"))
+        if bt:       why.append(f"{bt} archivos de workbench VERSIONADOS (contrato pre-1.19)")
+        if unpushed: why.append(f"{unpushed} en NINGUN remoto" + ("" if up else " (rama sin upstream)"))
         if cd:       why.append(f"{cd} archivos sucios")
         if ahead:    why.append(f"{ahead} ahead de {dep}")
         if behind:   why.append(f"{behind} behind")
         if stale > 30: why.append(f"tip de hace {stale}d")
         rows.append({"repo":name,"branch":br,"deploy":dep,"ahead":ahead,"behind":behind,
                      "unpushed":unpushed,"roots_dirty":rd,"code_dirty":cd,"stale":stale,
+                     "bench_dirty":bd,"bench_tracked":bt,
                      "score":round(score,1),"why":"; ".join(why) or "al dia","path":path})
     return rows
 
@@ -135,14 +157,15 @@ def main():
     print("# weights: " + " ".join(f"{k}={v}" for k, v in W.items()))
     print(f"# {len({r['repo'] for r in rows})} trees, {len(rows)} branches. "
           "`behind` is vs the LOCAL deploy branch: fetch first if it matters.\n")
-    hdr = f"{'score':>6}  {'TREE':<20}{'BRANCH':<30}{'a/b':>10}{'push':>6}{'.roots':>7}{'code':>6}  why"
+    hdr = (f"{'score':>6}  {'TREE':<20}{'BRANCH':<30}{'a/b':>10}{'push':>6}{'.roots':>7}"
+           f"{'bench':>6}{'code':>6}  why")
     print(hdr); print("-"*min(len(hdr)+40, 150))
     shown = rows[:a.top] if a.top else rows
     for r in shown:
         if r["score"] == 0 and a.top: continue
         print(f"{r['score']:>6.1f}  {r['repo'][:19]:<20}{r['branch'][:29]:<30}"
               f"{str(r['ahead'])+'/'+str(r['behind']):>10}{r['unpushed']:>6}{r['roots_dirty']:>7}"
-              f"{r['code_dirty']:>6}  {r['why']}")
+              f"{r['bench_dirty']:>6}{r['code_dirty']:>6}  {r['why']}")
 
     mem  = [r for r in rows if r["roots_dirty"]]
     push = [r for r in rows if r["unpushed"] and not r["roots_dirty"]]
@@ -159,7 +182,10 @@ def main():
     block(3, f"LANDEAR a su rama de deploy (cada día que pasa el merge cuesta más)", land,
           lambda r: f"{r['repo']}/{r['branch']}: {r['ahead']} ahead de {r['deploy']}"
                     + (f", tip de hace {r['stale']}d" if r['stale'] > 30 else ""))
-    print("\n4. La memoria distribuida (copias del seed): eso lo mide `roots-seed-audit.py`.")
+    bench = [r for r in rows if r["bench_tracked"]]
+    block(4, "REVISAR el contrato de workbench/ (versionado = contrato pre-1.19; el seed lo saca de git)",
+          bench, lambda r: f"{r['repo']}/{r['branch']}: {r['bench_tracked']} archivos versionados")
+    print("\n5. La memoria distribuida (copias del seed): eso lo mide `roots-seed-audit.py`.")
     return 0
 
 if __name__ == "__main__":
