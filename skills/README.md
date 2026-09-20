@@ -48,6 +48,8 @@ needs no credentials — and only a real publish counts as published).
 
 | Skill | What for |
 |-------|----------|
+| [roots-report.md](./roots-report.md) | **See the forest**: every Tree x Branch at once, ranked by what can still be LOST (uncommitted `.roots/` memory first), with the order to land it. Read-only. |
+| [roots-seed-audit.md](./roots-seed-audit.md) | **Before re-distributing a bumped seed**: which local copies are merely stale and which are forks carrying content nobody sent upstream. Read-only. |
 | [roots-suggest.md](./roots-suggest.md) | **Propose**: something this deployment learned should be in the seed (carries the measurement) |
 | [roots-issue.md](./roots-issue.md) | **Report**: the seed's own text is wrong, ambiguous or silently harmful |
 | [roots-pr.md](./roots-pr.md) | **Merge**: an improvement already written locally, split generic-vs-local, up as a PR |

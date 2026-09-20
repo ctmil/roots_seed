@@ -60,7 +60,12 @@ cmd_scrub() {
   # Found by using this script on itself — the pattern covered /home and /Users and would have
   # missed the workspace that wrote it, which lived under /media. A scrub with a hole in the
   # exact place you work is worse than none: it returns "clean" and you believe it.
-  local pat='([a-z0-9-]+\.)+(com|net|org|ar|mx|io)|[0-9]{1,3}(\.[0-9]{1,3}){3}|BEGIN [A-Z ]*PRIVATE KEY|secret_key|api[_-]?key|passw|/(home|Users|media|mnt|srv|opt|data|workspace|repos|projects)/[A-Za-z0-9_.-]|@[a-z0-9.-]+\.[a-z]{2,}'
+  # The TLDs MUST be anchored with \b. Unanchored, `ar` matched inside "argparse.ArgumentParser"
+  # and `com` inside "re.compile", so ANY file containing Python attribute access came out dirty —
+  # and since the gate now blocks on the publishing path, that silently made every code
+  # contribution unpublishable. A hygiene check that cries wolf on healthy input is not strict,
+  # it is broken: it gets overridden with --scrubbed by reflex, which is exactly the hole.
+  local pat='([a-z0-9-]{2,}\.)+(com|net|org|ar|mx|io)\b|[0-9]{1,3}(\.[0-9]{1,3}){3}|BEGIN [A-Z ]*PRIVATE KEY|secret_key|api[_-]?key|passw|/(home|Users|media|mnt|srv|opt|data|workspace|repos|projects)/[A-Za-z0-9_.-]|@[a-z0-9.-]+\.[a-z]{2,}'
   echo "scrub: $f"
   if grep -nEi "$pat" "$f"; then
     echo

@@ -62,3 +62,6 @@ cp roots_seed/main/scripts/*.sh .        # bring the tools to the root
 ```
 
 Advantage: git objects are shared across versions of the same repo (history is not duplicated), optimizing local space.
+
+- **`roots-report.py`** — the whole forest at once: every Tree x Branch, ranked by what can still be lost (uncommitted `.roots/` memory ranks first), plus the order to land it. Read-only git queries only.
+- **`roots-seed-audit.py`** — before re-distributing a bumped seed: classifies every local copy as FIEL / BANNER / DIVERGE(n lines) / ORPHAN, by hashing it normalized against every historical canonical. Read-only.
