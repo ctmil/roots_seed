@@ -7,9 +7,11 @@
 > **distributed copy** and out of date with respect to the canonical (compare the `Version` field /
 > changelog). The seed evolves — do not assume this copy is the latest. See § "Sync with the canonical upstream".
 
-**Version:** 1.21
+**Version:** 1.22
 
 **Changelog:**
+
+- **1.22** (6 October 2026) — **Two weeks of a live forest, distilled: what lies plausibly, and the third lock.** Nothing here is domain-specific; every item was paid for once and is written where it would have prevented the cost. **(1) A third semaphore, for the shared ENVIRONMENT** — the sync semaphore protects worktrees, the work semaphore protects the subject, and neither protects a **shared test environment** (one checkout + one database + one service that every front deploys to). Measured: a front's verification was **erased, code and data**, by another front that re-cloned the database two days later; nothing failed, nothing warned, and the memory kept saying *verified* with the exact commit. New § *Environment semaphore*, with the property that matters: **it coordinates, it does not authenticate** — when every session reaches the server as the same user, the authoritative record is the **seal** each move leaves, not the declared owner. **(2) New § *Instruments that lie plausibly***, extending 1.21's pattern with five cases that each returned a believable answer: a failed query whose empty output is reported as **the cause wired into the `else`**; an acknowledgement that confirms **the write, not the payload** (a ✓ for a message whose body never travelled; an API answering `ok:true` that wrote nothing); a check that cannot stop the action because it runs **in the same command**; a claim about a repository read from a **worktree parked on another branch** — read the ref (`git show <ref>:<path>`), never the folder; and **the memory index an agent carries in context can be older than the one on disk** — before an expensive diagnosis, search the disk, not your recollection of the index. **(3) Deploy discipline grows two rules:** **post-deploy monitoring measures DAMAGE, not the expected signal** (a watcher that only asked *"does the fix act?"* reported PROVEN while the system had stopped processing most of its work — compare damage indicators against the same window of previous days; *zero cases without traffic proves nothing*), **no deploy without the watch loop armed first**, and **a hotfix deployed from a branch lands on the deploy branch in the same act** (otherwise the next deploy silently reinstalls the bug). **(4) Declared loops can die silently:** session-scheduled recurring jobs may auto-expire (7 days in one common runtime) — write the expiry date in the plan and renew before it; *absence of rounds is not absence of news*. **(5) Two rules for working for a human:** a front's state is rebuilt from **the last INSTRUCTION, not the last SEND** (an instruction with an *"and"* has two parts — find the trace of each), and **before a question that blocks on the human, leave a heartbeat and a line on the bus** (a blocked session stops beating, and the front gets taken over while you wait). Does not change the `.roots/` format.
 - **1.21** (20 September 2026) — **The forest becomes measurable, and both instruments were wrong first.** Two read-only commands ship with the seed because a forest is N Trees x M Branches and `git status` answers for exactly one of them: **`roots-report.py`** (+ skill) gives every Tree x Branch ranked by *what can still be lost* — and the ranking separates **three** buckets, not two, because `.roots/workbench/` is the local bench the spec keeps out of git and is **not** memory; **`roots-seed-audit.py`** (+ skill) classifies each distributed copy as FIEL / BANNER / DIVERGE(n lines) / ORPHAN before any re-distribution, so `on-seed-update` stops reading like `cp`. Measured on one live forest: 72 Trees, 626 branches, **6407** copies — 5876 byte-identical, 417 differing only by the distribution banner, **114 carrying their own content**. What is worth carrying upstream is not the commands but **the seven ways they lied first**, each fixed and documented at the line that caused it: a walk capped at depth 4 counted 617 copies of 6407 *and the small number made the job look hand-sized*; a binary fork verdict flagged 185 healthy files that differed by a 5-line banner and **buried the eight blocks that mattered**; an `--exclude` matched as a substring silently dropped 4674 copies of a Tree whose name merely *contained* the word; `rev-parse --git-dir` succeeded from any subdirectory so seven plain folders reported their **parent's** status at the top of the ranking; splitting `refs/heads/feature/x` on the last `/` left a ref that resolves to nothing, so ahead/behind came back empty and **every prefixed branch was reported up to date while holding unlanded work**; counting `workbench/` as memory put a row at **score 507 for "42 uncommitted memory files" when 43 of 45 were bench and the real exposure was two**; and "unpushed" falling back to *ahead of deploy* reported **1498 for a branch with zero commits outside the remotes**. The pattern under all seven: **every one returned a plausible answer**, which is why a tool of this kind needs a control that fails, not a run that looks right — and why overstating urgency costs a report its reader exactly as fast as understating it. Also fixed in `roots-upstream.sh`: the scrub's TLDs were unanchored (`com` matched inside `re.compile`, `ar` inside `argparse.ArgumentParser`), so with 1.20's gate on the publishing path **every code contribution had become unpublishable in silence** — a hygiene check that cries wolf on healthy input gets overridden by reflex, which is the hole the gate was built to close.  And **shipped is not installed, which is not activated**: the installer copied five of eleven workspace-level scripts to the workspace root, so the semaphores, the leaf sweep, the whole contribution path and both new commands were *reachable and unnamed* — present in the cloned seed, absent from anywhere a human would type them, which is the same failure as shipping a skill with no front-matter. The list now covers all eleven, **a name missing from the seed warns instead of being skipped in silence**, and the activation hint names the seed's own command family (`roots-report` · `roots-seed-audit` · the four community ones) instead of two domain agents — still not preloaded, since *import on demand* is the rule, but no longer unmentioned. Does not change the `.roots/` format.
 - **1.20** (14 September 2026) — **The hygiene gate moves to where the body actually leaves.** Fix to the 1.19 contribution path: `roots-upstream.sh` only blocked a flagged body inside the branch that can publish (`gh` or `$GITHUB_TOKEN`), so on rung 3 — **the default state of anyone who clones the seed** — a flagged body was still rendered into the prefilled issue URL and printed as the last line of the output. Measured with a positive control: client name, production host, IP, an employee's email and the credential file, all inside the query string. **A prefilled URL is not a pointer to the body, it *is* the body.** The gate is now single, runs before the ladder branches, covers `url` as well as `issue`, and refuses with `5` on all three rungs (`--scrubbed` remains the explicit override). Verified with positive and negative controls, and the control that closes is **that no URL is printed**, not the exit code. Companion: two new **automatic triggers** — finding that the seed's own text is wrong ⇒ offer `roots-issue`; real use teaching what the spec does not say ⇒ offer `roots-suggest`. The 1.19 commands existed and nothing fired them, which is the same failure mode 1.19 was written to fix, one level up. And the spec was describing a block the code did not perform: **a doc that overstates a guard is worse than no doc — it gets trusted.** Does not change the `.roots/` format.
 - **1.19** (13 September 2026) — **The delivery layer: a memory that is not delivered does not exist.**
@@ -889,6 +891,40 @@ is not "recent": it is **2.9× its own period**. ⇒ **a gap is judged against t
 never against a global threshold** (an 8-hour staleness limit arrives 24 times too late for a
 15-minute loop).
 
+⚠️ **A declared loop can die without a sound.** Recurring jobs scheduled *by a session* may
+**auto-expire** (seven days in one common agent runtime) and never survive the session that created
+them. Measured: a watch loop armed on day 1 stopped on day 7, and the front stayed **two days blind**
+right after a message to a client that still needed verifying — with `loop=` still reading as if it
+were alive until the next `touch`. ⇒ **write the expiry date in the front's plan when you arm the
+loop, and have the last round before it renew it.** When a front looks "quiet" for days, list the
+scheduled jobs **before** concluding nothing happened: *absence of rounds is not absence of news.*
+
+### Environment semaphore — the third lock, and the one that protects the ENVIRONMENT
+
+The sync semaphore protects **files**, the work semaphore protects **the subject**. Neither protects
+a **shared environment**: one test checkout + one database + one service that every front deploys
+to. It fails in the most expensive way — silently. Measured once: a front verified a feature on the
+shared test environment; two days later another front **re-cloned the database from production and
+re-pointed the checkout**. The verification was not stale, it was **gone — code and data** — and the
+front's memory kept saying *verified*, with the exact commit.
+
+- **One claim for the environment**, same shape and flow as the work semaphore: `check` before
+  touching it; held by another → **do not touch**; free → `take <branch> "<note>"`, `touch` on long
+  runs, `release` at the end. A shorter staleness window than for subjects (hours, not a day).
+- **Moving the environment goes through the script, never by hand**: one command that does
+  fetch + checkout + update + restart **under a file lock**, respects the claim, and **leaves a seal**
+  (who, when, which commit, which modules).
+- **A refresh/re-clone asks and seals**: it erases every front's work at once, not just yours.
+- ⚠️ **It coordinates, it does not authenticate.** When every session reaches the server as the same
+  user, the `who` is *declared*. **The authoritative record is the SEAL**: if the current commit
+  appears in no seal, someone moved the environment from outside — say so in `status`. Real
+  enforcement needs one OS account per session; that is a human decision, not a script's.
+- **A broken or missing semaphore LETS THROUGH, and says so.** It never freezes the environment for
+  everyone.
+- **Before acting on a verification made earlier — yours or another front's — re-measure the
+  environment** (current commit, installed version, the tables/fields you expect). The memory saying
+  *verified* is not evidence that it still is.
+
 ---
 
 ## The delivery layer — a memory that is not delivered does not exist
@@ -1106,6 +1142,55 @@ Before deploying, confirm the target is actually the machine you think it is and
 stored credentials and old notes outlive the servers they describe. After deploying, verify the
 service answers, not just that the command exited 0: a compile check does **not** catch a missing
 import that only fails at runtime.
+
+
+### Monitoring measures DAMAGE, not the expected signal
+A post-deploy watcher that only asks *"does the fix act?"* is **blind to damage — and worse than none,
+because it returns PROVEN.** Measured once: the fix worked on its first case and was reported as
+solved, while the deploy had left **most of the day's work stuck in an unprocessed state**; the
+client reported it twice before anyone looked, because the session had no loop.
+- **No deploy without the watch loop armed first.** The loop is part of the deploy, not the
+  aftermath. A session that cannot hold a loop does not deploy — it hands the front over.
+- Measure at fixed intervals (e.g. 15 min / 1 h / 4 h) **against the same window of the previous
+  days**: the distribution of records by state (a jump in "unprocessed" is the alarm), invalid values
+  (negative totals, broken prices), and lock/deadlock errors in the log.
+- **"Zero cases" without traffic is not proof: without a denominator there is no measurement.**
+- **Under damage: revert first, diagnose after.** And data repair is not computed by hand — clear the
+  field and re-run the instrument that already exists, **one verified case before the batch**.
+- Two technical causes that recur, worth checking in every review: **an amount defined at an
+  aggregate level applied at a finer level without prorating**, and **a network call inside a database
+  transaction** (it stretches the transaction and the damage comes from the latency, not the logic).
+
+### A hotfix deployed from a branch lands in the SAME act
+An emergency deploy made from a work branch leaves the deploy branch **behind what is running**. The
+next ordinary deploy then reinstalls the old code — often without the upgrade step and without a log
+line, because the installed version already looks newer. ⇒ **closing an emergency deploy includes
+landing it on the deploy branch** (with the human's OK), or writing the pending landing down as a
+blocker. *"Deployed" without "landed" is not done.* Footprint to sweep for: a branch whose version is
+**greater** than the deploy branch's and which is **not an ancestor** of it.
+
+---
+
+## Instruments that lie plausibly
+
+> 1.21 recorded seven ways two forest-wide commands lied before they were right, and the pattern under
+> all of them: **every one returned a plausible answer.** This section keeps the cases that are not
+> about one command but about **how an agent reads any instrument** — each measured once on a live
+> forest, each invisible from the inside.
+
+| The instrument says | What actually happened | The control |
+|---|---|---|
+| **"None found" / "not linked" / `0`**, for every row, neatly | The query **failed**: the error went to `stderr`, `stdout` was empty, and empty was printed as a negative result. A broken query fails for *all* rows, so the false finding is uniform — exactly the shape of a real one | The wrapper checks exit code **and** `stderr`, and returns `ERR: …`, never `""`. Count the same fact **by another path** before believing a uniform negative |
+| **"Cause: connection down"** for hours | An upstream step returned empty, and the script's `else` branch **assigned a cause** to it — while the connection was being used by hand in the same console | **An `else` that names a cause turns any failure into THAT cause.** The instrument must distinguish *"could not connect"* from *"connected and got nothing"*; run by hand exactly what the instrument runs |
+| **✓ sent** | The acknowledgement described **the command, not the effect**: an unsupported flag was sent *as the message body*, and the ✓ was printed anyway. Two messages never arrived — one for 2 days, one for 7 | After sending, **grep for a distinctive phrase of the body** at the destination. A ✓ confirms the entry was written, not that the payload travelled |
+| **`ok: true`** from a write API | A wrong key name: the API accepted the call **and wrote nothing** | After any write, **re-read the field and compare**. The response proves nothing about the record |
+| **"Checked: nothing new"**, then the action | The check and the action ran **in the same command**: the check printed a new message from the other side, three minutes old, and the post went out anyway, answering the previous one | **Check in one step, read its output, act in the next.** A verification that cannot stop the action is not a verification |
+| **"The code does X"** about a repository | The folder read was a **worktree parked on another branch** (in the bare+worktree pattern this spec promotes, the directory named after a branch may have *any* branch checked out). A false finding, twice in one hour — the second while stating the rule | To assert anything about a branch, read **the ref**: `git show <ref>:<path>` / `git archive <ref>`. Never the folder. And a finding goes to the record only after that read |
+| **"Not in memory — diagnose from scratch"** | The memory **index the agent carried in context was older than the one on disk** (the one loaded at session start had been rewritten since). Half a day was spent on a problem already solved and recorded | **Before an expensive diagnosis, search the memory on disk** (`ls`/`grep` over the memory folder), not your recollection of the index |
+
+**The common rule:** an instrument's output is a claim about the world, and **it must be able to say
+"I don't know"**. Where it can't, the agent adds the control — a positive case that must come back
+positive, or a second path to the same fact — before the output reaches a decision or a person.
 
 ---
 
@@ -2892,6 +2977,13 @@ When starting a session in a project with `.roots/`:
 | **About to launch an action (write or run) not yet written in `tasks/`** | → **Run hooks/on-task-start.md → write it FIRST.** Per action, not once per session |
 | **About to run something over MANY items** (batch, sweep, whole corpus) | → **Stop. Is it demonstrated on ONE case?** If not, the task IS the single case. If yes, declare spend ceiling + stop criterion |
 | A parse/validation fails and you need a fallback | → return a value that **cannot be mistaken for data** (`None`), never a plausible midpoint |
+| **Rebuilding the state of a front** (after a pause, a handover, a compaction) | → The source is **the last INSTRUCTION, not the last SEND**: re-read the bus/thread of the front even if you read it yesterday. If the instruction has an *"and"*, count the parts and find the trace of **each** — the documented half silently takes the place of the whole |
+| **About to ask the human a question that blocks the session** | → `touch` the claim and leave a line on the bus (*"waiting on X, still alive"*) **first**: a blocked session stops beating and its front gets taken over. On return: `check` the claim and read the bus **before the next write** |
+| **About to act on a verification made earlier** (yours or another front's, on a shared environment) | → **Re-measure** the environment first (§ *Environment semaphore*) |
+| **About to send/post to a person** | → Re-read the thread **in a separate step** and read the output; then send (§ *Instruments that lie plausibly*) |
+| **About to assert what a branch's code does** | → `git show <ref>:<path>`, never the worktree folder |
+| **About to start an expensive diagnosis** | → Search the memory **on disk** first; the index in your context may be older |
+| **About to deploy** | → Arm the damage-measuring watch loop **before** the cut; no loop, no deploy (§ *Deploy discipline*) |
 | Task completed, about to report it | → Run hooks/on-task-done.md |
 | Exception in code | → Run hooks/on-error.md → errors-log.md |
 | Commit with a fix | → Run hooks/on-fix.md → fixes-log.md |

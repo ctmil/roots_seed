@@ -1203,7 +1203,8 @@
    "see_also": [
     "sync-semaphore",
     "session-liveness",
-    "declared-loop"
+    "declared-loop",
+    "environment-semaphore"
    ],
    "en": {
     "term": "work semaphore (claim)",
@@ -1245,15 +1246,15 @@
    ],
    "en": {
     "term": "declared loop",
-    "def": "The `loop=<name>@<interval>` field of a claim: whether that front **gets looked at again by itself**, and how often. It is **declared, not detected** (nothing in the environment reveals a running loop), and kept honest two ways: a loop declared by a dead session prints with a warning, and every heartbeat rewrites it. Read it together with the heartbeat **series**, not one value: **a gap is judged against the front's own cadence, never a global threshold** — 43 minutes of silence on a front that beats every 20 is 2.9× its own period, while an 8-hour staleness limit would arrive 24 times too late."
+    "def": "The `loop=<name>@<interval>` field of a claim: whether that front **gets looked at again by itself**, and how often. It is **declared, not detected** (nothing in the environment reveals a running loop), and kept honest two ways: a loop declared by a dead session prints with a warning, and every heartbeat rewrites it. Read it together with the heartbeat **series**, not one value: **a gap is judged against the front's own cadence, never a global threshold** — 43 minutes of silence on a front that beats every 20 is 2.9× its own period, while an 8-hour staleness limit would arrive 24 times too late. ⚠️ A declared loop can **die silently**: session-scheduled recurring jobs may auto-expire (7 days in one common runtime) — write the expiry in the plan and renew before it."
    },
    "es": {
     "term": "loop declarado",
-    "def": "El campo `loop=<nombre>@<intervalo>` de un claim: si ese frente **se vuelve a mirar solo**, y cada cuánto. Es **declarado, no detectado** (nada en el entorno delata un loop corriendo), y se blinda de dos formas: un loop declarado por una sesión muerta se imprime con aviso, y cada latido lo reescribe. Se lee junto con la **serie** de latidos, no con un valor suelto: **el hueco se juzga contra la cadencia propia del frente, nunca contra un umbral global** — 43 minutos de silencio en un frente que late cada 20 son 2,9× su propio período, mientras que un límite de 8 h llegaría 24 veces tarde."
+    "def": "El campo `loop=<nombre>@<intervalo>` de un claim: si ese frente **se vuelve a mirar solo**, y cada cuánto. Es **declarado, no detectado** (nada en el entorno delata un loop corriendo), y se blinda de dos formas: un loop declarado por una sesión muerta se imprime con aviso, y cada latido lo reescribe. Se lee junto con la **serie** de latidos, no con un valor suelto: **el hueco se juzga contra la cadencia propia del frente, nunca contra un umbral global** — 43 minutos de silencio en un frente que late cada 20 son 2,9× su propio período, mientras que un límite de 8 h llegaría 24 veces tarde. ⚠️ Un loop declarado puede **morir en silencio**: los recurrentes agendados por una sesión pueden auto-expirar (7 días en un runtime común) — anotar el vencimiento en el plan y renovarlo antes."
    },
    "fr": {
     "term": "boucle déclarée",
-    "def": "Le champ `loop=<nom>@<intervalle>` d'un claim : si ce front **est réexaminé tout seul**, et à quelle fréquence. Il est **déclaré, non détecté**, et tenu honnête de deux façons : une boucle déclarée par une session morte s'affiche avec un avertissement, et chaque battement la réécrit. On le lit avec la **série** des battements : **un écart se juge face à la cadence propre du front, jamais face à un seuil global**."
+    "def": "Le champ `loop=<nom>@<intervalle>` d'un claim : si ce front **est réexaminé tout seul**, et à quelle fréquence. Il est **déclaré, non détecté**, et tenu honnête de deux façons : une boucle déclarée par une session morte s'affiche avec un avertissement, et chaque battement la réécrit. On le lit avec la **série** des battements : **un écart se juge face à la cadence propre du front, jamais face à un seuil global**. ⚠️ Une boucle déclarée peut **mourir en silence** : les tâches récurrentes planifiées par une session peuvent expirer (7 jours dans un runtime courant) — noter l'échéance dans le plan et la renouveler avant."
    }
   },
   "delivery-layer": {
@@ -1351,6 +1352,25 @@
     "term": "échelle de capacité",
     "def": "Comment une commande publie en amont sans dépendre d'un outil que le lecteur n'a peut-être pas : un CLI authentifié → un jeton d'API → une **URL d'issue pré-remplie, qui fonctionne toujours et sans identifiants**. La commande **déclare quel échelon elle a utilisé**, avec la règle : ⛔ ne jamais annoncer une issue comme « ouverte » quand seule une URL a été imprimée."
    }
+  },
+  "environment-semaphore": {
+   "category": "lifecycle",
+   "en": {
+    "term": "environment semaphore",
+    "def": "The third lock: the `sync semaphore` protects files, the `work semaphore` protects the subject, this one protects a **shared environment** (one test checkout + database + service every front deploys to). `check` before touching it; moving it goes through one script that runs under a file lock and leaves a **seal** (who, when, which commit). It **coordinates, it does not authenticate**: when every session is the same server user, the seal is the authoritative record. A broken semaphore lets through and says so."
+   },
+   "es": {
+    "term": "semáforo de entorno",
+    "def": "El tercer lock: el `semáforo de sync` protege archivos, el `semáforo de trabajo` protege el tema, éste protege un **entorno compartido** (un checkout de test + base + servicio al que deployan todos los frentes). `check` antes de tocarlo; moverlo va por un script que corre bajo `flock` y deja un **sello** (quién, cuándo, qué commit). **Coordina, no autentica**: si todas las sesiones son el mismo usuario del server, lo autoritativo es el sello. Semáforo roto ⇒ deja pasar y lo dice."
+   },
+   "fr": {
+    "term": "sémaphore d'environnement",
+    "def": "Le troisième verrou : le `sémaphore de sync` protège les fichiers, le `sémaphore de travail` protège le sujet, celui-ci protège un **environnement partagé** (un checkout de test + base + service sur lequel tous les fronts déploient). `check` avant d'y toucher ; le déplacer passe par un script sous verrou de fichier qui laisse un **sceau** (qui, quand, quel commit). **Il coordonne, il n'authentifie pas** : le sceau fait foi. Sémaphore cassé ⇒ il laisse passer et le dit."
+   },
+   "see_also": [
+    "work-semaphore",
+    "sync-semaphore"
+   ]
   }
  }
 }
