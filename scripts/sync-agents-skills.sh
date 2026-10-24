@@ -3,11 +3,17 @@
 #
 #   base   roots_seed/{agents,skills}/*.md      (cross-project library, this repo)
 #   store  <repo>/.roots/{agents,skills}/*.md   (tracked: where they live and evolve)
-#   act.   <repo>/.claude/agents/*.md           (local activation, flat .md)
-#          <repo>/.claude/skills/<name>/SKILL.md (local activation, directory form)
+#   act.   Claude Code: <repo>/.claude/agents/*.md            (flat .md)
+#                       <repo>/.claude/skills/<name>/SKILL.md  (directory form)
+#          Codex:       <repo>/.codex/agents/<name>.toml       (GENERATED from the .md)
+#                       <repo>/.agents/skills/<name>/SKILL.md  (same file as Claude's)
 #
-# The store keeps skills as a flat <name>.md; Claude Code wants <name>/SKILL.md. This script
-# does that conversion so the two layers cannot drift silently.
+# The store keeps skills as a flat <name>.md; both tools want <name>/SKILL.md (same front-matter:
+# name + description). Codex subagents are TOML (name, description, developer_instructions), so
+# each agent .md is converted: front-matter -> keys, body -> developer_instructions. The Claude-only
+# keys (`tools`, `model`) are dropped: a Claude model name means nothing to Codex, and a Codex agent
+# inherits the parent's sandbox and cannot narrow it from this file. The .md in the store stays
+# the single source; the TOML is never edited by hand and never harvested back.
 #
 # Usage:
 #   ./sync-agents-skills.sh activate [<name>...]   store  -> .claude   (all if no name given)
@@ -19,13 +25,14 @@
 # Options:
 #   --repo <path>   repo root (default: cwd)
 #   --seed <path>   roots_seed checkout (default: ./roots_seed/main, then ./roots_seed)
+#   --for claude|codex|both   which activation layer(s) (default: both)
 #   --agents-only | --skills-only
 #   -n, --dry-run
 #
 # Portable: POSIX-ish bash, works with bash 3.2 (stock macOS) and BSD or GNU coreutils.
 set -euo pipefail
 
-REPO="$PWD"; SEED=""; DRY=0; DO_AGENTS=1; DO_SKILLS=1; CMD=""; NAMES=()
+REPO="$PWD"; SEED=""; DRY=0; DO_AGENTS=1; DO_SKILLS=1; CMD=""; NAMES=(); FOR="both"
 
 die() { printf 'error: %s\n' "$*" >&2; exit 1; }
 say() { printf '%s\n' "$*"; }
@@ -36,6 +43,7 @@ while [ $# -gt 0 ]; do
     activate|harvest|import|check|list) CMD="$1" ;;
     --repo) REPO="${2:?}"; shift ;;
     --seed) SEED="${2:?}"; shift ;;
+    --for) FOR="${2:?}"; shift ;;
     --agents-only) DO_SKILLS=0 ;;
     --skills-only) DO_AGENTS=0 ;;
     -n|--dry-run) DRY=1 ;;
@@ -46,10 +54,14 @@ while [ $# -gt 0 ]; do
   shift
 done
 [ -n "$CMD" ] || { sed -n '2,25p' "$0"; exit 1; }
+case "$FOR" in claude|codex|both) ;; *) die "--for must be claude, codex or both" ;; esac
+for_claude() { [ "$FOR" != codex ]; }
+for_codex()  { [ "$FOR" != claude ]; }
 
 [ -d "$REPO" ] || die "repo not found: $REPO"
 STORE_A="$REPO/.roots/agents"; STORE_S="$REPO/.roots/skills"
 ACT_A="$REPO/.claude/agents";  ACT_S="$REPO/.claude/skills"
+CDX_A="$REPO/.codex/agents";   CDX_S="$REPO/.agents/skills"
 
 if [ -z "$SEED" ]; then
   for c in "$REPO/roots_seed/main" "$REPO/roots_seed" "$REPO/../roots_seed/main"; do
@@ -80,8 +92,8 @@ sync_agents() {  # sync_agents <src_dir> <dst_dir>
 }
 
 # --- skills: flat <name>.md  <->  <name>/SKILL.md ------------------------------------
-skills_to_act() {  # store -> .claude (flat -> dir)
-  local f base
+skills_to_act() {  # skills_to_act <act_dir>   store -> activation (flat -> dir)
+  local f base ACT_S="$1"
   [ -d "$STORE_S" ] || return 0
   for f in "$STORE_S"/*.md; do
     [ -e "$f" ] || continue
@@ -95,8 +107,8 @@ skills_to_act() {  # store -> .claude (flat -> dir)
   done
 }
 
-skills_to_store() {  # .claude -> store (dir -> flat)
-  local d base
+skills_to_store() {  # skills_to_store <act_dir>   activation -> store (dir -> flat)
+  local d base ACT_S="$1"
   [ -d "$ACT_S" ] || return 0
   run "mkdir -p '$STORE_S'"
   for d in "$ACT_S"/*/; do
@@ -110,17 +122,71 @@ skills_to_store() {  # .claude -> store (dir -> flat)
   done
 }
 
+# --- Codex agents: .md (front-matter + body) -> .toml ---------------------------------
+# TOML basic strings: escape \ and ". The body goes in a multi-line basic string; a literal '''
+# string would need no escaping but breaks on a body that contains ''' and fails silently later.
+agent_toml() {  # agent_toml <agent.md>  -> TOML on stdout
+  awk -v src="$(basename "$1")" '
+    function esc(s) { gsub(/\\/, "\\\\", s); gsub(/"/, "\\\"", s); return s }
+    function unq(s) { sub(/^[ \t]+/, "", s); sub(/[ \t]+$/, "", s)
+                      if (s ~ /^".*"$/) { s = substr(s, 2, length(s) - 2); gsub(/\\"/, "\"", s) }
+                      else if (s ~ /^\047.*\047$/) s = substr(s, 2, length(s) - 2)
+                      return s }
+    NR == 1 && $0 == "---" { fm = 1; next }
+    fm && $0 == "---"      { fm = 0; next }
+    fm { if (match($0, /^[A-Za-z_]+:/)) meta[substr($0, 1, RLENGTH - 1)] = unq(substr($0, RLENGTH + 1)); next }
+    { if (!started && $0 ~ /^[ \t]*$/) next; started = 1; body = body $0 "\n" }
+    END {
+      print "# GENERATED by sync-agents-skills.sh from .roots/agents/" src " -- edit the .md, not this file."
+      if (meta["tools"] != "") print "# (Claude tools: " meta["tools"] "; Codex inherits the parent sandbox)"
+      print "name = \"" esc(meta["name"]) "\""
+      print "description = \"" esc(meta["description"]) "\""
+      printf "developer_instructions = \"\"\"\n%s\"\"\"\n", esc(body)
+    }' "$1"
+}
+
+agents_to_codex() {  # store -> .codex/agents (md -> toml)
+  local f base tmp
+  [ -d "$STORE_A" ] || return 0
+  run "mkdir -p '$CDX_A'"
+  tmp="$(mktemp)"
+  for f in "$STORE_A"/*.md; do
+    [ -e "$f" ] || continue
+    base="$(basename "$f" .md)"
+    case "$base" in README|*.template) continue ;; esac
+    wanted "$base" || continue
+    agent_toml "$f" > "$tmp"
+    if [ -e "$CDX_A/$base.toml" ] && cmp -s "$tmp" "$CDX_A/$base.toml"; then continue; fi
+    say "  agent  $base  (codex)"
+    run "cp '$tmp' '$CDX_A/$base.toml'"
+  done
+  rm -f "$tmp"
+}
+
 case "$CMD" in
   activate)
-    say "→ store → activation  ($REPO)"
-    [ "$DO_AGENTS" -eq 1 ] && sync_agents "$STORE_A" "$ACT_A"
-    [ "$DO_SKILLS" -eq 1 ] && skills_to_act
+    say "→ store → activation [$FOR]  ($REPO)"
+    if for_claude; then
+      [ "$DO_AGENTS" -eq 1 ] && sync_agents "$STORE_A" "$ACT_A"
+      [ "$DO_SKILLS" -eq 1 ] && skills_to_act "$ACT_S"
+    fi
+    if for_codex; then
+      [ "$DO_AGENTS" -eq 1 ] && agents_to_codex
+      [ "$DO_SKILLS" -eq 1 ] && skills_to_act "$CDX_S"
+    fi
     say "✓ done. Activation is local — it does not need to be committed."
     ;;
   harvest)
-    say "→ activation → store  ($REPO)"
-    [ "$DO_AGENTS" -eq 1 ] && sync_agents "$ACT_A" "$STORE_A"
-    [ "$DO_SKILLS" -eq 1 ] && skills_to_store
+    # One source per harvest: with --for both, Claude's layer wins (it is the one with editable
+    # agents). Codex agents are generated TOML and are never harvested — edit the .md instead.
+    if for_claude; then
+      say "→ activation (.claude) → store  ($REPO)"
+      [ "$DO_AGENTS" -eq 1 ] && sync_agents "$ACT_A" "$STORE_A"
+      [ "$DO_SKILLS" -eq 1 ] && skills_to_store "$ACT_S"
+    else
+      say "→ activation (.agents/skills) → store  ($REPO)   [codex agents are generated: not harvested]"
+      [ "$DO_SKILLS" -eq 1 ] && skills_to_store "$CDX_S"
+    fi
     say "✓ done. The store IS tracked — review and commit the diff."
     ;;
   import)
@@ -140,6 +206,7 @@ case "$CMD" in
     ;;
   check)
     drift=0
+    if for_claude; then
     for f in "$STORE_A"/*.md; do
       [ -e "$f" ] || continue
       base="$(basename "$f" .md)"; case "$base" in README|*.template) continue ;; esac
@@ -160,6 +227,32 @@ case "$CMD" in
       [ -e "$d" ] || continue; base="$(basename "$d")"
       [ -e "$STORE_S/$base.md" ] || { say "activation-only skill: $base (not tracked!)"; drift=1; }
     done
+    fi
+    if for_codex; then
+      tmp="$(mktemp)"
+      for f in "$STORE_A"/*.md; do
+        [ -e "$f" ] || continue
+        base="$(basename "$f" .md)"; case "$base" in README|*.template) continue ;; esac
+        agent_toml "$f" > "$tmp"
+        if [ ! -e "$CDX_A/$base.toml" ]; then say "store-only agent : $base (codex)"; drift=1
+        elif ! cmp -s "$tmp" "$CDX_A/$base.toml"; then say "DRIFT agent      : $base (codex)"; drift=1; fi
+      done
+      rm -f "$tmp"
+      for f in "$CDX_A"/*.toml; do
+        [ -e "$f" ] || continue; base="$(basename "$f" .toml)"
+        [ -e "$STORE_A/$base.md" ] || { say "activation-only agent: $base (codex, not tracked!)"; drift=1; }
+      done
+      for f in "$STORE_S"/*.md; do
+        [ -e "$f" ] || continue
+        base="$(basename "$f" .md)"; case "$base" in README) continue ;; esac
+        if [ ! -e "$CDX_S/$base/SKILL.md" ]; then say "store-only skill : $base (codex)"; drift=1
+        elif ! cmp -s "$f" "$CDX_S/$base/SKILL.md"; then say "DRIFT skill      : $base (codex)"; drift=1; fi
+      done
+      for d in "$CDX_S"/*/; do
+        [ -e "$d" ] || continue; base="$(basename "$d")"
+        [ -e "$STORE_S/$base.md" ] || { say "activation-only skill: $base (codex, not tracked!)"; drift=1; }
+      done
+    fi
     # A skill with no front-matter copies and activates fine and is NEVER LISTED as a command:
     # it fails by being absent, which is the hardest failure to notice. Agents always had it;
     # skills did not, and nothing checked. Checking it is what makes the rule happen.
@@ -172,7 +265,7 @@ case "$CMD" in
     exit "$drift"
     ;;
   list)
-    printf '%-28s %-8s %-8s %s\n' NAME BASE STORE ACTIVE
+    printf '%-28s %-8s %-8s %-8s %s\n' NAME BASE STORE CLAUDE CODEX
     # NOTE: `ls dirA dirB` prints a "dirA:" section header per directory, and those headers used to
     # end up in this list as if they were entries (two rows of absolute paths). With a single
     # directory ls prints no header, which is why it stayed invisible until a run had both.
@@ -182,13 +275,16 @@ case "$CMD" in
     all="$( { ls1 "$STORE_A" "$STORE_S" | sed 's/\.md$//'
               ls1 "$ACT_A" | sed 's/\.md$//'
               ls1 "$ACT_S"
+              ls1 "$CDX_A" | sed 's/\.toml$//'
+              ls1 "$CDX_S"
               printf '%s\n' "$seed_names"; } | grep -v '^README$' | grep -v '^$' | grep -v ':$' | sort -u )"
     for n in $all; do
-      b=" "; s=" "; a=" "
+      b=" "; s=" "; a=" "; c=" "
       printf '%s\n' "$seed_names" | grep -qx "$n" && b="yes"
       { [ -e "$STORE_A/$n.md" ] || [ -e "$STORE_S/$n.md" ]; } && s="yes"
       { [ -e "$ACT_A/$n.md" ] || [ -e "$ACT_S/$n/SKILL.md" ]; } && a="yes"
-      printf '%-28s %-8s %-8s %s\n' "$n" "$b" "$s" "$a"
+      { [ -e "$CDX_A/$n.toml" ] || [ -e "$CDX_S/$n/SKILL.md" ]; } && c="yes"
+      printf '%-28s %-8s %-8s %-8s %s\n' "$n" "$b" "$s" "$a" "$c"
     done
     ;;
 esac

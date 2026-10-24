@@ -7,10 +7,11 @@
 > **distributed copy** and out of date with respect to the canonical (compare the `Version` field /
 > changelog). The seed evolves — do not assume this copy is the latest. See § "Sync with the canonical upstream".
 
-**Version:** 1.22
+**Version:** 1.23
 
 **Changelog:**
 
+- **1.23** (24 October 2026) — **Codex as a first-class activation target, next to Claude Code.** A workspace is now used by people who combine Claude Code and OpenAI Codex on the same laptop, and the seed only knew how to activate for one of them: the compatibility table said Codex reads `codex.md` (it reads **`AGENTS.md`**), and `sync-agents-skills.sh` wrote only to `.claude/`, so a Codex session opened a forest with **no instructions, no skills and no agents** and nothing said so. Now: **(1) `AGENTS.md` is the canonical bridge** and `CLAUDE.md` imports it (`@AGENTS.md`) adding only what is Claude-specific — one set of rules, two tools, no drift; the installer writes both and never touches existing ones. **(2) `sync-agents-skills.sh --for claude|codex|both`** (default `both`): skills are copied to `.agents/skills/<name>/SKILL.md` (same file, same front-matter — both tools read `name` + `description`), and agents are **converted** to Codex's TOML subagents in `.codex/agents/<name>.toml` (front-matter → `name`/`description`, body → `developer_instructions`; the Claude-only `tools`/`model` are dropped, because a Codex subagent inherits the parent's sandbox). The TOML is **generated, never edited and never harvested**: the `.md` in the store stays the single source, and `check` regenerates and compares, so a hand edit shows up as drift. Verified on mawk, BWK awk and busybox with a hostile body (quotes, backslashes, `"""`) parsed back byte-identical. **(3) Installer:** `--codex` installs the Codex CLI, `--check` reports `codex` and a missing `AGENTS.md`, and the `.gitignore` gets the two generated directories under **their own guard** (the 1.19 lesson: a block gated on an older marker never reaches an install that already has it). Does not change the `.roots/` format. <!-- scrub-ok: @AGENTS.md is Claude Code's import syntax, not an address -->
 - **1.22** (6 October 2026) — **Two weeks of a live forest, distilled: what lies plausibly, and the third lock.** Nothing here is domain-specific; every item was paid for once and is written where it would have prevented the cost. **(1) A third semaphore, for the shared ENVIRONMENT** — the sync semaphore protects worktrees, the work semaphore protects the subject, and neither protects a **shared test environment** (one checkout + one database + one service that every front deploys to). Measured: a front's verification was **erased, code and data**, by another front that re-cloned the database two days later; nothing failed, nothing warned, and the memory kept saying *verified* with the exact commit. New § *Environment semaphore*, with the property that matters: **it coordinates, it does not authenticate** — when every session reaches the server as the same user, the authoritative record is the **seal** each move leaves, not the declared owner. **(2) New § *Instruments that lie plausibly***, extending 1.21's pattern with five cases that each returned a believable answer: a failed query whose empty output is reported as **the cause wired into the `else`**; an acknowledgement that confirms **the write, not the payload** (a ✓ for a message whose body never travelled; an API answering `ok:true` that wrote nothing); a check that cannot stop the action because it runs **in the same command**; a claim about a repository read from a **worktree parked on another branch** — read the ref (`git show <ref>:<path>`), never the folder; and **the memory index an agent carries in context can be older than the one on disk** — before an expensive diagnosis, search the disk, not your recollection of the index. **(3) Deploy discipline grows two rules:** **post-deploy monitoring measures DAMAGE, not the expected signal** (a watcher that only asked *"does the fix act?"* reported PROVEN while the system had stopped processing most of its work — compare damage indicators against the same window of previous days; *zero cases without traffic proves nothing*), **no deploy without the watch loop armed first**, and **a hotfix deployed from a branch lands on the deploy branch in the same act** (otherwise the next deploy silently reinstalls the bug). **(4) Declared loops can die silently:** session-scheduled recurring jobs may auto-expire (7 days in one common runtime) — write the expiry date in the plan and renew before it; *absence of rounds is not absence of news*. **(5) Two rules for working for a human:** a front's state is rebuilt from **the last INSTRUCTION, not the last SEND** (an instruction with an *"and"* has two parts — find the trace of each), and **before a question that blocks on the human, leave a heartbeat and a line on the bus** (a blocked session stops beating, and the front gets taken over while you wait). Does not change the `.roots/` format.
 - **1.21** (20 September 2026) — **The forest becomes measurable, and both instruments were wrong first.** Two read-only commands ship with the seed because a forest is N Trees x M Branches and `git status` answers for exactly one of them: **`roots-report.py`** (+ skill) gives every Tree x Branch ranked by *what can still be lost* — and the ranking separates **three** buckets, not two, because `.roots/workbench/` is the local bench the spec keeps out of git and is **not** memory; **`roots-seed-audit.py`** (+ skill) classifies each distributed copy as FIEL / BANNER / DIVERGE(n lines) / ORPHAN before any re-distribution, so `on-seed-update` stops reading like `cp`. Measured on one live forest: 72 Trees, 626 branches, **6407** copies — 5876 byte-identical, 417 differing only by the distribution banner, **114 carrying their own content**. What is worth carrying upstream is not the commands but **the seven ways they lied first**, each fixed and documented at the line that caused it: a walk capped at depth 4 counted 617 copies of 6407 *and the small number made the job look hand-sized*; a binary fork verdict flagged 185 healthy files that differed by a 5-line banner and **buried the eight blocks that mattered**; an `--exclude` matched as a substring silently dropped 4674 copies of a Tree whose name merely *contained* the word; `rev-parse --git-dir` succeeded from any subdirectory so seven plain folders reported their **parent's** status at the top of the ranking; splitting `refs/heads/feature/x` on the last `/` left a ref that resolves to nothing, so ahead/behind came back empty and **every prefixed branch was reported up to date while holding unlanded work**; counting `workbench/` as memory put a row at **score 507 for "42 uncommitted memory files" when 43 of 45 were bench and the real exposure was two**; and "unpushed" falling back to *ahead of deploy* reported **1498 for a branch with zero commits outside the remotes**. The pattern under all seven: **every one returned a plausible answer**, which is why a tool of this kind needs a control that fails, not a run that looks right — and why overstating urgency costs a report its reader exactly as fast as understating it. Also fixed in `roots-upstream.sh`: the scrub's TLDs were unanchored (`com` matched inside `re.compile`, `ar` inside `argparse.ArgumentParser`), so with 1.20's gate on the publishing path **every code contribution had become unpublishable in silence** — a hygiene check that cries wolf on healthy input gets overridden by reflex, which is the hole the gate was built to close.  And **shipped is not installed, which is not activated**: the installer copied five of eleven workspace-level scripts to the workspace root, so the semaphores, the leaf sweep, the whole contribution path and both new commands were *reachable and unnamed* — present in the cloned seed, absent from anywhere a human would type them, which is the same failure as shipping a skill with no front-matter. The list now covers all eleven, **a name missing from the seed warns instead of being skipped in silence**, and the activation hint names the seed's own command family (`roots-report` · `roots-seed-audit` · the four community ones) instead of two domain agents — still not preloaded, since *import on demand* is the rule, but no longer unmentioned. Does not change the `.roots/` format.
 - **1.20** (14 September 2026) — **The hygiene gate moves to where the body actually leaves.** Fix to the 1.19 contribution path: `roots-upstream.sh` only blocked a flagged body inside the branch that can publish (`gh` or `$GITHUB_TOKEN`), so on rung 3 — **the default state of anyone who clones the seed** — a flagged body was still rendered into the prefilled issue URL and printed as the last line of the output. Measured with a positive control: client name, production host, IP, an employee's email and the credential file, all inside the query string. **A prefilled URL is not a pointer to the body, it *is* the body.** The gate is now single, runs before the ladder branches, covers `url` as well as `issue`, and refuses with `5` on all three rungs (`--scrubbed` remains the explicit override). Verified with positive and negative controls, and the control that closes is **that no URL is printed**, not the exit code. Companion: two new **automatic triggers** — finding that the seed's own text is wrong ⇒ offer `roots-issue`; real use teaching what the spec does not say ⇒ offer `roots-suggest`. The 1.19 commands existed and nothing fired them, which is the same failure mode 1.19 was written to fix, one level up. And the spec was describing a block the code did not perform: **a doc that overstates a guard is worse than no doc — it gets trusted.** Does not change the `.roots/` format.
@@ -591,7 +592,7 @@ English is primary (the key); `es`/`fr` are translations and may lag (a missing 
 | Tool | Integration point | Merge strategy |
 |-------------|---------------------|---------------------|
 | **Claude Code** | `.claude/` + `CLAUDE.md` | File-based — reads `.roots/` directly. Bridge via `CLAUDE.md` (see § Integration) |
-| **Codex** | `codex.md` / `.codex/` | Hybrid — map `context.md` → `codex.md`, has native support + config |
+| **Codex** | `AGENTS.md` + `.agents/skills/` + `.codex/agents/` | File-based — `AGENTS.md` is the bridge (Claude Code imports the same file); skills and subagents activated by `sync-agents-skills.sh` (see § Integration → Codex) |
 | **Antigravity** | native | File-based — direct support of `.roots/` |
 | **VS Code + Copilot** | `.github/copilot-instructions.md` | Instruction-based — reference `.roots/` from instructions |
 | **Cursor** | `.cursorrules` | Instruction-based — reference `.roots/` from rules |
@@ -602,7 +603,7 @@ Each tool integrates context differently:
 
 - **File-based**: The tool reads files from `.roots/` directly at session start (Claude Code, Antigravity)
 - **Instruction-based**: The tool needs a pointer file that references `.roots/` (Copilot, Cursor)
-- **Hybrid**: The tool has native support + a configuration file (Codex)
+- **Hybrid**: The tool has native support + a configuration file
 
 ### Extensibility
 
@@ -1255,7 +1256,7 @@ Detail: `recipes/token-economy.md`.
 | Layer | Where | Tracked? | Role |
 |---|---|---|---|
 | **Store** | `<repo>/.roots/{agents,skills}/` | **yes** (with the repo) | where they **live** and evolve; local source of truth; copyable |
-| **Activation** | `<repo>/.claude/{agents,skills}/` | no (local) | you copy here what you want to use; Claude Code reads from here |
+| **Activation** | `<repo>/.claude/{agents,skills}/` (Claude Code) · `<repo>/.codex/agents/` + `<repo>/.agents/skills/` (Codex) | no (local) | you copy here what you want to use; each tool reads from its own |
 | **Base** | `roots_seed/{agents,skills}/` | yes (seed) | cross-client library everyone draws from |
 
 **Why import on-demand:** the base can become huge. Not everything is preloaded in each client: the seed reports *what exists and where*; you copy to `.roots/` what that repo needs and **activate in `.claude/`** what you are going to use (fits the *layer ladder* of Token economy: the library is L2/L3, not L0).
@@ -1284,6 +1285,16 @@ model: opus | sonnet | haiku             # optional
 |---|---|---|
 | Agent | `agents/<name>.md` | `agents/<name>.md` (same file) |
 | Skill | `skills/<name>.md` (flat) | `skills/<name>/SKILL.md` (**directory**) |
+
+| | Store (`.roots/`) | Activation for Codex |
+|---|---|---|
+| Agent | `agents/<name>.md` | `.codex/agents/<name>.toml` — **generated** (`name`, `description`, `developer_instructions` = body) |
+| Skill | `skills/<name>.md` (flat) | `.agents/skills/<name>/SKILL.md` (same file as Claude's) |
+
+> The Codex agent is the one place where activation is **not** a plain copy, because Codex wants TOML.
+> It is still mechanical and one-way: `sync-agents-skills.sh activate` generates it, `check`
+> regenerates and compares, and `harvest` never reads it back. Edit the `.md`, never the `.toml`.
+> `tools` and `model` are Claude-only and are dropped (a Codex subagent inherits the parent's sandbox).
 
 > ⛔ **A skill with no front-matter copies fine, activates fine, and is NEVER LISTED as a command.**
 > It does not error — it is simply absent, which is the hardest failure to notice: you invoke it, the
@@ -1764,6 +1775,7 @@ publishes its memory** — `state/`, `journal/` and `workbench/` included.
 | `CLAUDE.md` (root) | Global project | Claude Code (auto-loads) | Index and top-level directives |
 | `.roots/{module}/context.md` | Specific module | Any agent/human | Module detail |
 | `.claude/` (root) | Claude Code config | Only Claude Code | Optional bridge — settings, json hooks |
+| `AGENTS.md` (root, and per directory) | Global / per directory | Codex (auto-loads) and most other agents | **Canonical bridge** — `CLAUDE.md` imports it with `@AGENTS.md` | <!-- scrub-ok: @AGENTS.md is Claude Code's import syntax, not an address -->
 
 ### No-duplication rules
 
@@ -1824,13 +1836,40 @@ When `CLAUDE.md` is created from the seed, use this template as a base:
 Example: Odoo multi-website routing conventions, JS standards, etc.)
 ```
 
+### Codex (`AGENTS.md`, `.agents/skills/`, `.codex/agents/`)
+
+A forest is often worked with **Claude Code and Codex at the same time** (on one laptop, or one
+person on each). The rule is the same as for `CLAUDE.md` — `.roots/` is the truth, the tool files
+are bridges — plus one more: **the two bridges must not become two rulebooks.**
+
+- **`AGENTS.md` is the canonical bridge.** Codex reads it natively: one global
+  (`~/.codex/AGENTS.md`) and then one per directory from the repo root down to the working directory
+  (`AGENTS.override.md` wins in its directory), concatenated, **up to 32 KiB** — past that it stops
+  reading. So the same index discipline applies, harder: `AGENTS.md` points into `.roots/`, it does
+  not copy it.
+- **`CLAUDE.md` imports it:** first line `@AGENTS.md`, then only what is Claude-specific (hooks, <!-- scrub-ok: @AGENTS.md is Claude Code's import syntax, not an address -->
+  settings, Claude-only commands). An existing `CLAUDE.md` with rules of its own: move the shared
+  rules to `AGENTS.md` and leave the import — otherwise the next rule gets written in one file only.
+- **Skills and subagents:** `sync-agents-skills.sh activate` (default `--for both`) writes
+  `.agents/skills/<name>/SKILL.md` and `.codex/agents/<name>.toml` next to the `.claude/` ones. Both
+  generated directories are gitignored (the installer adds both rules).
+- **Hooks:** the protocols in `.roots/*/hooks/*.md` are tool-agnostic; the Claude Code wiring in
+  `.claude/` (json hooks, `UserPromptSubmit` injections) does **not** run under Codex. Whatever must
+  happen at session start for a Codex session has to be **said in `AGENTS.md`** (e.g. *"read
+  `.roots/state/` and run `work-claim.sh check` before touching a front"*).
+- **Semaphores:** `sync-lock.sh`, `work-claim.sh` and `leaf-fall.sh` work unchanged (they default to
+  `$PWD` when `$CLAUDE_PROJECT_DIR` is unset). What Codex does **not** give them is the session
+  identity: `work-claim.sh` resolves *alive/dead* from Claude Code's per-session socket, so a Codex
+  session's claim shows `?` — set `CLAIM_WHO` explicitly and `touch` the claim, because the
+  liveness check cannot speak for it.
+
 ### Future compatibility
 
 Anticipated problems and how to resolve them:
 
 | Problem | Resolution |
 |----------|------------|
-| Another agent (Cursor, Copilot) ignores `CLAUDE.md` | Doesn't matter — `.roots/` is self-contained and tool-agnostic, the other agent reads it directly |
+| Another agent (Codex, Cursor, Copilot) ignores `CLAUDE.md` | Doesn't matter — `.roots/` is self-contained and tool-agnostic. Codex reads `AGENTS.md`, which is why the shared rules live there and `CLAUDE.md` imports them |
 | Claude Code ignores `.roots/` | `CLAUDE.md` points to `.roots/` — Claude Code follows the links. Alternatively, a `session-start` hook in `.claude/hooks/` can force the read |
 | A module extracted to another repo loses `CLAUDE.md` | The module carries its `.roots/` with the embedded seed — it is reprocessable without `CLAUDE.md`. The new repo can generate its own `CLAUDE.md` from the seed |
 | `CLAUDE.md` grows too much | A sign that content should migrate to `.roots/`. `CLAUDE.md` must stay a light index |

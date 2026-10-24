@@ -13,6 +13,7 @@
 #   --profile <name>    minimal | standard | full         (default: standard)
 #   --no-claude         skip installing Claude Code
 #   --desktop           also install the Claude Desktop app (Cowork lives there)
+#   --codex             also install the OpenAI Codex CLI (the workspace works with both)
 #   --check             report what is installed/missing and exit (changes nothing)
 #   -n, --dry-run       print what would run
 #   -y, --yes           no prompts
@@ -26,7 +27,7 @@
 # Apple's Command Line Tools and Homebrew's own installer, which ask for their own consent.
 set -euo pipefail
 
-WORKSPACE="${HOME}/forest"; PROFILE="standard"; DO_CLAUDE=1; DO_DESKTOP=0
+WORKSPACE="${HOME}/forest"; PROFILE="standard"; DO_CLAUDE=1; DO_DESKTOP=0; DO_CODEX=0
 CHECK_ONLY=0; DRY=0; ASSUME_YES=0
 SEED_REPO="${ROOTS_SEED_REPO:-https://github.com/ctmil/roots_seed.git}"
 
@@ -56,6 +57,7 @@ while [ $# -gt 0 ]; do
     --profile)   PROFILE="${2:?}"; shift ;;
     --no-claude) DO_CLAUDE=0 ;;
     --desktop)   DO_DESKTOP=1 ;;
+    --codex)     DO_CODEX=1 ;;
     --check)     CHECK_ONLY=1 ;;
     -n|--dry-run) DRY=1 ;;
     -y|--yes)    ASSUME_YES=1 ;;
@@ -91,7 +93,7 @@ fi
 # ---------- check mode ----------
 if [ "$CHECK_ONLY" -eq 1 ]; then
   step "Environment report"
-  for t in brew git claude jq rg fd gawk python3 gh pandoc ffmpeg node tree wget; do
+  for t in brew git claude codex jq rg fd gawk python3 gh pandoc ffmpeg node tree wget; do
     if have "$t"; then ok "$(printf '%-9s %s' "$t" "$(command -v "$t")")"; else err "$(printf '%-9s missing' "$t")"; fi
   done
   say ""
@@ -99,6 +101,7 @@ if [ "$CHECK_ONLY" -eq 1 ]; then
   have gsed && ok "gsed present (GNU sed — scripts written for GNU need it)" || warn "gsed missing: BSD sed differs from GNU (\`sed -i\` needs an argument)"
   [ -d "$WORKSPACE" ] && ok "workspace exists: $WORKSPACE" || warn "workspace not created yet: $WORKSPACE"
   [ -d "$WORKSPACE/.roots" ] && ok ".roots/ present" || warn ".roots/ not initialized"
+  [ -e "$WORKSPACE/AGENTS.md" ] && ok "AGENTS.md present (Codex entry point)" || warn "AGENTS.md missing: Codex starts this workspace with no instructions"
   exit 0
 fi
 
@@ -200,6 +203,20 @@ if [ "$DO_DESKTOP" -eq 1 ]; then
     warn "no cask available — download it from https://claude.com/download"  # scrub-ok: public vendor URL
     run "open 'https://claude.com/download' || true"  # scrub-ok: public vendor URL
   fi
+fi
+
+if [ "$DO_CODEX" -eq 1 ]; then
+  step "OpenAI Codex CLI"
+  if have codex; then
+    ok "already installed: $(codex --version 2>/dev/null || echo 'version unknown')"
+  elif brew info --cask codex >/dev/null 2>&1; then
+    run "brew install --cask codex"
+  elif have npm; then
+    run "npm install -g @openai/codex"
+  else
+    warn "no cask and no npm — see https://github.com/openai/codex for the current install"  # scrub-ok: public vendor URL
+  fi
+  info "first run: 'codex' asks to sign in. It reads AGENTS.md, .agents/skills/ and .codex/agents/"
 fi
 
 # ---------- 5. workspace ----------
@@ -346,9 +363,24 @@ else
   info "[dry-run] would append the .roots/.claude/macOS rules"
 fi
 
+# Codex activation (seed >= 1.23). Its own guard, for the reason written above: a block gated
+# on an older marker would never reach an install that already has that marker.
+if [ -e "$GI" ] && ! grep -q '^\.agents/skills/' "$GI" 2>/dev/null; then
+  [ "$DRY" -eq 0 ] && cat >> "$GI" <<'EOF'
+
+# --- Codex activation layer: generated from .roots/, local (seed >= 1.23) ---
+# .codex/agents/*.toml are GENERATED from .roots/agents/*.md by sync-agents-skills.sh, and
+# .agents/skills/ is a copy of .roots/skills/: tracking them would version a second source.
+.codex/agents/
+.agents/skills/
+EOF
+  ok "added the Codex activation rules"
+fi
+
 # ---------- 8. activation layer ----------
-step "Activation layer (.claude/)"
+step "Activation layer (.claude/ for Claude Code, .codex/ + .agents/ for Codex)"
 run "mkdir -p '$WORKSPACE/.claude/agents' '$WORKSPACE/.claude/skills'"
+run "mkdir -p '$WORKSPACE/.codex/agents' '$WORKSPACE/.agents/skills'"
 if [ -d "$SEED_DIR/agents" ]; then
   info "base library at $SEED_DIR/agents — import on demand, do not preload:"
   info "  ./sync-agents-skills.sh import bug-hunter grove-keeper --seed '$SEED_DIR'"
@@ -365,16 +397,21 @@ if [ -d "$SEED_DIR/skills" ]; then
   info "  ./sync-agents-skills.sh activate"
 fi
 
-# ---------- 9. CLAUDE.md + Cowork entry point ----------
-step "Entry points for the assistant"
-if [ -e "$WORKSPACE/CLAUDE.md" ]; then
-  ok "CLAUDE.md exists (untouched)"
+# ---------- 9. AGENTS.md + CLAUDE.md + Cowork entry point ----------
+# AGENTS.md is the CANONICAL bridge: Codex reads it natively (and so do most other agents).
+# CLAUDE.md imports it with `@AGENTS.md` and only adds what is Claude-specific, so the rules  # scrub-ok: import syntax, not an address
+# live in one file and the two tools cannot drift. Existing files are never touched.
+step "Entry points for the assistants"
+IMPORT_AGENTS='@AGENTS.md'  # scrub-ok: Claude Code's import syntax, not an address
+if [ -e "$WORKSPACE/AGENTS.md" ]; then
+  ok "AGENTS.md exists (untouched)"
 elif [ "$DRY" -eq 0 ]; then
-  cat > "$WORKSPACE/CLAUDE.md" <<'EOF'
-# CLAUDE.md — Forest workspace
+  cat > "$WORKSPACE/AGENTS.md" <<'EOF'
+# AGENTS.md — Forest workspace
 
 Persistent memory lives in **`.roots/`** (tool-agnostic markdown). `.roots/` is the source of
-truth; this file is only a bridge for Claude Code.
+truth; this file is only the bridge for the agent (Codex reads it natively; Claude Code imports
+it from `CLAUDE.md`). Keep it short: Codex stops reading project instructions at 32 KiB.
 
 ## Start here
 - `.roots/context.md` — what this workspace is (30 s)
@@ -391,7 +428,22 @@ truth; this file is only a bridge for Claude Code.
 ## Sessions
 At session close, update `.roots/` (`state/`, and `journal/` if something happened worth keeping).
 EOF
-  ok "CLAUDE.md"
+  ok "AGENTS.md"
+fi
+if [ -e "$WORKSPACE/CLAUDE.md" ]; then
+  ok "CLAUDE.md exists (untouched)"
+  grep -qF "$IMPORT_AGENTS" "$WORKSPACE/CLAUDE.md" 2>/dev/null \
+    || info "tip: add a line '$IMPORT_AGENTS' to CLAUDE.md so Claude Code and Codex share one set of rules"
+elif [ "$DRY" -eq 0 ]; then
+  cat > "$WORKSPACE/CLAUDE.md" <<EOF
+# CLAUDE.md — Forest workspace
+
+$IMPORT_AGENTS
+
+The shared rules are in \`AGENTS.md\` (imported above), so Claude Code and Codex read the same ones.
+Put here only what is specific to Claude Code.
+EOF
+  ok "CLAUDE.md (imports AGENTS.md)"
 fi
 
 if [ ! -e "$WORKSPACE/README.md" ] && [ "$DRY" -eq 0 ]; then
@@ -434,7 +486,7 @@ say "  Profile   : $PROFILE"
 say ""
 say "  Next:"
 say "    1. ${B}open a new terminal${Z} (so the PATH changes apply)"
-say "    2. cd '$WORKSPACE' && claude          ${D}# log in on first run${Z}"
+say "    2. cd '$WORKSPACE' && claude          ${D}# log in on first run (or: codex)${Z}"
 say "    3. edit .roots/context.md             ${D}# tell it what this Forest is${Z}"
 say "    4. ./setup-module.sh <name> <git-url> <branch...>   ${D}# mount your first Tree${Z}"
 say ""
