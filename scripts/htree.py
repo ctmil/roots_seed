@@ -22,6 +22,7 @@ so a person who works with two organisations keeps two profiles in the same file
     python3 htree.py projects [-p P]           # projects I can see (with task counts)
     python3 htree.py tasks [-p P] [--project X] [--mine] [--all]   # list tasks
     python3 htree.py tasks [-p P] <ID>         # one task: description + conversation
+    python3 htree.py new [-p P] --project <id|name> "title" [-f desc.md | --desc text] [--yes]  # DRY-RUN unless --yes
     python3 htree.py comment [-p P] <ID> [-f file | text] [--yes]  # DRY-RUN unless --yes
     python3 htree.py set [-p P] <ID> field=value ... [--yes]       # DRY-RUN unless --yes
 
@@ -418,6 +419,45 @@ def cmd_comment(args):
     return 0
 
 
+def cmd_new(args):
+    (name, v), = pick(args)
+    desc = open(args.file, encoding="utf-8").read() if args.file else (args.desc or "")
+    if not args.yes:
+        print(f"\n  DRY-RUN — nothing created. [{name}] project «{args.project}» would get a task:")
+        print(f"    title: {args.title}")
+        if desc.strip():
+            print("\n".join("    | " + l for l in desc.splitlines()))
+        print("\n  Re-run with --yes to create it.\n")
+        return 2
+    b = Board(name, v)
+    dom = _project_domain(b, args.project)
+    pid = dom[0][2] if dom[0][1] == "=" else None
+    if pid is None:
+        ids = dom[0][2]
+        if len(ids) != 1:
+            die(f"'{args.project}' matches {len(ids)} projects — use the project id",
+                "List them with:  htree.py projects")
+        pid = ids[0]
+    vals = {"name": args.title, "project_id": pid}
+    if desc.strip():
+        vals["description"] = to_html(desc)
+    # project_id goes in vals: a gateway that supports portal accounts moves it to the context
+    # (an Odoo portal user may not write project_id). If it refuses, say what to do instead.
+    try:
+        r = _post(b.base, "/project.task/create", {"access_token": b.token, "vals": vals})
+    except GatewayError as e:
+        if "project_id" in e.msg:
+            die(f"[{name}] this board does not let your account create tasks yet",
+                "Propose it as a comment on the task the organisation gave you for requests.")
+        die(f"[{name}] the board refused the new task", f"{e.code}: {e.msg}")
+    tid = r["ids"][0]
+    back = b.search("project.task", [["id", "=", tid]], ["name", "project_id", "stage_id"], limit=1)
+    t = back and back[0]
+    print(f"  ✅ task #{tid} created in «{t and t['project_id'] and t['project_id'][1]}» "
+          f"[{t and t['stage_id'] and t['stage_id'][1]}]  {b.task_link(tid)}")
+    return 0
+
+
 def cmd_set(args):
     (name, v), = pick(args)
     vals = {}
@@ -450,6 +490,12 @@ def main():
     t.add_argument("--project", help="project id or part of its name")
     t.add_argument("--mine", action="store_true", help="only tasks assigned to me")
     t.add_argument("--all", action="store_true", help="include closed/folded stages")
+    n = sub.add_parser("new", help="create a task in a project (dry-run unless --yes)")
+    n.add_argument("title")
+    n.add_argument("--project", required=True, help="project id or part of its name")
+    n.add_argument("--desc", help="description text")
+    n.add_argument("-f", "--file", help="description from a file")
+    n.add_argument("--yes", action="store_true")
     c = sub.add_parser("comment", help="comment on a task (dry-run unless --yes)")
     c.add_argument("id", type=int)
     c.add_argument("text", nargs="*")
@@ -464,7 +510,7 @@ def main():
     args = ap.parse_args()
     args.profile = args.profile or getattr(args, "profile_sub", None)
     return {"credentials": cmd_credentials, "check": cmd_check, "whoami": cmd_whoami,
-            "projects": cmd_projects, "tasks": cmd_tasks, "comment": cmd_comment,
+            "projects": cmd_projects, "tasks": cmd_tasks, "new": cmd_new, "comment": cmd_comment,
             "set": cmd_set}[args.cmd](args)
 
 

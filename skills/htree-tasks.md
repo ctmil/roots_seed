@@ -25,7 +25,10 @@ One **profile** per board: any prefix `P` with `P_BASE`, `P_CLIENT_ID`, `P_SECRE
    is not the person, stop and say so.
 3. **Read.** `htree.py projects -p P` · `htree.py tasks -p P [--project <id|name>] [--mine] [--all]` ·
    `htree.py tasks -p P <ID>` (description + conversation). Summarise for the person; link the task.
-4. **Write = their words, their OK.** `comment` and `set` are **DRY-RUN by default** (exit 2). Show the
+3b. **Create.** `htree.py new -p P --project <id|name> "title" [--desc …|-f file]` — dry-run first, then
+   `--yes`. One task = one subject, with a title that says what it is (not "question" / "pending").
+   If the board answers that the account cannot create tasks, propose it in the requests task instead.
+4. **Write = their words, their OK.** `new`, `comment` and `set` are **DRY-RUN by default** (exit 2). Show the
    person exactly what will be published, and re-run with `--yes` only after an explicit yes. After a
    `set`, the tool re-reads the field: report the re-read value, not the request.
 
@@ -35,7 +38,6 @@ One **profile** per board: any prefix `P` with `P_BASE`, `P_CLIENT_ID`, `P_SECRE
 - `You cannot read/write ... fields` or `restricted` = the account deliberately does not reach that
   (a portal user only sees the projects it collaborates on). It is a permission, not a bug: ask the
   board owner, do not look for a way around it.
-- Creating new tasks may not be available to portal accounts; propose them as a comment on a task.
 
 ## Expected output
 A short answer in the person's language: what they have pending (by project), what a task says, or

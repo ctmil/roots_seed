@@ -19,7 +19,7 @@ The `.roots/` memory does not live in thin air: it lives in repos. These scripts
 | `dashboard.sh` | Brings up `tools/forest-dashboard` pointing at the workspace and opens the browser. `./dashboard.sh` (see flags in the script header) |
 | `sync-lock.sh` | **Sync semaphore** over a Tree's worktrees: `check`/`acquire`/`release`/`list`. One `.SYNCING` flag in the branch *container*, never per branch (per-branch is slow and leaves stale flags when a session dies) |
 | `work-claim.sh` | **Work semaphore** between sessions (subjects, not files): `check`/`take`/`touch`/`release`/`list`. `check --self` verifies the liveness probe can see its own session — a probe that cannot must never report anyone as dead |
-| `htree.py` | **Task boards** (OCAPI htree gateway), several at once: `credentials` (form; verifies before saving; keeps `.htree.env` out of git) · `check` · `whoami` · `projects` · `tasks [ID]` · `comment`/`set` (dry-run unless `--yes`). Stdlib only. Skill: `skills/htree-tasks.md` |
+| `htree.py` | **Task boards** (OCAPI htree gateway), several at once: `credentials` (form; verifies before saving; keeps `.htree.env` out of git) · `check` · `whoami` · `projects` · `tasks [ID]` · `new`/`comment`/`set` (dry-run unless `--yes`). Stdlib only. Skill: `skills/htree-tasks.md` |
 | `leaf-fall.sh` | **Leaf fall**: `status` (litter on the Forest floor) · `sweep` (into `workbench/leaves/<date>-<front>/`) · `compost [days]`. Warns, never blocks |
 | `roots-upstream.sh` | **Contribute upstream**: `check` (capability ladder) · `scrub` (public-hygiene pass) · `issue` · `url`. Refuses to publish without `--yes` |
 
