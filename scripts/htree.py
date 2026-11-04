@@ -16,14 +16,14 @@ is a **profile**: any prefix P with the three keys
 
 so a person who works with two organisations keeps two profiles in the same file.
 
-    python3 scripts/htree.py credentials [-p P]        # add / edit a profile (form; verifies before saving)
-    python3 scripts/htree.py check                     # does every profile authenticate?
-    python3 scripts/htree.py whoami [-p P]             # which account / user signs my comments
-    python3 scripts/htree.py projects [-p P]           # projects I can see (with task counts)
-    python3 scripts/htree.py tasks [-p P] [--project X] [--mine] [--all]   # list tasks
-    python3 scripts/htree.py tasks [-p P] <ID>         # one task: description + conversation
-    python3 scripts/htree.py comment [-p P] <ID> [-f file | text] [--yes]  # DRY-RUN unless --yes
-    python3 scripts/htree.py set [-p P] <ID> field=value ... [--yes]       # DRY-RUN unless --yes
+    python3 htree.py credentials [-p P]        # add / edit a profile (form; verifies before saving)
+    python3 htree.py check                     # does every profile authenticate?
+    python3 htree.py whoami [-p P]             # which account / user signs my comments
+    python3 htree.py projects [-p P]           # projects I can see (with task counts)
+    python3 htree.py tasks [-p P] [--project X] [--mine] [--all]   # list tasks
+    python3 htree.py tasks [-p P] <ID>         # one task: description + conversation
+    python3 htree.py comment [-p P] <ID> [-f file | text] [--yes]  # DRY-RUN unless --yes
+    python3 htree.py set [-p P] <ID> field=value ... [--yes]       # DRY-RUN unless --yes
 
 -p is optional when there is a single profile. Exit codes: 0 ok · 1 error · 2 dry-run (nothing sent).
 Standard library only. Safe on a Windows console (cp1252).
@@ -111,7 +111,7 @@ def write_env(env, p=None):
     """Rewrites the file: UTF-8 without BOM, LF, grouped by profile, mode 600."""
     p = p or ENV_FILE
     lines = ["# htree board credentials (tree accounts). NEVER commit this file.",
-             "# Edit with:  python3 scripts/htree.py credentials", ""]
+             "# Edit with:  python3 htree.py credentials", ""]
     done = set()
     for name, vals in sorted(profiles(env).items()):
         for x in KEYS:
@@ -198,7 +198,7 @@ class Board:
         self.name, self.base = name, vals["BASE"]
         if not all(vals.values()):
             die(f"Profile {name} is incomplete", f"File: {ENV_FILE}",
-                "Fix it with:  python3 scripts/htree.py credentials -p " + name)
+                "Fix it with:  python3 htree.py credentials -p " + name)
         try:
             a = authenticate(self.base, vals["CLIENT_ID"], vals["SECRET_KEY"])
         except GatewayError as e:
@@ -233,7 +233,7 @@ def pick(args, need_one=True):
     ps = profiles()
     if not ps:
         die("No board credentials yet", f"Looked in: {ENV_FILE}",
-            "Load them with:  python3 scripts/htree.py credentials")
+            "Load them with:  python3 htree.py credentials")
     if args.profile:
         key = args.profile.upper()
         if key not in ps:

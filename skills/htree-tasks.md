@@ -7,7 +7,9 @@ description: Work the person's tasks on one or more htree task boards (Odoo back
 
 > A person invited to work with an organisation gets a **tree account** (Client ID + Secret Key) per
 > board. This skill is how their forest reads and works those boards — without them ever touching a
-> terminal command or an Odoo password. The instrument is **`scripts/htree.py`** (stdlib only).
+> terminal command or an Odoo password. The instrument is **`htree.py`** (stdlib only) at the workspace
+> root — the installer copies it there; if it is missing, copy `roots_seed/scripts/htree.py` (after
+> `git -C roots_seed pull`). Run it from the workspace root: that is where it looks for `.htree.env`.
 
 ## Where the credentials live
 `.htree.env` at the repo root — **never committed** (`htree.py credentials` adds it to `.gitignore`).
@@ -15,7 +17,7 @@ One **profile** per board: any prefix `P` with `P_BASE`, `P_CLIENT_ID`, `P_SECRE
 
 ## Steps
 1. **Credentials first.** If the person pastes new keys or says they changed:
-   `python3 scripts/htree.py credentials -p <NAME>` — it asks URL / Client ID / Secret Key
+   `python3 htree.py credentials -p <NAME>` — it asks URL / Client ID / Secret Key
    (Enter keeps the current value), **authenticates against the real board before saving**, and saves
    nothing if it fails. If they pasted the values in the chat, feed them on stdin; **never echo the
    Secret Key back**, never write it in a task, a commit or a `.roots/` file.
