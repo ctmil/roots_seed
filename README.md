@@ -34,7 +34,7 @@
 
 ## What it is
 
-`.roots/` is a **persistent memory** folder you drop into a repo: decisions, error/fix logs, design docs, tasks, reusable skills — written for **AI agents and humans alike**, in a stable format so any tool can read and grow it. The canonical spec is **[`roots_seed.md`](roots_seed.md)** (currently **v1.23**); the navigable front door is **[`manual.md`](manual.md)**.
+`.roots/` is a **persistent memory** folder you drop into a repo: decisions, error/fix logs, design docs, tasks, reusable skills — written for **AI agents and humans alike**, in a stable format so any tool can read and grow it. The canonical spec is **[`roots_seed.md`](roots_seed.md)** (currently **v1.24**); the navigable front door is **[`manual.md`](manual.md)**.
 
 > **Language:** the spec is **canonical in English**; each deployment keeps its own working language. See **[Language & glossary](#language--glossary-i18n)** below.
 
@@ -42,6 +42,8 @@ Not just for code: the same model spans software, design and narrative. See **[`
 
 It ships with a small toolkit: **`scripts/`** mount the substrate (bare + worktrees), **`skills/`** are a shared library of well-designed strategies, and **`tools/`** are apps that read the memory — first among them the **`forest-dashboard`**.
 
+> **v1.24 adds `scripts/htree.py` + the `htree-tasks` skill:** a forest works the task boards it was invited to (several at once), with credentials verified before they are saved and writes dry-run by default.
+>
 > **v1.23 makes Codex a first-class target next to Claude Code:** `AGENTS.md` is the canonical bridge (`CLAUDE.md` imports it), and `sync-agents-skills.sh` activates skills and subagents for both tools from the same `.roots/` store. See the changelog in [`roots_seed.md`](roots_seed.md).
 >
 > **v1.22 added what a live forest taught in two weeks:** a third lock for **shared environments**, a table of **instruments that lie plausibly** (and the control for each), and deploy rules where **monitoring measures damage, not the expected signal**. See the changelog in [`roots_seed.md`](roots_seed.md).
