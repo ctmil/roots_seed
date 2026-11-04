@@ -19,3 +19,4 @@ Every recipe reuses the same three primitives of the model, plus the cross-cutti
 2. **[design-forest.md](./design-forest.md)** — Design forest (Folio/Lab): `1 vendor (artist) > N trees > designs`. Bridge `ai_context_md` ↔ `.roots`.
 3. **[narrative-game.md](./narrative-game.md)** — Script + scenarios + RPG: sheets, lore, NPCs, arcs as branches, character skills ≡ AI skills.
 4. **[token-economy.md](./token-economy.md)** — Token economy: layer ladder, formula (CER/FS), internal benchmarking and a repo of techniques per AI model.
+5. **[collaborator-forest.md](./collaborator-forest.md)** — The forest of an invited collaborator: the task as the channel, requests and proposals by template, someone else's voice, third parties, session end.

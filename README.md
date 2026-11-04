@@ -34,7 +34,7 @@
 
 ## What it is
 
-`.roots/` is a **persistent memory** folder you drop into a repo: decisions, error/fix logs, design docs, tasks, reusable skills — written for **AI agents and humans alike**, in a stable format so any tool can read and grow it. The canonical spec is **[`roots_seed.md`](roots_seed.md)** (currently **v1.24**); the navigable front door is **[`manual.md`](manual.md)**.
+`.roots/` is a **persistent memory** folder you drop into a repo: decisions, error/fix logs, design docs, tasks, reusable skills — written for **AI agents and humans alike**, in a stable format so any tool can read and grow it. The canonical spec is **[`roots_seed.md`](roots_seed.md)** (currently **v1.25**); the navigable front door is **[`manual.md`](manual.md)**.
 
 > **Language:** the spec is **canonical in English**; each deployment keeps its own working language. See **[Language & glossary](#language--glossary-i18n)** below.
 
