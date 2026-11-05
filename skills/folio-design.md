@@ -33,6 +33,17 @@ description: Design by layers on a Folio board (MoldeoLab parametric design) fro
 6. **Write the experience down** — this is a betatest: in `.roots/` and as a comment on the MoldeoLab
    task: what was clear, what blocked, what was missing, what surprised. That record is the product.
 
+## Scenes and sketchbooks (v1.28)
+A **scene** is a moldeo js composition tied to a work (config JSON + layers); a **sketchbook** gathers
+a work's process (pages: image · video · audio · document · text). Same rules: yours only, unpublished.
+1. `scene-new "Name" --work <ID> [--config scene.json]` → the scene is set on the work.
+2. `scene-layer <SCENE_ID> "Name" --type image|text|shape|video|animation|particle|3d [--config layer.json] [--image f.png]`.
+3. `sketchbook-new <WORK_ID> "Name" [--scene <SCENE_ID>]` → `page-new <SKETCHBOOK_ID> "Name" --type image --file f.png [--notes "..."]`.
+4. `scenes` · `sketchbooks --work <ID>` to see them.
+- ⛔ **Raw code** (js/css/html/embed, a JS library by URL) is not loaded from a collaborator account yet:
+  upload what the code produced (image/video) as a page, or describe it in the scene config.
+- You can only attach to YOUR work, scene or sketchbook; published ones of others are read-only reference.
+
 ## Rules
 - The design and its rules are the author's: propose, never overwrite someone else's work.
 - `code` is unique on the board — prefix it with something of yours.

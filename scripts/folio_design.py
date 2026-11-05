@@ -18,6 +18,19 @@ templates, plus the published works of others as reference.
     python3 folio_design.py generate [-p P] <TEMPLATE_ID> [--yes]         # compose every variant
     python3 folio_design.py results [-p P] <TEMPLATE_ID> [--out DIR]      # download the PNGs + params
 
+  Scenes (moldeo js) and sketchbooks — v1.28:
+    python3 folio_design.py scenes [-p P]                                  # your scenes (+ published ones with --all)
+    python3 folio_design.py scene-new [-p P] "Name" [--work ID] [--config scene.json] [--yes]
+    python3 folio_design.py scene-layer [-p P] <SCENE_ID> "Name" [--type T] [--config layer.json] [--image f.png] [--yes]
+    python3 folio_design.py sketchbooks [-p P] [--work ID]
+    python3 folio_design.py sketchbook-new [-p P] <WORK_ID> "Name" [--scene ID] [--yes]
+    python3 folio_design.py page-new [-p P] <SKETCHBOOK_ID> "Name" [--type image|video|audio|document|text] [--file F] [--yes]
+
+  A scene is a moldeo js composition (config JSON + layers: image|text|shape|video|animation|particle|3d).
+  A sketchbook gathers the process of a work: pages with images, video, audio, documents, notes.
+  Raw code (js/css/html/embed, a JS library by URL) is not loaded from a collaborator account yet:
+  upload the result (image/video) or describe it in a scene. Everything stays unpublished.
+
 Writes are DRY-RUN unless --yes (exit 2 = nothing sent). Standard library only.
 
 THE SPEC (design.json) — one object:
@@ -184,6 +197,104 @@ def cmd_results(args):
     print(f"{len(rows)} variants of '{ex[0]['name']}' in {out}/")
 
 
+
+def _b64(path):
+    f = Path(path)
+    if not f.is_file():
+        die(f"File not found: {f}")
+    return base64.b64encode(f.read_bytes()).decode(), f.name
+
+
+def _json_file(path):
+    try:
+        return json.dumps(json.loads(Path(path).read_text(encoding="utf-8")))
+    except (OSError, ValueError) as e:
+        die(f"Cannot read the JSON {path}", str(e))
+
+
+def cmd_scenes(args):
+    b = board(args)
+    # The board only shows you your scenes and the published ones; without --all, the unpublished (yours).
+    dom = [] if args.all else [["website_published", "=", False], ["state", "!=", "published"]]
+    rows = b.search("moldeo.scene", dom, ["code", "name", "state", "website_published"], limit=200)
+    if not rows:
+        print("No scenes yet. Create one:  python3 folio_design.py scene-new \"Name\" --yes")
+    for r in rows:
+        print(f"#{r['id']:<5} {r.get('code') or '':<16} {r.get('state') or '':<9} {r['name']}")
+
+
+def cmd_scene_new(args):
+    b = board(args)
+    vals = {"name": args.name}
+    if args.config:
+        vals["scene_config"] = _json_file(args.config)
+    dry(args, f"create a scene on [{b.name}]" + (f" and set it on work #{args.work}" if args.work else ""), vals)
+    sid = b.gw("/moldeo.scene/create", vals=vals)["ids"][0]
+    if args.work:
+        b.gw("/moldeo.folio.work/write", ids=[int(args.work)], vals={"moldeo_scene_id": sid})
+    row = b.search("moldeo.scene", [["id", "=", sid]], ["code"], limit=1)[0]
+    print(f"✓ scene #{sid} {row.get('code')} — unpublished." + (f" Set on work #{args.work}." if args.work else ""))
+
+
+def cmd_scene_layer(args):
+    b = board(args)
+    vals = {"name": args.name, "scene_id": int(args.scene), "layer_type": args.type}
+    if args.config:
+        vals["config_json"] = _json_file(args.config)
+    shown = dict(vals)
+    if args.image:
+        vals["image"], fname = _b64(args.image)
+        shown["image"] = f"{fname} ({len(vals['image'])} b64 chars)"
+    dry(args, f"add a layer to scene #{args.scene}", shown)
+    lid = b.gw("/moldeo.scene.layer/create", vals=vals)["ids"][0]
+    print(f"✓ layer #{lid} on scene #{args.scene}.")
+
+
+def cmd_sketchbooks(args):
+    b = board(args)
+    dom = [["work_id", "=", int(args.work)]] if args.work else []
+    rows = b.search("moldeo.folio.sketchbook", dom, ["code", "name", "state", "work_id", "page_count"], limit=200)
+    if not rows:
+        print("No sketchbooks yet. Create one:  python3 folio_design.py sketchbook-new <WORK_ID> \"Name\" --yes")
+    for r in rows:
+        w = r.get("work_id")
+        print(f"#{r['id']:<5} {r.get('code') or '':<12} {r.get('state') or '':<11} work {w[0] if isinstance(w, list) else w}  pages {r.get('page_count')}  {r['name']}")
+
+
+def cmd_sketchbook_new(args):
+    b = board(args)
+    vals = {"name": args.name, "work_id": int(args.work)}
+    if args.scene:
+        vals["moldeo_scene_id"] = int(args.scene)
+    dry(args, f"create a sketchbook on [{b.name}]", vals)
+    sid = b.gw("/moldeo.folio.sketchbook/create", vals=vals)["ids"][0]
+    row = b.search("moldeo.folio.sketchbook", [["id", "=", sid]], ["code"], limit=1)[0]
+    print(f"✓ sketchbook #{sid} {row.get('code')} on work #{args.work} — unpublished.")
+
+
+_PAGE_FILE = {"image": ("image_1920", None), "video": ("video_file", "video_filename"),
+              "audio": ("audio_file", "audio_filename"), "document": ("document_file", "document_filename")}
+
+
+def cmd_page_new(args):
+    b = board(args)
+    vals = {"name": args.name, "sketchbook_id": int(args.sketchbook), "page_type": args.type}
+    shown = dict(vals)
+    if args.file:
+        if args.type not in _PAGE_FILE:
+            die(f"--file goes with --type {'|'.join(_PAGE_FILE)}")
+        field, fname_field = _PAGE_FILE[args.type]
+        vals[field], fname = _b64(args.file)
+        if fname_field:
+            vals[fname_field] = fname
+        shown[field] = f"{fname} ({len(vals[field])} b64 chars)"
+    if args.notes:
+        vals["notes"] = shown["notes"] = args.notes
+    dry(args, f"add a page to sketchbook #{args.sketchbook}", shown)
+    pid = b.gw("/moldeo.folio.sketchbook.page/create", vals=vals)["ids"][0]
+    print(f"✓ page #{pid} in sketchbook #{args.sketchbook}.")
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0],
                                  epilog=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -196,9 +307,21 @@ def main():
     sub.add_parser("templates", parents=[common])
     s = sub.add_parser("generate", parents=[common]); s.add_argument("template"); s.add_argument("--yes", action="store_true")
     s = sub.add_parser("results", parents=[common]); s.add_argument("template"); s.add_argument("--out", default="out")
+    s = sub.add_parser("scenes", parents=[common]); s.add_argument("--all", action="store_true")
+    s = sub.add_parser("scene-new", parents=[common]); s.add_argument("name"); s.add_argument("--work"); s.add_argument("--config"); s.add_argument("--yes", action="store_true")
+    s = sub.add_parser("scene-layer", parents=[common]); s.add_argument("scene"); s.add_argument("name")
+    s.add_argument("--type", default="image", choices=["image", "text", "shape", "video", "animation", "particle", "3d"])
+    s.add_argument("--config"); s.add_argument("--image"); s.add_argument("--yes", action="store_true")
+    s = sub.add_parser("sketchbooks", parents=[common]); s.add_argument("--work")
+    s = sub.add_parser("sketchbook-new", parents=[common]); s.add_argument("work"); s.add_argument("name"); s.add_argument("--scene"); s.add_argument("--yes", action="store_true")
+    s = sub.add_parser("page-new", parents=[common]); s.add_argument("sketchbook"); s.add_argument("name")
+    s.add_argument("--type", default="image", choices=["image", "video", "audio", "document", "text"])
+    s.add_argument("--file"); s.add_argument("--notes"); s.add_argument("--yes", action="store_true")
     args = ap.parse_args()
     {"works": cmd_works, "work-new": cmd_work_new, "spec": cmd_spec, "templates": cmd_templates,
-     "generate": cmd_generate, "results": cmd_results}[args.cmd](args)
+     "generate": cmd_generate, "results": cmd_results,
+     "scenes": cmd_scenes, "scene-new": cmd_scene_new, "scene-layer": cmd_scene_layer,
+     "sketchbooks": cmd_sketchbooks, "sketchbook-new": cmd_sketchbook_new, "page-new": cmd_page_new}[args.cmd](args)
 
 
 if __name__ == "__main__":
