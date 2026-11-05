@@ -245,7 +245,7 @@ fi
 # which is the same failure as shipping a skill with no front-matter: present, and not a command.
 step "Fleet scripts at the workspace root"
 for s in setup-module.sh setupbranch.sh dashboard.sh pull-all.sh sync-agents-skills.sh \
-         work-claim.sh sync-lock.sh leaf-fall.sh roots-upstream.sh htree.py \
+         work-claim.sh sync-lock.sh leaf-fall.sh roots-upstream.sh htree.py folio_design.py \
          roots-report.py roots-seed-audit.py; do
   if [ -e "$WORKSPACE/$s" ]; then ok "$s (kept — not overwritten)"
   elif [ -e "$SEED_DIR/scripts/$s" ]; then run "cp '$SEED_DIR/scripts/$s' '$WORKSPACE/$s'"; run "chmod +x '$WORKSPACE/$s'"; ok "$s"

@@ -50,6 +50,7 @@ needs no credentials — and only a real publish counts as published).
 |-------|----------|
 | [roots-report.md](./roots-report.md) | **See the forest**: every Tree x Branch at once, ranked by what can still be LOST (uncommitted `.roots/` memory first), with the order to land it. Read-only. |
 | [roots-seed-audit.md](./roots-seed-audit.md) | **Before re-distributing a bumped seed**: which local copies are merely stale and which are forks carrying content nobody sent upstream. Read-only. |
+| [folio-design.md](./folio-design.md) | **Design by layers on a Folio board**: works, layered templates (JSON + local images), compose and download variants (with `scripts/folio_design.py`) |
 | [htree-tasks.md](./htree-tasks.md) | **Work a task board**: load/edit tree-account credentials, read tasks and conversation, comment (with `scripts/htree.py`) |
 | [roots-suggest.md](./roots-suggest.md) | **Propose**: something this deployment learned should be in the seed (carries the measurement) |
 | [roots-issue.md](./roots-issue.md) | **Report**: the seed's own text is wrong, ambiguous or silently harmful |
