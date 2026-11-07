@@ -1,6 +1,6 @@
 ---
 name: htree-tasks
-description: Work the person's tasks on one or more htree task boards (Odoo backends exposing the OCAPI htree gateway) — load or edit their tree-account credentials, see which projects and tasks they have, read a task and its conversation, comment, or update a field. Invoke when the person says "my tasks", "what's pending on <project>", "comment on task N", "load / change my credentials", "my key changed", or pastes a Client ID / Secret Key. NOT for administering the board (creating accounts or projects is done by the board owner).
+description: Work the person's tasks on one or more htree task boards (Odoo backends exposing the OCAPI htree gateway) — load or edit their tree-account credentials, see which projects and tasks they have, read a task and its conversation, comment, attach files, or update a field. Invoke when the person says "my tasks", "what's pending on <project>", "comment on task N", "load / change my credentials", "my key changed", or pastes a Client ID / Secret Key. NOT for administering the board (creating accounts or projects is done by the board owner).
 ---
 
 # htree-tasks
@@ -28,7 +28,12 @@ One **profile** per board: any prefix `P` with `P_BASE`, `P_CLIENT_ID`, `P_SECRE
 3b. **Create.** `htree.py new -p P --project <id|name> "title" [--desc …|-f file]` — dry-run first, then
    `--yes`. One task = one subject, with a title that says what it is (not "question" / "pending").
    If the board answers that the account cannot create tasks, propose it in the requests task instead.
-4. **Write = their words, their OK.** `new`, `comment` and `set` are **DRY-RUN by default** (exit 2). Show the
+3c. **Attach.** `htree.py attachments -p P <ID>` lists the files of a task; `htree.py attach -p P <ID> file… [-m text]`
+   uploads each file **as a comment carrying it** (a portal account cannot attach to the record itself) and
+   re-reads the list to verify. There is **no delete**: check the task id before `--yes`. Anyone who follows the
+   task can download the file. **A secret (key, token, password) goes ONLY as a file, never in comment text**,
+   and only scoped/read-only/rotatable credentials — ask the board owner to rotate them when the work ends.
+4. **Write = their words, their OK.** `new`, `comment`, `attach` and `set` are **DRY-RUN by default** (exit 2). Show the
    person exactly what will be published, and re-run with `--yes` only after an explicit yes. After a
    `set`, the tool re-reads the field: report the re-read value, not the request.
 

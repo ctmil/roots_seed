@@ -25,11 +25,16 @@ so a person who works with two organisations keeps two profiles in the same file
     python3 htree.py new [-p P] --project <id|name> "title" [-f desc.md | --desc text] [--yes]  # DRY-RUN unless --yes
     python3 htree.py comment [-p P] <ID> [-f file | text] [--yes]  # DRY-RUN unless --yes
     python3 htree.py set [-p P] <ID> field=value ... [--yes]       # DRY-RUN unless --yes
+    python3 htree.py attachments [-p P] <ID>                       # files attached to a task
+    python3 htree.py attach [-p P] <ID> file [file ...] [-m text] [--yes]  # upload; DRY-RUN unless --yes
 
 -p is optional when there is a single profile. Exit codes: 0 ok · 1 error · 2 dry-run (nothing sent).
 Standard library only. Safe on a Windows console (cp1252).
 """
 import argparse
+import base64
+import hashlib
+import mimetypes
 import getpass
 import html
 import json
@@ -477,6 +482,62 @@ def cmd_set(args):
     return 0
 
 
+def _attachments(b, tid):
+    # the gateway answers under `records` (not `attachments`): reading the wrong key gives an empty list
+    return b.gw("/attachments/list", res_model="project.task", res_id=tid).get("records", [])
+
+
+def cmd_attachments(args):
+    (name, v), = pick(args)
+    b = Board(name, v)
+    rows = _attachments(b, args.id)
+    print(f"\n  [{name}] task #{args.id}: {len(rows)} file(s)")
+    for a in rows:
+        print("    %-7s %-52s %9s B" % (a.get("id"), (a.get("name") or "?")[:52], a.get("file_size", "?")))
+    return 0
+
+
+MAX_BYTES = 20 * 1024 * 1024
+
+
+def cmd_attach(args):
+    """Upload files to a task, each one as a COMMENT carrying the file (the way the web portal does it:
+    a portal account cannot attach to the record itself, only through the conversation). Everyone who
+    follows the task can download them. The gateway has no delete — check the target before --yes."""
+    (name, v), = pick(args)
+    files = []
+    for f in args.files:
+        pth = Path(f)
+        if not pth.is_file():
+            die(f"Not a file: {f}")
+        if pth.stat().st_size > MAX_BYTES:
+            die(f"{f} is over {MAX_BYTES // 1048576} MB", "Compress it or split it.")
+        files.append(pth)
+    if not args.yes:
+        print(f"\n  DRY-RUN — nothing uploaded. [{name}] task #{args.id} would get:")
+        for pth in files:
+            print(f"    {pth.name}  ({pth.stat().st_size} B)")
+        print("\n  Attachments cannot be deleted from here. Re-run with --yes to upload.\n")
+        return 2
+    b = Board(name, v)
+    before = {a.get("id") for a in _attachments(b, args.id)}
+    sent = []
+    for pth in files:
+        raw = pth.read_bytes()
+        b.gw("/attachments/add", res_model="project.task", res_id=args.id, name=pth.name,
+             mimetype=mimetypes.guess_type(pth.name)[0] or "application/octet-stream",
+             datas=base64.b64encode(raw).decode("ascii"), as_comment=True,
+             body=to_html(args.message or pth.name))
+        sent.append((pth.name, hashlib.sha1(raw).hexdigest()))
+    # verify by re-reading: an ok:true from the POST does not prove the file is there
+    new = [a for a in _attachments(b, args.id) if a.get("id") not in before]
+    names = {a.get("name") for a in new}
+    for n, _ in sent:
+        print(("  ✅ " if n in names else "  ⛔ NOT FOUND after upload: ") + f"{n} on #{args.id}")
+    # images are resized/re-compressed by Odoo on upload: a different size is normal there
+    return 0 if all(n in names for n, _ in sent) else 1
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("-p", "--profile", help="which board (prefix in .htree.env)")
@@ -505,13 +566,20 @@ def main():
     s.add_argument("id", type=int)
     s.add_argument("pairs", nargs="+")
     s.add_argument("--yes", action="store_true")
+    a = sub.add_parser("attachments", help="list the files attached to a task")
+    a.add_argument("id", type=int)
+    u = sub.add_parser("attach", help="upload files to a task (dry-run unless --yes)")
+    u.add_argument("id", type=int)
+    u.add_argument("files", nargs="+")
+    u.add_argument("-m", "--message", help="comment text that goes with the file (default: its name)")
+    u.add_argument("--yes", action="store_true")
     for p in sub.choices.values():  # accept -p after the subcommand too
         p.add_argument("-p", "--profile", dest="profile_sub", help=argparse.SUPPRESS)
     args = ap.parse_args()
     args.profile = args.profile or getattr(args, "profile_sub", None)
     return {"credentials": cmd_credentials, "check": cmd_check, "whoami": cmd_whoami,
             "projects": cmd_projects, "tasks": cmd_tasks, "new": cmd_new, "comment": cmd_comment,
-            "set": cmd_set}[args.cmd](args)
+            "set": cmd_set, "attachments": cmd_attachments, "attach": cmd_attach}[args.cmd](args)
 
 
 if __name__ == "__main__":

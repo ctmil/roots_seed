@@ -7,10 +7,14 @@
 > **distributed copy** and out of date with respect to the canonical (compare the `Version` field /
 > changelog). The seed evolves — do not assume this copy is the latest. See § "Sync with the canonical upstream".
 
-**Version:** 1.28
+**Version:** 1.29
 
 **Changelog:**
 
+- **1.29** (7 November 2026) — **`htree.py attach` / `attachments`.** A collaborator's forest can now send files
+  (documents, scoped credentials) to a task on the board and list what a task carries. Each file goes as a comment
+  carrying it — the only path a portal account has — and the upload is verified by re-reading. Documented in the
+  `htree-tasks` skill. Does not change the `.roots/` format.
 - **1.28** (5 November 2026) — **`folio_design.py`: scenes (moldeo js) and sketchbooks.** New subcommands `scenes` · `scene-new` · `scene-layer` · `sketchbooks` · `sketchbook-new` · `page-new`, documented in the `folio-design` skill. A collaborator attaches a scene and a sketchbook (pages with image/video/audio/document/notes) to their own works, unpublished. Raw code (js/css/html/embed) stays closed to collaborator accounts for now. Does not change the `.roots/` format.
 - **1.27** (5 November 2026) — **`scripts/folio_design.py` + skill `folio-design`: parametric design by layers from a forest.** A collaborator betatests MoldeoLab's generative design: create their works (saved unpublished), turn a layered JSON design plus local images into a template, compose every variant on the board and download PNG + params. Reuses `htree.py` profiles (no second credential file). Rules it carries: **the AI runs in the forest, the board composes** — server-side `ai_image` is closed to collaborators, so an image made locally enters as a `static` layer; **publishing stays with the organisation**; writes dry-run unless `--yes`; **one design that works before a series**. Does not change the `.roots/` format.
 - **1.26** (4 November 2026) — **`htree.py new`: a collaborator creates tasks.** Dry-run unless `--yes`, project by id or by name (ambiguous name ⇒ asks for the id), re-reads what was created. Measured on a real portal account: Odoo 17 does not let a portal user write `project_id` on a task (the portal web form passes it as `default_project_id` in the context), so the tool sends `project_id` in `vals` and relies on a gateway that moves it to the context; against a gateway that does not, it says so and points to the requests task instead of failing with an ORM message.
