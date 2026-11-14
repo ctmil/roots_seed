@@ -27,6 +27,8 @@ so a person who works with two organisations keeps two profiles in the same file
     python3 htree.py set [-p P] <ID> field=value ... [--yes]       # DRY-RUN unless --yes
     python3 htree.py attachments [-p P] <ID>                       # files attached to a task
     python3 htree.py attach [-p P] <ID> file [file ...] [-m text] [--yes]  # upload; DRY-RUN unless --yes
+    python3 htree.py florum [-p P] [--forum N] [--all]   # Florum topics you can vote on (votes, ✓ = yours)
+    python3 htree.py vote [-p P] <ID> [--yes]            # vote / un-vote a Florum topic; DRY-RUN unless --yes
 
 -p is optional when there is a single profile. Exit codes: 0 ok · 1 error · 2 dry-run (nothing sent).
 Standard library only. Safe on a Windows console (cp1252).
@@ -538,6 +540,75 @@ def cmd_attach(args):
     return 0 if all(n in names for n, _ in sent) else 1
 
 
+# ---- Florum: vote on the features you asked for (gateway resource forum.post) -----------------
+_FLORUM_FIELDS = ["id", "name", "forum_id", "state", "florum_vote_count", "florum_user_voted"]
+
+
+def _florum_unavailable(name, e):
+    die(f"[{name}] this board does not expose Florum to your account yet",
+        f"{e.code}: {e.msg}",
+        "Florum voting from a forest needs the board's htree gateway >= 26.293 with Florum installed.")
+
+
+def cmd_florum(args):
+    (name, v), = pick(args)
+    b = Board(name, v)
+    dom = [["parent_id", "=", False], ["florum_kind", "!=", False]]
+    if not args.all:
+        dom.append(["state", "=", "active"])
+    if args.forum:
+        dom.append(["forum_id", "=", args.forum])
+    try:
+        rows = _post(b.base, "/forum.post/search_read", {
+            "access_token": b.token, "domain": dom, "fields": _FLORUM_FIELDS, "limit": 200,
+            "order": "florum_vote_count desc, id desc"})["records"]
+    except GatewayError as e:
+        _florum_unavailable(name, e)
+    if not rows:
+        print(f"\n  [{name}] no Florum topics to vote on" + (f" in forum {args.forum}" if args.forum else "") + ".\n")
+        return 0
+    forum = None
+    for r in sorted(rows, key=lambda r: ((r["forum_id"] or [0, ""])[1], -(r["florum_vote_count"] or 0))):
+        f = r["forum_id"] and r["forum_id"][1]
+        if f != forum:
+            forum = f
+            print(f"\n  ▸ {f}  (forum {r['forum_id'][0]})")
+        mark = "✓" if r.get("florum_user_voted") else " "
+        print(f"   {mark} #{r['id']:<6} {r['florum_vote_count'] or 0:>3} votes  {r['name']}")
+    print("\n  ✓ = you voted. Vote or un-vote:  htree.py vote <ID> --yes\n")
+    return 0
+
+
+def cmd_vote(args):
+    (name, v), = pick(args)
+    b = Board(name, v)
+    try:
+        rows = _post(b.base, "/forum.post/search_read", {
+            "access_token": b.token, "domain": [["id", "=", args.id]], "fields": _FLORUM_FIELDS,
+            "limit": 1})["records"]
+    except GatewayError as e:
+        _florum_unavailable(name, e)
+    if not rows:
+        die(f"[{name}] topic #{args.id} not found (or not visible to your account)",
+            "List what you can vote on with:  htree.py florum")
+    t = rows[0]
+    now = bool(t.get("florum_user_voted"))
+    if not args.yes:
+        print(f"\n  DRY-RUN — nothing sent. [{name}] #{t['id']} «{t['name']}» has {t['florum_vote_count'] or 0} votes;")
+        print(f"  you {'already voted' if now else 'have not voted'} ⇒ --yes would {'REMOVE your vote' if now else 'ADD your vote'}.\n")
+        return 2
+    try:
+        r = _post(b.base, "/forum.post/call", {"access_token": b.token, "ids": [t["id"]],
+                                                "method": "florum_toggle_vote"})["result"]
+    except GatewayError as e:
+        die(f"[{name}] the board refused the vote", f"{e.code}: {e.msg}")
+    if not isinstance(r, dict) or "voted" not in r:
+        die(f"[{name}] unexpected answer from the board", str(r)[:200])
+    print(f"  ✅ #{t['id']} «{t['name']}»: {'voted' if r['voted'] else 'vote removed'} — "
+          f"{r.get('vote_count')} votes now")
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("-p", "--profile", help="which board (prefix in .htree.env)")
@@ -573,13 +644,20 @@ def main():
     u.add_argument("files", nargs="+")
     u.add_argument("-m", "--message", help="comment text that goes with the file (default: its name)")
     u.add_argument("--yes", action="store_true")
+    fl = sub.add_parser("florum", help="Florum topics you can vote on")
+    fl.add_argument("--forum", type=int, help="only this forum id")
+    fl.add_argument("--all", action="store_true", help="include closed topics")
+    vo = sub.add_parser("vote", help="vote / un-vote a Florum topic (dry-run unless --yes)")
+    vo.add_argument("id", type=int)
+    vo.add_argument("--yes", action="store_true")
     for p in sub.choices.values():  # accept -p after the subcommand too
         p.add_argument("-p", "--profile", dest="profile_sub", help=argparse.SUPPRESS)
     args = ap.parse_args()
     args.profile = args.profile or getattr(args, "profile_sub", None)
     return {"credentials": cmd_credentials, "check": cmd_check, "whoami": cmd_whoami,
             "projects": cmd_projects, "tasks": cmd_tasks, "new": cmd_new, "comment": cmd_comment,
-            "set": cmd_set, "attachments": cmd_attachments, "attach": cmd_attach}[args.cmd](args)
+            "set": cmd_set, "attachments": cmd_attachments, "attach": cmd_attach,
+            "florum": cmd_florum, "vote": cmd_vote}[args.cmd](args)
 
 
 if __name__ == "__main__":

@@ -7,10 +7,16 @@
 > **distributed copy** and out of date with respect to the canonical (compare the `Version` field /
 > changelog). The seed evolves — do not assume this copy is the latest. See § "Sync with the canonical upstream".
 
-**Version:** 1.29
+**Version:** 1.30
 
 **Changelog:**
 
+- **1.30** (14 November 2026) — **`htree.py florum` / `vote`: vote on the features you asked for, from your forest.**
+  A community member's Florum (the board's feature forum) had topics and no votes: voting meant logging in to the portal,
+  and people who build with AI work from their own agent. Now `florum` lists the topics you can vote on (votes, ✓ =
+  yours) and `vote <ID>` adds or removes your vote — dry-run unless `--yes`, and the answer is the board's new count, not
+  an echo. Needs a board whose htree gateway exposes `forum.post` (read + the single method `florum_toggle_vote`); against
+  an older board it says so instead of failing with a gateway error. Does not change the `.roots/` format.
 - **1.29** (7 November 2026) — **`htree.py attach` / `attachments`.** A collaborator's forest can now send files
   (documents, scoped credentials) to a task on the board and list what a task carries. Each file goes as a comment
   carrying it — the only path a portal account has — and the upload is verified by re-reading. Documented in the

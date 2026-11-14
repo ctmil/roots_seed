@@ -1,6 +1,6 @@
 ---
 name: htree-tasks
-description: Work the person's tasks on one or more htree task boards (Odoo backends exposing the OCAPI htree gateway) — load or edit their tree-account credentials, see which projects and tasks they have, read a task and its conversation, comment, attach files, or update a field. Invoke when the person says "my tasks", "what's pending on <project>", "comment on task N", "load / change my credentials", "my key changed", or pastes a Client ID / Secret Key. NOT for administering the board (creating accounts or projects is done by the board owner).
+description: Work the person's tasks on one or more htree task boards (Odoo backends exposing the OCAPI htree gateway) — load or edit their tree-account credentials, see which projects and tasks they have, read a task and its conversation, comment, attach files, update a field, or vote on their Florum topics. Invoke when the person says "my tasks", "what's pending on <project>", "comment on task N", "load / change my credentials", "my key changed", "vote for X", "what can I vote on", or pastes a Client ID / Secret Key. NOT for administering the board (creating accounts or projects is done by the board owner).
 ---
 
 # htree-tasks
@@ -33,6 +33,9 @@ One **profile** per board: any prefix `P` with `P_BASE`, `P_CLIENT_ID`, `P_SECRE
    re-reads the list to verify. There is **no delete**: check the task id before `--yes`. Anyone who follows the
    task can download the file. **A secret (key, token, password) goes ONLY as a file, never in comment text**,
    and only scoped/read-only/rotatable credentials — ask the board owner to rotate them when the work ends.
+3d. **Vote (Florum).** `htree.py florum -p P [--forum N]` lists the topics the person can vote on (votes, ✓ =
+   theirs); `htree.py vote -p P <ID>` shows what would happen and `--yes` adds or removes the vote, printing the
+   board's new count. A vote is the person's voice: cast it only when they asked for that topic, never in bulk.
 4. **Write = their words, their OK.** `new`, `comment`, `attach` and `set` are **DRY-RUN by default** (exit 2). Show the
    person exactly what will be published, and re-run with `--yes` only after an explicit yes. After a
    `set`, the tool re-reads the field: report the re-read value, not the request.
