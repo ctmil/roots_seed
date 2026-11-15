@@ -7,10 +7,19 @@
 > **distributed copy** and out of date with respect to the canonical (compare the `Version` field /
 > changelog). The seed evolves — do not assume this copy is the latest. See § "Sync with the canonical upstream".
 
-**Version:** 1.31
+**Version:** 1.32
 
 **Changelog:**
 
+- **1.32** (15 November 2026) — **`docs/moldeolab-api.md`: the Moldeo Lab API, offline, ordered by the stages of the cycle.**
+  The board's htree gateway now documents itself from ONE declarative registry: `GET /ocapi/tree/v1/docs` (JSON for
+  agents; `?format=md` markdown; `?audience=lab` only what a Studio credential can do), the Studio's «API» page, and
+  this file all say the same because they are generated from it. It is organised by stage — connect · idea → Florum
+  (propose, vote, comment) · accepted → task (status, and the project owner accepts) · work → agents (soon) · piece →
+  Folio (my pieces, full definition, templates, new piece from a template, images) · publish · repo · feedback — with
+  an end-to-end example that starts from the token, the permission each call needs, and what is not there yet with
+  its reason. The file is in Spanish (the board's language) and is a snapshot: re-fetch it with
+  `curl -s '<board>/ocapi/tree/v1/docs?format=md&audience=lab'`. Does not change `htree.py` nor the `.roots/` format.
 - **1.31** (15 November 2026) — **`htree.py pieces` / `piece new`: a forest works its own Studio pieces.**
   A Studio (a person's own channel of Folio pieces on the board) gives each tool its own credential, with
   permissions ticked one by one (read · edit · create · publish · assets). With that credential loaded as a
