@@ -7,10 +7,22 @@
 > **distributed copy** and out of date with respect to the canonical (compare the `Version` field /
 > changelog). The seed evolves — do not assume this copy is the latest. See § "Sync with the canonical upstream".
 
-**Version:** 1.30
+**Version:** 1.31
 
 **Changelog:**
 
+- **1.31** (15 November 2026) — **`htree.py pieces` / `piece new`: a forest works its own Studio pieces.**
+  A Studio (a person's own channel of Folio pieces on the board) gives each tool its own credential, with
+  permissions ticked one by one (read · edit · create · publish · assets). With that credential loaded as a
+  separate profile — next to, never instead of, the task-board profile — `pieces` lists the person's pieces (id,
+  title, publication state, channel) and `piece new "title" [--year --technique --desc|-f]` creates one: born as a
+  **draft, unpublished, in the person's channel**, dry-run unless `--yes`, and verified by re-reading it from the
+  person's own channels (an `ok` from the create does not prove where it landed). Listing is keyed on publications,
+  not works: a Folio author can also read everyone else's *published* works, so a works list is not "mine".
+  Publishing stays a human step in the Studio. Also: every request now says `charset=utf-8` and a description file
+  is read tolerating BOM/UTF-16 (Notepad) — a client that sent its console codepage (cp1252) had every accent
+  replaced on the server. `folio_design.py works` is the design-board view and stays as is. Does not change the
+  `.roots/` format.
 - **1.30** (14 November 2026) — **`htree.py florum` / `vote`: vote on the features you asked for, from your forest.**
   A community member's Florum (the board's feature forum) had topics and no votes: voting meant logging in to the portal,
   and people who build with AI work from their own agent. Now `florum` lists the topics you can vote on (votes, ✓ =

@@ -1,6 +1,6 @@
 ---
 name: htree-tasks
-description: Work the person's tasks on one or more htree task boards (Odoo backends exposing the OCAPI htree gateway) — load or edit their tree-account credentials, see which projects and tasks they have, read a task and its conversation, comment, attach files, update a field, or vote on their Florum topics. Invoke when the person says "my tasks", "what's pending on <project>", "comment on task N", "load / change my credentials", "my key changed", "vote for X", "what can I vote on", or pastes a Client ID / Secret Key. NOT for administering the board (creating accounts or projects is done by the board owner).
+description: Work the person's tasks on one or more htree task boards (Odoo backends exposing the OCAPI htree gateway) — load or edit their tree-account credentials, see which projects and tasks they have, read a task and its conversation, comment, attach files, update a field, vote on their Florum topics, or list / create the pieces of their own Studio. Invoke when the person says "my tasks", "what's pending on <project>", "comment on task N", "load / change my credentials", "my key changed", "vote for X", "what can I vote on", "my pieces", "create a piece", or pastes a Client ID / Secret Key. NOT for administering the board (creating accounts or projects is done by the board owner).
 ---
 
 # htree-tasks
@@ -36,7 +36,13 @@ One **profile** per board: any prefix `P` with `P_BASE`, `P_CLIENT_ID`, `P_SECRE
 3d. **Vote (Florum).** `htree.py florum -p P [--forum N]` lists the topics the person can vote on (votes, ✓ =
    theirs); `htree.py vote -p P <ID>` shows what would happen and `--yes` adds or removes the vote, printing the
    board's new count. A vote is the person's voice: cast it only when they asked for that topic, never in bulk.
-4. **Write = their words, their OK.** `new`, `comment`, `attach` and `set` are **DRY-RUN by default** (exit 2). Show the
+3e. **Studio pieces.** A Studio has its **own** credential (created by the person on the Studio's Credentials
+   page, with the permissions they tick) ⇒ load it as a **separate profile** (`credentials -p <STUDIO_NAME>`); the
+   task-board profile stays as it is. `htree.py pieces -p <STUDIO_NAME>` lists their pieces (id, title, state,
+   channel); `htree.py piece new -p <STUDIO_NAME> "title" [--year Y] [--technique T] [--desc …|-f file]` is dry-run,
+   then `--yes` creates it as a **draft in their channel** and re-reads it. Publishing is the person's step, in the
+   Studio. `permission_denied` = the credential lacks that box: they tick it on the Credentials page.
+4. **Write = their words, their OK.** `new`, `comment`, `attach`, `set`, `vote` and `piece new` are **DRY-RUN by default** (exit 2). Show the
    person exactly what will be published, and re-run with `--yes` only after an explicit yes. After a
    `set`, the tool re-reads the field: report the re-read value, not the request.
 

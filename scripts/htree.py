@@ -29,6 +29,9 @@ so a person who works with two organisations keeps two profiles in the same file
     python3 htree.py attach [-p P] <ID> file [file ...] [-m text] [--yes]  # upload; DRY-RUN unless --yes
     python3 htree.py florum [-p P] [--forum N] [--all]   # Florum topics you can vote on (votes, ✓ = yours)
     python3 htree.py vote [-p P] <ID> [--yes]            # vote / un-vote a Florum topic; DRY-RUN unless --yes
+    python3 htree.py pieces [-p P]                       # my Folio pieces on a Studio board: id, title, state, channel
+    python3 htree.py piece new [-p P] "title" [--year Y] [--technique T] [--desc text | -f desc.md] [--yes]
+                                                         # create a piece (draft, in my channel); DRY-RUN unless --yes
 
 -p is optional when there is a single profile. Exit codes: 0 ok · 1 error · 2 dry-run (nothing sent).
 Standard library only. Safe on a Windows console (cp1252).
@@ -158,9 +161,11 @@ class GatewayError(Exception):
 
 def _post(base, route, params, timeout=60):
     """JSON-RPC POST. The body MUST be wrapped in `params` (Odoo JSON controller): sent flat the
-    gateway answers 'missing client_id/secret_key' even with correct credentials."""
+    gateway answers 'missing client_id/secret_key' even with correct credentials.
+    The body is ALWAYS UTF-8 bytes (json.dumps escapes non-ASCII anyway): a client that sent the
+    console's codepage (cp1252 on Windows) had every accent replaced by U+FFFD on the server."""
     req = urllib.request.Request(
-        base.rstrip("/") + route, headers={"Content-Type": "application/json"},
+        base.rstrip("/") + route, headers={"Content-Type": "application/json; charset=utf-8"},
         data=json.dumps({"jsonrpc": "2.0", "method": "call", "params": params}).encode("utf-8"))
     for attempt in range(3):
         try:
@@ -190,7 +195,7 @@ def authenticate(base, client_id, secret_key):
         raise GatewayError("no_token", "the gateway returned no access_token")
     me = _post(base, "/whoami", {"access_token": token})
     return {"token": token, "account": me.get("account"), "depth": me.get("depth"),
-            "user": me.get("user")}
+            "user": me.get("user"), "type": me.get("type")}
 
 
 def explain(e, base):
@@ -212,6 +217,7 @@ class Board:
         except GatewayError as e:
             die(f"[{name}] " + explain(e, self.base)[0], *explain(e, self.base)[1:])
         self.token, self.account, self.depth, self.user = a["token"], a["account"], a["depth"], a["user"]
+        self.type = a.get("type")  # "lab" = a Studio account; older boards do not say
         self.host = re.sub(r"/ocapi/.*$", "", self.base)
 
     def gw(self, route, **params):
@@ -609,6 +615,130 @@ def cmd_vote(args):
     return 0
 
 
+# ---- Studio: my Folio pieces (gateway resources moldeo.folio.work + moldeo.folio.publication) --
+# A piece is a `moldeo.folio.work`; where it shows (channel) and whether it is out (state) live on
+# its `moldeo.folio.publication`. A Studio account reads ONLY the publications of its own channels,
+# so "my pieces" is keyed on publications: listing works directly would also return every PUBLISHED
+# work of other people (folio lets an author read what is public).
+_PIECE_STATE = {"draft": "draft", "preview": "preview", "published": "published", "archived": "archived"}
+
+
+def _studio_unavailable(name, e):
+    if e.code == "permission_denied":  # a Studio credential without that box ticked
+        die(f"[{name}] this credential is missing a permission", e.msg,
+            "Tick it on your Studio's Credentials page (reading needs «read», creating «create pieces»).")
+    die(f"[{name}] this account has no Studio pieces", f"{e.code}: {e.msg}",
+        "Pieces need the credential of a Studio (its own profile), not a task-board one:",
+        "create it on your Studio's Credentials page and load it with  htree.py credentials -p <NAME>")
+
+
+def _my_pieces(b, name, work_ids=None):
+    dom = [["work_id", "in", list(work_ids)]] if work_ids else []
+    try:
+        pubs = _post(b.base, "/moldeo.folio.publication/search_read", {
+            "access_token": b.token, "domain": dom, "limit": 500, "order": "id desc",
+            "fields": ["id", "work_id", "channel_id", "state", "website_published"]})["records"]
+    except GatewayError as e:
+        _studio_unavailable(name, e)
+    rows = {}
+    for p in pubs:
+        if not p.get("work_id"):
+            continue
+        wid, title = p["work_id"][0], p["work_id"][1]
+        r = rows.setdefault(wid, {"id": wid, "title": title, "states": [], "channels": []})
+        st = _PIECE_STATE.get(p.get("state"), p.get("state") or "?")
+        if st == "published" and not p.get("website_published"):
+            st = "published (hidden)"
+        if st not in r["states"]:
+            r["states"].append(st)
+        ch = p["channel_id"] and p["channel_id"][1]
+        if ch and ch not in r["channels"]:
+            r["channels"].append(ch)
+    return sorted(rows.values(), key=lambda r: -r["id"])
+
+
+def cmd_pieces(args):
+    (name, v), = pick(args)
+    b = Board(name, v)
+    if b.type and b.type != "lab":
+        die(f"[{name}] is a task-board account («{b.account}»), not a Studio",
+            "Pieces live in your Studio, with its own credential and its own profile:",
+            "create it on your Studio's Credentials page and load it with  htree.py credentials -p <NAME>")
+    rows = _my_pieces(b, name)
+    print(f"\n  [{name}] {len(rows)} piece(s) in your Studio")
+    if rows:
+        print("    %-7s %-18s %-30s %s" % ("id", "state", "channel", "title"))
+    for r in rows:
+        print("    %-7s %-18s %-30s %s" % (r["id"], ", ".join(r["states"])[:18],
+                                         ", ".join(r["channels"])[:30], r["title"]))
+    print(f"\n  Open one: {b.host}/my/studio/pieza/<id> · new one: htree.py piece new \"title\"\n")
+    return 0
+
+
+def _read_desc(path):
+    """A description file as the person saved it: BOM'd UTF-8/UTF-16 (Notepad), plain UTF-8, or the
+    Windows codepage. NOT `_read_text`: trying UTF-16 without a BOM turns cp1252 text into CJK noise.
+    Whatever it was on disk, it is SENT as UTF-8."""
+    pth = Path(path)
+    if not pth.is_file():
+        die(f"Not a file: {path}")
+    raw = pth.read_bytes()
+    if raw.startswith(b"\xef\xbb\xbf"):
+        return raw[3:].decode("utf-8", errors="replace")
+    if raw[:2] in (b"\xff\xfe", b"\xfe\xff"):
+        return raw.decode("utf-16", errors="replace")
+    try:
+        return raw.decode("utf-8")
+    except UnicodeDecodeError:
+        return raw.decode("cp1252", errors="replace")
+
+
+def cmd_piece(args):
+    if args.action != "new":
+        die(f"Unknown piece action '{args.action}'", "Use:  htree.py piece new \"title\" [--yes]")
+    (name, v), = pick(args)
+    title = (args.title or "").strip()
+    if not title:
+        die("The piece needs a title", "Use:  htree.py piece new \"title\" [--year Y] [--technique T] [--yes]")
+    desc = _read_desc(args.file) if args.file else (args.desc or "")
+    vals = {"name": title}
+    if args.year:
+        vals["year"] = str(args.year)
+    if args.technique:
+        vals["technique"] = args.technique
+    if desc.strip():
+        vals["description"] = to_html(desc)
+    if not args.yes:
+        print(f"\n  DRY-RUN — nothing created. [{name}] your Studio would get a piece (draft, NOT published):")
+        print(f"    title    : {title}")
+        for k in ("year", "technique"):
+            if k in vals:
+                print(f"    {k:<9}: {vals[k]}")
+        if desc.strip():
+            print("\n".join("    | " + l for l in desc.splitlines()))
+        print("\n  It counts against your plan's pieces. Re-run with --yes to create it.\n")
+        return 2
+    b = Board(name, v)
+    try:
+        r = _post(b.base, "/moldeo.folio.work/create", {"access_token": b.token, "vals": vals})
+    except GatewayError as e:
+        if e.code in ("permission_denied", "not_registered", "op_forbidden", "below_horizon"):
+            _studio_unavailable(name, e)
+        die(f"[{name}] the board refused the new piece", f"{e.code}: {e.msg}")
+    wid = (r.get("ids") or [None])[0]
+    if not wid:
+        die(f"[{name}] unexpected answer from the board", str(r)[:200])
+    # verify by re-reading: an ok:true from the create does not prove it landed in YOUR channel
+    back = _my_pieces(b, name, [wid])
+    if not back:
+        print(f"  ⛔ piece #{wid} was created but is NOT in any of your channels — tell the board owner.")
+        return 1
+    p = back[0]
+    print(f"  ✅ piece #{wid} «{p['title']}» [{', '.join(p['states'])}] in «{', '.join(p['channels'])}»")
+    print(f"     {b.host}/my/studio/pieza/{wid}  (publish it from your Studio when it is ready)")
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("-p", "--profile", help="which board (prefix in .htree.env)")
@@ -650,6 +780,15 @@ def main():
     vo = sub.add_parser("vote", help="vote / un-vote a Florum topic (dry-run unless --yes)")
     vo.add_argument("id", type=int)
     vo.add_argument("--yes", action="store_true")
+    sub.add_parser("pieces", help="my Folio pieces on a Studio board (id, title, state, channel)")
+    pc = sub.add_parser("piece", help="piece new \"title\": create a draft piece (dry-run unless --yes)")
+    pc.add_argument("action", choices=["new"])
+    pc.add_argument("title")
+    pc.add_argument("--year", help="year of the piece (e.g. 2026)")
+    pc.add_argument("--technique", help="technique / medium")
+    pc.add_argument("--desc", help="description text")
+    pc.add_argument("-f", "--file", help="description from a file (UTF-8)")
+    pc.add_argument("--yes", action="store_true")
     for p in sub.choices.values():  # accept -p after the subcommand too
         p.add_argument("-p", "--profile", dest="profile_sub", help=argparse.SUPPRESS)
     args = ap.parse_args()
@@ -657,7 +796,8 @@ def main():
     return {"credentials": cmd_credentials, "check": cmd_check, "whoami": cmd_whoami,
             "projects": cmd_projects, "tasks": cmd_tasks, "new": cmd_new, "comment": cmd_comment,
             "set": cmd_set, "attachments": cmd_attachments, "attach": cmd_attach,
-            "florum": cmd_florum, "vote": cmd_vote}[args.cmd](args)
+            "florum": cmd_florum, "vote": cmd_vote, "pieces": cmd_pieces,
+            "piece": cmd_piece}[args.cmd](args)
 
 
 if __name__ == "__main__":
