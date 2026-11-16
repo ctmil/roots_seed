@@ -739,6 +739,107 @@ def cmd_piece(args):
     return 0
 
 
+# ---------------- agents push (Miciel F1) ----------------
+# Your forest is the source; the board is the showcase. `agents push` mirrors the definitions of the
+# agents and skills VERSIONED in your forest (git ls-files) into your Studio, read-only, private by
+# default. Nothing runs on the board because it was pushed. Design: Moldeo Lab «Miciel en el Studio».
+MICIEL_PUSH_METHOD = "studio_api_miciel_push"
+MICIEL_GLOBS = (".claude/agents/*.md", ".claude/skills/*/SKILL.md", ".roots/agents/*.md")
+MICIEL_MAX_ITEMS = 200
+MICIEL_MAX_BYTES = 200 * 1024
+# Same shapes the board rejects (odoo_moldeo_roots/models/omr_miciel.py): checked HERE first, so a
+# secret never leaves your machine. On a hit we name the file, never the value.
+MICIEL_SECRET_PATTERNS = [
+    re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----"),
+    re.compile(r"\bsk-(?:ant-)?[A-Za-z0-9_\-]{20,}"),
+    re.compile(r"\bgh[pousr]_[A-Za-z0-9]{30,}"),
+    re.compile(r"\bgithub_pat_[A-Za-z0-9_]{30,}"),
+    re.compile(r"\bAKIA[0-9A-Z]{16}\b"),
+    re.compile(r"\bxox[abpr]-[A-Za-z0-9\-]{10,}"),
+    re.compile(r"\bAIza[0-9A-Za-z_\-]{35}\b"),
+    re.compile(r"(?i)\b(?:api[_-]?key|secret[_-]?key|client[_-]?secret|password|passwd|token)\b"
+               r"\s*[:=]\s*[\"']?[A-Za-z0-9/+_\-\.]{16,}"),
+]
+
+
+def _git(root, *a):
+    import subprocess
+    r = subprocess.run(["git", "-C", str(root), *a], capture_output=True, text=True)
+    if r.returncode != 0:
+        die(f"git {' '.join(a[:2])} failed in {root}", (r.stderr or r.stdout).strip()[:300],
+            "agents push needs a git forest: run it from (or point --path to) your forest's root.")
+    return r.stdout
+
+
+def _miciel_items(root):
+    root = Path(root).resolve()
+    top = Path(_git(root, "rev-parse", "--show-toplevel").strip())
+    commit = _git(top, "rev-parse", "--short", "HEAD").strip()
+    files = [f for f in _git(top, "ls-files", "-z", "--", *MICIEL_GLOBS).split("\0") if f]
+    dirty = set(f for f in _git(top, "status", "--porcelain", "-z", "--", *MICIEL_GLOBS).split("\0")
+                for f in [f[3:]] if f)
+    items, problems = [], []
+    for f in sorted(files):
+        pth = top / f
+        if not pth.is_file():
+            continue
+        raw = pth.read_bytes()
+        if len(raw) > MICIEL_MAX_BYTES:
+            problems.append(f"{f}: {len(raw)//1024} KB (max {MICIEL_MAX_BYTES//1024} KB)")
+            continue
+        text = raw.decode("utf-8", errors="replace")
+        if any(p.search(text) for p in MICIEL_SECRET_PATTERNS):
+            problems.append(f"{f}: has something shaped like a key or secret")
+            continue
+        kind = "skill" if f.endswith("/SKILL.md") else "agent"
+        items.append({"kind": kind, "path": f, "content": text,
+                      "commit": commit + ("-dirty" if f in dirty else "")})
+    return top, commit, items, problems, dirty
+
+
+def cmd_agents(args):
+    if args.action != "push":
+        die(f"Unknown agents action '{args.action}'", "Use:  htree.py agents push [--path FOREST] [--yes]")
+    top, commit, items, problems, dirty = _miciel_items(args.path or ".")
+    if problems:
+        die("Nothing was sent — fix these files first (the push goes all or nothing):",
+            *["  " + p for p in problems],
+            "Secrets never belong in an agent or skill: move them to an ignored .env and re-run.")
+    if not items:
+        die(f"No agents or skills versioned in {top}", "Looked for: " + ", ".join(MICIEL_GLOBS),
+            "Only files tracked by git are pushed (git add + commit them first).")
+    if len(items) > MICIEL_MAX_ITEMS:
+        die(f"{len(items)} files: the board takes at most {MICIEL_MAX_ITEMS} per push")
+    n_ag = sum(1 for i in items if i["kind"] == "agent")
+    if not args.yes:
+        print(f"\n  DRY-RUN — nothing sent. From {top} @ {commit}, your Studio would mirror "
+              f"{n_ag} agent(s) and {len(items) - n_ag} skill(s), PRIVATE (only you see them):")
+        for i in items:
+            mark = "  (uncommitted changes: pushed as -dirty)" if i["commit"].endswith("-dirty") else ""
+            print(f"    {i['kind']:<6} {i['path']}{mark}")
+        print("\n  Pushing twice changes nothing; a new commit updates in place. Re-run with --yes.\n")
+        return 2
+    (name, v), = pick(args)
+    b = Board(name, v)
+    if b.type and b.type != "lab":
+        die(f"[{name}] is a task-board account («{b.account}»), not a Studio",
+            "Agents are pushed to your Studio, with the Studio's credential (its own profile).")
+    try:
+        r = _post(b.base, "/moldeo.lab.account/call", {
+            "access_token": b.token, "method": MICIEL_PUSH_METHOD, "kwargs": {"items": items}},
+            timeout=180)["result"]
+    except GatewayError as e:
+        if e.code == "permission_denied":
+            die(f"[{name}] this credential cannot publish agents",
+                "Tick «Publicar agentes y skills» on your Studio's Credentials page.")
+        die(f"[{name}] the board refused the push (nothing was written)", f"{e.code}: {e.msg}")
+    r = r or {}
+    print(f"  ✅ [{name}] created {r.get('created', 0)} · updated {r.get('updated', 0)} · "
+          f"unchanged {r.get('unchanged', 0)}  (from {commit})")
+    print(f"     See them in your Studio: {b.host}/my/studio  (Miciel section)")
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("-p", "--profile", help="which board (prefix in .htree.env)")
@@ -789,6 +890,10 @@ def main():
     pc.add_argument("--desc", help="description text")
     pc.add_argument("-f", "--file", help="description from a file (UTF-8)")
     pc.add_argument("--yes", action="store_true")
+    ag = sub.add_parser("agents", help="agents push: mirror your forest's agents and skills to your Studio (dry-run unless --yes)")
+    ag.add_argument("action", choices=["push"])
+    ag.add_argument("--path", help="your forest's root (default: current directory)")
+    ag.add_argument("--yes", action="store_true")
     for p in sub.choices.values():  # accept -p after the subcommand too
         p.add_argument("-p", "--profile", dest="profile_sub", help=argparse.SUPPRESS)
     args = ap.parse_args()
@@ -797,7 +902,7 @@ def main():
             "projects": cmd_projects, "tasks": cmd_tasks, "new": cmd_new, "comment": cmd_comment,
             "set": cmd_set, "attachments": cmd_attachments, "attach": cmd_attach,
             "florum": cmd_florum, "vote": cmd_vote, "pieces": cmd_pieces,
-            "piece": cmd_piece}[args.cmd](args)
+            "piece": cmd_piece, "agents": cmd_agents}[args.cmd](args)
 
 
 if __name__ == "__main__":

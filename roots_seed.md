@@ -7,7 +7,7 @@
 > **distributed copy** and out of date with respect to the canonical (compare the `Version` field /
 > changelog). The seed evolves — do not assume this copy is the latest. See § "Sync with the canonical upstream".
 
-**Version:** 1.32
+**Version:** 1.33
 
 **Changelog:**
 

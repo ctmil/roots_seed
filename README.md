@@ -34,7 +34,7 @@
 
 ## What it is
 
-`.roots/` is a **persistent memory** folder you drop into a repo: decisions, error/fix logs, design docs, tasks, reusable skills — written for **AI agents and humans alike**, in a stable format so any tool can read and grow it. The canonical spec is **[`roots_seed.md`](roots_seed.md)** (currently **v1.32**); the navigable front door is **[`manual.md`](manual.md)**.
+`.roots/` is a **persistent memory** folder you drop into a repo: decisions, error/fix logs, design docs, tasks, reusable skills — written for **AI agents and humans alike**, in a stable format so any tool can read and grow it. The canonical spec is **[`roots_seed.md`](roots_seed.md)** (currently **v1.33**); the navigable front door is **[`manual.md`](manual.md)**.
 
 > **Language:** the spec is **canonical in English**; each deployment keeps its own working language. See **[Language & glossary](#language--glossary-i18n)** below.
 
@@ -42,7 +42,7 @@ Not just for code: the same model spans software, design and narrative. See **[`
 
 It ships with a small toolkit: **`scripts/`** mount the substrate (bare + worktrees), **`skills/`** are a shared library of well-designed strategies, and **`tools/`** are apps that read the memory — first among them the **`forest-dashboard`**.
 
-> **v1.32 adds [`docs/moldeolab-api.md`](docs/moldeolab-api.md):** the Moldeo Lab API ordered by the stages of the cycle, generated from the board's `/ocapi/tree/v1/docs`. **v1.31 added `htree.py pieces` / `piece new`:** list and create the pieces of your own Studio from your forest, with the Studio's credential (drafts, dry-run unless `--yes`). **v1.30 added `htree.py florum` / `vote`:** vote on your Florum topics from your forest. **v1.29 added `htree.py attach`:** send files to a board task from your forest (verified by re-reading). **v1.28 added scenes and sketchbooks to `folio_design.py`.** **v1.27 added `scripts/folio_design.py` + the `folio-design` skill:** parametric design by layers on a Folio board — works, layered templates, variants composed on the board and downloaded. The AI runs in the forest; the board composes.
+> **v1.33 adds `htree.py agents push`:** mirror the agents and skills versioned in your forest (`.claude/agents`, `.claude/skills/*/SKILL.md`, `.roots/agents`) into your Studio, private by default — only git-tracked files, secrets checked locally before anything leaves, all or nothing, dry-run unless `--yes`. **v1.32 added [`docs/moldeolab-api.md`](docs/moldeolab-api.md):** the Moldeo Lab API ordered by the stages of the cycle, generated from the board's `/ocapi/tree/v1/docs`. **v1.31 added `htree.py pieces` / `piece new`:** list and create the pieces of your own Studio from your forest, with the Studio's credential (drafts, dry-run unless `--yes`). **v1.30 added `htree.py florum` / `vote`:** vote on your Florum topics from your forest. **v1.29 added `htree.py attach`:** send files to a board task from your forest (verified by re-reading). **v1.28 added scenes and sketchbooks to `folio_design.py`.** **v1.27 added `scripts/folio_design.py` + the `folio-design` skill:** parametric design by layers on a Folio board — works, layered templates, variants composed on the board and downloaded. The AI runs in the forest; the board composes.
 >
 > **v1.24 adds `scripts/htree.py` + the `htree-tasks` skill:** a forest works the task boards it was invited to (several at once), with credentials verified before they are saved and writes dry-run by default.
 >
