@@ -744,6 +744,8 @@ def cmd_piece(args):
 # agents and skills VERSIONED in your forest (git ls-files) into your Studio, read-only, private by
 # default. Nothing runs on the board because it was pushed. Design: Moldeo Lab «Miciel en el Studio».
 MICIEL_PUSH_METHOD = "studio_api_miciel_push"
+# Where the Lab API exposes it: moldeo.lab.account (studio 26.348); older builds had it on the work.
+MICIEL_PUSH_MODELS = ("moldeo.lab.account", "moldeo.folio.work")
 MICIEL_GLOBS = (".claude/agents/*.md", ".claude/skills/*/SKILL.md", ".roots/agents/*.md")
 MICIEL_MAX_ITEMS = 200
 MICIEL_MAX_BYTES = 200 * 1024
@@ -825,9 +827,16 @@ def cmd_agents(args):
         die(f"[{name}] is a task-board account («{b.account}»), not a Studio",
             "Agents are pushed to your Studio, with the Studio's credential (its own profile).")
     try:
-        r = _post(b.base, "/moldeo.folio.work/call", {
-            "access_token": b.token, "method": MICIEL_PUSH_METHOD, "kwargs": {"items": items}},
-            timeout=180)["result"]
+        r = None
+        for model in MICIEL_PUSH_MODELS:  # the first door the board opens; the next only if this one is not there
+            try:
+                r = _post(b.base, f"/{model}/call", {
+                    "access_token": b.token, "method": MICIEL_PUSH_METHOD, "kwargs": {"items": items}},
+                    timeout=180)["result"]
+                break
+            except GatewayError as e:
+                if e.code not in ("not_registered", "op_forbidden", "method_forbidden") or model == MICIEL_PUSH_MODELS[-1]:
+                    raise
     except GatewayError as e:
         if e.code == "permission_denied":
             die(f"[{name}] this credential cannot publish agents",
