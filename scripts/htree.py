@@ -744,8 +744,8 @@ def cmd_piece(args):
 # agents and skills VERSIONED in your forest (git ls-files) into your Studio, read-only, private by
 # default. Nothing runs on the board because it was pushed. Design: Moldeo Lab «Miciel en el Studio».
 MICIEL_PUSH_METHOD = "studio_api_miciel_push"
-# Where the Lab API exposes it: moldeo.lab.account (studio 26.348); older builds had it on the work.
-MICIEL_PUSH_MODELS = ("moldeo.lab.account", "moldeo.folio.work")
+# Where the Lab API exposes it: moldeo.lab.account (studio 26.348), the ONLY door for a Lab account.
+MICIEL_PUSH_MODELS = ("moldeo.lab.account",)
 MICIEL_GLOBS = (".claude/agents/*.md", ".claude/skills/*/SKILL.md", ".roots/agents/*.md")
 MICIEL_MAX_ITEMS = 200
 MICIEL_MAX_BYTES = 200 * 1024
