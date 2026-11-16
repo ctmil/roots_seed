@@ -825,7 +825,7 @@ def cmd_agents(args):
         die(f"[{name}] is a task-board account («{b.account}»), not a Studio",
             "Agents are pushed to your Studio, with the Studio's credential (its own profile).")
     try:
-        r = _post(b.base, "/moldeo.lab.account/call", {
+        r = _post(b.base, "/moldeo.folio.work/call", {
             "access_token": b.token, "method": MICIEL_PUSH_METHOD, "kwargs": {"items": items}},
             timeout=180)["result"]
     except GatewayError as e:
@@ -835,7 +835,7 @@ def cmd_agents(args):
         die(f"[{name}] the board refused the push (nothing was written)", f"{e.code}: {e.msg}")
     r = r or {}
     print(f"  ✅ [{name}] created {r.get('created', 0)} · updated {r.get('updated', 0)} · "
-          f"unchanged {r.get('unchanged', 0)}  (from {commit})")
+          f"unchanged {r.get('unchanged', 0)} · agent→skill links {r.get('linked', 0)}  (from {commit})")
     print(f"     See them in your Studio: {b.host}/my/studio  (Miciel section)")
     return 0
 
