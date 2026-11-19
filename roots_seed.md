@@ -7,10 +7,16 @@
 > **distributed copy** and out of date with respect to the canonical (compare the `Version` field /
 > changelog). The seed evolves — do not assume this copy is the latest. See § "Sync with the canonical upstream".
 
-**Version:** 1.33
+**Version:** 1.34
 
 **Changelog:**
 
+- **1.34** (19 November 2026) — **Florum nudge at session start: `htree.py florum --pending`.** Votes were not in
+  anyone's path: a Florum had topics and zero votes. Now the `session-start` hook (step 13) runs `florum --pending` once:
+  ONE line if open proposals wait for your vote, nothing otherwise, and silent on any error (no credentials, no network,
+  a board without Florum) so it can never block a session. It only reads (`search_read`); voting stays a human decision
+  (`vote <ID> --yes`). Pairs with the board side (Florum 26.371: the author's proposal is born with their vote). Does not
+  change the `.roots/` format.
 - **1.32** (15 November 2026) — **`docs/moldeolab-api.md`: the Moldeo Lab API, offline, ordered by the stages of the cycle.**
   The board's htree gateway now documents itself from ONE declarative registry: `GET /ocapi/tree/v1/docs` (JSON for
   agents; `?format=md` markdown; `?audience=lab` only what a Studio credential can do), the Studio's «API» page, and
@@ -2612,6 +2618,10 @@ Hooks are **executable protocols** that define what to do automatically on speci
     making assumptions; don't decide blindly.
 12. If there is an active feature, look for design docs in `docs/design-*.md` and
     read the relevant section before touching code.
+13. **Florum nudge (v1.34, optional, non-blocking):** if the forest has board credentials, run
+    `python3 scripts/htree.py florum --pending` ONCE per session. It prints one line only if open
+    proposals in your Florum wait for your vote (else nothing; it never fails loudly). Show that line
+    to the human as is. **Never vote for them** — `vote --yes` only when the person says so.
 
 ## Expected output
 

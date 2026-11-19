@@ -556,7 +556,33 @@ def _florum_unavailable(name, e):
         "Florum voting from a forest needs the board's htree gateway >= 26.293 with Florum installed.")
 
 
+def _florum_pending(args):
+    """Session-start nudge (v1.34): ONE line if there are open proposals you have not voted, else
+    nothing. Never fails loudly (no board, no network, no Florum ⇒ silent, exit 0) and never votes."""
+    import contextlib
+    import io
+    try:
+        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+            (name, v), = pick(args)
+            b = Board(name, v)
+            dom = [["parent_id", "=", False], ["florum_kind", "!=", False], ["state", "=", "active"]]
+            if args.forum:
+                dom.append(["forum_id", "=", args.forum])
+            rows = _post(b.base, "/forum.post/search_read", {
+                "access_token": b.token, "domain": dom, "fields": _FLORUM_FIELDS, "limit": 200})["records"]
+    except (SystemExit, Exception):
+        return 0
+    todo = [r for r in rows or [] if not r.get("florum_user_voted")]
+    if todo:
+        forums = sorted({(r["forum_id"] or [0, "?"])[1] for r in todo})
+        print(f"🌱 Florum [{name}]: {len(todo)} proposal(s) waiting for your vote "
+              f"({', '.join(forums)}) — see them with: htree.py florum")
+    return 0
+
+
 def cmd_florum(args):
+    if getattr(args, "pending", False):
+        return _florum_pending(args)
     (name, v), = pick(args)
     b = Board(name, v)
     dom = [["parent_id", "=", False], ["florum_kind", "!=", False]]
@@ -887,6 +913,8 @@ def main():
     fl = sub.add_parser("florum", help="Florum topics you can vote on")
     fl.add_argument("--forum", type=int, help="only this forum id")
     fl.add_argument("--all", action="store_true", help="include closed topics")
+    fl.add_argument("--pending", action="store_true",
+                    help="session-start nudge: one line if open proposals wait for your vote, else nothing (never fails)")
     vo = sub.add_parser("vote", help="vote / un-vote a Florum topic (dry-run unless --yes)")
     vo.add_argument("id", type=int)
     vo.add_argument("--yes", action="store_true")
