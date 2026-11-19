@@ -17,7 +17,7 @@
   a board without Florum) so it can never block a session. It only reads (`search_read`); voting stays a human decision
   (`vote <ID> --yes`). Pairs with the board side (Florum 26.371: the author's proposal is born with their vote). Does not
   change the `.roots/` format.
-- **1.33** (18 November 2026) — **`htree.py agents push`: mirror the agents and skills versioned in your forest into your Studio.**
+- **1.33** (16 November 2026) — **`htree.py agents push`: mirror the agents and skills versioned in your forest into your Studio.**
   Reads `.claude/agents`, `.claude/skills/*/SKILL.md` and `.roots/agents` — only git-tracked files — checks them locally for
   secrets before anything leaves, and pushes all or nothing to the Studio of the Lab account (private by default), through the
   Lab API (`studio_api_miciel_push`, studio ≥ 26.348). Dry-run unless `--yes`; prints the links of what it created or updated.
